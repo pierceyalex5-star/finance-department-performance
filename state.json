@@ -1,0 +1,3443 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-07T16:05:24.111230+00:00",
+  "settings": {
+    "warnMinutes": 60,
+    "repeatMinutes": 60,
+    "holidays": [],
+    "closeTargetWD": 2,
+    "closeTargetTime": "18:00"
+  },
+  "users": [
+    "Dumitru R.",
+    "Line R.",
+    "Martin B.",
+    "Feida F.",
+    "Isabelle L.",
+    "Alex P.",
+    "Akram L."
+  ],
+  "taskTemplates": [
+    {
+      "id": "int_9ac41d864f",
+      "name": "Receiving Info INUT",
+      "person": "Dumitru R.",
+      "day": "WD -1",
+      "time": "12:00",
+      "workbookOwner": "INUT (MS; AR; DT)",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_e7b9fc73ff",
+      "name": "Journal entries INUT",
+      "person": "Dumitru R.",
+      "day": "WD1",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_c010e4fcaa",
+      "name": "JE Spare Parts MV",
+      "person": "Dumitru R.",
+      "day": "WD1",
+      "time": "12:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_98a7bea111",
+      "name": "Fixed Assets INUT",
+      "person": "Dumitru R.",
+      "day": "WD1",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_2b6f91b8c4",
+      "name": "Prepaid INUT",
+      "person": "Dumitru R.",
+      "day": "WD1",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_308ca6edf0",
+      "name": "Purchases file INUT",
+      "person": "Dumitru R.",
+      "day": "WD1",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_3af85af95e",
+      "name": "ROD file INUT",
+      "person": "Dumitru R.",
+      "day": "WD2",
+      "time": "12:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_3ef882b409",
+      "name": "Rolling Transit Inventory INUT",
+      "person": "Dumitru R.",
+      "day": "WD2",
+      "time": "12:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_4823fed3cf",
+      "name": "Rolling FG + WIP Inventory  INUT",
+      "person": "Dumitru R.",
+      "day": "WD2",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_6e6f0c38dc",
+      "name": "Sales analisys INUT",
+      "person": "Dumitru R.",
+      "day": "WD2",
+      "time": "15:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_9fb120343c",
+      "name": "JE Inventory INUT",
+      "person": "Dumitru R.",
+      "day": "WD2",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_2e385ef33c",
+      "name": "Snapshot INUT",
+      "person": "Dumitru R.",
+      "day": "WD2",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_0f177309f6",
+      "name": "Preliminary analisys INUT / ADJ",
+      "person": "Dumitru R.",
+      "day": "WD3",
+      "time": "12:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_3a1033f484",
+      "name": "BPC day 1 load",
+      "person": "Dumitru R.",
+      "day": "WD3",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_1c8778aaf9",
+      "name": "BPC day 2 load",
+      "person": "Dumitru R.",
+      "day": "WD4",
+      "time": "12:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_cabe5c5b2a",
+      "name": "OS load",
+      "person": "Dumitru R.",
+      "day": "WD4",
+      "time": "12:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_b3d2737c3a",
+      "name": "Inventory variance analisys INUT",
+      "person": "Dumitru R.",
+      "day": "WD4",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_ab8bb06710",
+      "name": "EBIT variance analisys INUT",
+      "person": "Dumitru R.",
+      "day": "WD4",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_30af63130f",
+      "name": "Bridge Infasco format",
+      "person": "Dumitru R.",
+      "day": "WD4",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_29647ea0b8",
+      "name": "Bridge Heico format",
+      "person": "Dumitru R.",
+      "day": "WD5",
+      "time": "17:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_ea4b6df707",
+      "name": "Monthly results Presentation",
+      "person": "Dumitru R.",
+      "day": "WD5",
+      "time": "12:00",
+      "workbookOwner": "DR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_850c0ebd16",
+      "name": "TO BE CONTINUED",
+      "person": "Dumitru R.",
+      "day": "",
+      "time": "",
+      "workbookOwner": "",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_b28a17d337",
+      "name": "Fermeture modules  PO, IC et MP pour Infasco, IDG et DSI",
+      "person": "Line R.",
+      "day": "WD-1",
+      "time": "12:00",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_d7194ada8c",
+      "name": "Fermeture module AP pour Infasco, IDG et DSI",
+      "person": "Line R.",
+      "day": "WD-1",
+      "time": "15:00",
+      "workbookOwner": "NB",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_13ef38de53",
+      "name": "Je fermeture pour Galvano",
+      "person": "Line R.",
+      "day": "WD-2",
+      "time": "16:00",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_4659580cc7",
+      "name": "Je Prepaid, banque, corrections diverses  INF;IDG:DSI",
+      "person": "Line R.",
+      "day": "WD 1",
+      "time": "10:30",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_5baf34647d",
+      "name": "Fichier Salaire et Je pour DSI",
+      "person": "Line R.",
+      "day": "WD-3",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_f4d57fba47",
+      "name": "Je couru factures MPG et Heico Holding INF: DSI",
+      "person": "Line R.",
+      "day": "WD 1",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_6e99be0f34",
+      "name": "Je couru salaires INFASCO ET IDG",
+      "person": "Line R.",
+      "day": "WD 1",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_1548e8d0b5",
+      "name": "Fichier Benefices Marginaux et Je pour Infasco",
+      "person": "Line R.",
+      "day": "WD 1",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_895d7cfeac",
+      "name": "Fichier Achats importations  INF; IDG et DSI",
+      "person": "Line R.",
+      "day": "WD 1",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_acf650974d",
+      "name": "JE reclasser les AR affiliées",
+      "person": "Line R.",
+      "day": "WD 1",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_c9241f7b21",
+      "name": "Fichier pour couru estimation Sivaco gaz et electricité",
+      "person": "Line R.",
+      "day": "WD 2",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_a3d60e74ff",
+      "name": "Je change Infasco et IDG",
+      "person": "Line R.",
+      "day": "WD 2",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_e228aba8ca",
+      "name": "Balancer inters-co",
+      "person": "Line R.",
+      "day": "WD 2",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_0f7432c2e9",
+      "name": "Je statistiques",
+      "person": "Line R.",
+      "day": "WD 2",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_b67b469541",
+      "name": "Input % dans Ross pour les allocations",
+      "person": "Line R.",
+      "day": "WD 2",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_a82b8e3a33",
+      "name": "Fichier Allocation et JE Allocations Infasco",
+      "person": "Line R.",
+      "day": "WD 2",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Line R.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_7f53b2545e",
+      "name": "Fichier Inventaire comptable",
+      "person": "Line R.",
+      "day": "WD 2-3",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_58f56c8827",
+      "name": "Message additions capex",
+      "person": "Line R.",
+      "day": "WD 3",
+      "time": "",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_8951785e68",
+      "name": "Headcount update",
+      "person": "Martin B.",
+      "day": "WD1",
+      "time": "12:00",
+      "workbookOwner": "AL-AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_f79037198c",
+      "name": "Couru - Tariffs",
+      "person": "Martin B.",
+      "day": "WD1",
+      "time": "12:00",
+      "workbookOwner": "AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_6043e9330c",
+      "name": "Courus_placage",
+      "person": "Martin B.",
+      "day": "WD1",
+      "time": "12:00",
+      "workbookOwner": "AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_9e88d8527c",
+      "name": "Tariffs DSI- Infasco",
+      "person": "Martin B.",
+      "day": "WD1",
+      "time": "12:00",
+      "workbookOwner": "AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_e7ea39aaaf",
+      "name": "Elim profit",
+      "person": "Martin B.",
+      "day": "WD3",
+      "time": "12:00",
+      "workbookOwner": "AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_53b81c73f6",
+      "name": "Labor file update",
+      "person": "Martin B.",
+      "day": "WD3",
+      "time": "12:00",
+      "workbookOwner": "AL-AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_43f1ddab2a",
+      "name": "Allocation Salaire",
+      "person": "Martin B.",
+      "day": "",
+      "time": "12:00",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_a7b4f0a773",
+      "name": "Benefices marginaux",
+      "person": "Martin B.",
+      "day": "",
+      "time": "12:00",
+      "workbookOwner": "LR",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_430c88fb9f",
+      "name": "Tariffs -COGS _Forecast",
+      "person": "Martin B.",
+      "day": "WD5",
+      "time": "12:00",
+      "workbookOwner": "MG-AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_9ae404755b",
+      "name": "Maintenance report",
+      "person": "Martin B.",
+      "day": "WD6",
+      "time": "12:00",
+      "workbookOwner": "AL-AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_566721efe1",
+      "name": "FX_exposure",
+      "person": "Martin B.",
+      "day": "WD6",
+      "time": "12:00",
+      "workbookOwner": "AL-AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_8b71e784ca",
+      "name": "Flash_FX",
+      "person": "Martin B.",
+      "day": "WD6",
+      "time": "12:00",
+      "workbookOwner": "AL-AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_0ac1954a90",
+      "name": "Forecast Inut-Infasco",
+      "person": "Martin B.",
+      "day": "",
+      "time": "",
+      "workbookOwner": "DT-AL-AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_d104578381",
+      "name": "Forecast Load BPC",
+      "person": "Martin B.",
+      "day": "",
+      "time": "",
+      "workbookOwner": "AL-AP",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Martin B.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_63f1c502b1",
+      "name": "Fixed Assets INFASCO",
+      "person": "Feida F.",
+      "day": "WD-1",
+      "time": "12:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_9141bd24c6",
+      "name": "JE Lease Accounting - INFASCO INUTS DSI IDG",
+      "person": "Feida F.",
+      "day": "WD-1",
+      "time": "14:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Feida F.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_d42d560fd4",
+      "name": "JE Crédit Carbone",
+      "person": "Feida F.",
+      "day": "WD-1",
+      "time": "15:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Feida F.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_3697748a7e",
+      "name": "JE Spare parts",
+      "person": "Feida F.",
+      "day": "WD1",
+      "time": "12:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Feida F.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_7c4b7c754f",
+      "name": "JE ROD ROSS",
+      "person": "Feida F.",
+      "day": "WD1",
+      "time": "14:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Feida F.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_1fb9ef5b7a",
+      "name": "JE Tooling",
+      "person": "Feida F.",
+      "day": "WD2",
+      "time": "12:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Feida F.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_a5e57c6079",
+      "name": "Packaging DSI - IDG",
+      "person": "Feida F.",
+      "day": "WD3",
+      "time": "12:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_21f2a5f783",
+      "name": "Etat financier Entrepôt - Mise à jour et analyse",
+      "person": "Feida F.",
+      "day": "WD3",
+      "time": "12:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_de4445e864",
+      "name": "Mise à jour Capex",
+      "person": "Feida F.",
+      "day": "WD3",
+      "time": "12:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_1fe58f1c2d",
+      "name": "Forecast Capex",
+      "person": "Feida F.",
+      "day": "WD3",
+      "time": "12:00",
+      "workbookOwner": "FF",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_921cb3e40d",
+      "name": "Segment Margins report INFACO INUTS",
+      "person": "Feida F.",
+      "day": "",
+      "time": "",
+      "workbookOwner": "",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_245344be57",
+      "name": "TO BE CONTINUED",
+      "person": "Feida F.",
+      "day": "",
+      "time": "",
+      "workbookOwner": "",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_082178685e",
+      "name": "Extract Slob datas + update scrap value, MV & Wip cost per ton",
+      "person": "Isabelle L.",
+      "day": "WD -2",
+      "time": "17:00",
+      "workbookOwner": "IL",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Isabelle L.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_04d11be6ca",
+      "name": "Extract Coils & Bar Raw material WIP & Inventory for Rod Ross",
+      "person": "Isabelle L.",
+      "day": "WD-1",
+      "time": "12:00",
+      "workbookOwner": "IL",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Isabelle L.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_9111b190cf",
+      "name": "Je Billed but not Shipped MV only",
+      "person": "Isabelle L.",
+      "day": "WD1",
+      "time": "12:00",
+      "workbookOwner": "IL",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": true,
+      "stageOwners": {
+        "Preparation": "Isabelle L.",
+        "Approval": "Unassigned",
+        "Entry": "Isabelle L.",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_ad9f64eec2",
+      "name": "Update Metal Margin Report",
+      "person": "Isabelle L.",
+      "day": "WD4",
+      "time": "12:00",
+      "workbookOwner": "IL",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Isabelle L.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_6a1ed23aa1",
+      "name": "Update Tour de contrôle VM $/T",
+      "person": "Isabelle L.",
+      "day": "WD4",
+      "time": "12:00",
+      "workbookOwner": "IL",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Isabelle L.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_6a6631a159",
+      "name": "Update Cycle Count MV - $/T Pan + FG",
+      "person": "Isabelle L.",
+      "day": "WD4",
+      "time": "17:00",
+      "workbookOwner": "IL",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Isabelle L.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_c0d09e739e",
+      "name": "Extract datas for Infasco Margins",
+      "person": "Isabelle L.",
+      "day": "WD4",
+      "time": "17:00",
+      "workbookOwner": "IL",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Isabelle L.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    },
+    {
+      "id": "int_972e112379",
+      "name": "Extract datas for INUTs Margins",
+      "person": "Isabelle L.",
+      "day": "WD4",
+      "time": "17:00",
+      "workbookOwner": "IL",
+      "source": "Internal Close",
+      "active": true,
+      "closeCritical": false,
+      "stageOwners": {
+        "Preparation": "Isabelle L.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      }
+    }
+  ],
+  "periodStates": {},
+  "closeActual": {},
+  "headOfficeTemplate": [
+    {
+      "id": "ho_d28ad839b8",
+      "activity": "Sales & Inventory Flash - Week 1",
+      "day": "",
+      "time": "12:00",
+      "owner": "FP&A Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_18f12ba64e",
+      "activity": "Sales & Inventory Flash - Week 2",
+      "day": "",
+      "time": "12:00",
+      "owner": "FP&A Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_779f8df3da",
+      "activity": "Sales & Inventory Flash - Week 3",
+      "day": "",
+      "time": "12:00",
+      "owner": "FP&A Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_497705eea1",
+      "activity": "Sales & Inventory Flash - Week 4",
+      "day": "",
+      "time": "12:00",
+      "owner": "FP&A Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_3364e66a9b",
+      "activity": "Sales & Inventory Flash Month End",
+      "day": "",
+      "time": "12:00",
+      "owner": "FP&A Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_a870eba739",
+      "activity": "CAN Management Fees and charges",
+      "day": "WD1",
+      "time": "15:00",
+      "owner": "Corp.",
+      "signoffOwner": "Gabriel"
+    },
+    {
+      "id": "ho_3cbdcd9623",
+      "activity": "Interco. Balances MPG",
+      "day": "WD2",
+      "time": "16:00",
+      "owner": "Business Unit",
+      "signoffOwner": "Gabriel"
+    },
+    {
+      "id": "ho_1119d14ff9",
+      "activity": "Initial BPC submission (incl. Tons and FX template)",
+      "day": "WD3",
+      "time": "17:00",
+      "owner": "Business Unit / Corp",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_fc5018e487",
+      "activity": "Preliminary flash - Sales & EBIT conso.",
+      "day": "WD3",
+      "time": "18:00",
+      "owner": "FP&A Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_00f0008d02",
+      "activity": "Close BPC submission (incl. Tons and FX template)",
+      "day": "WD4",
+      "time": "14:00",
+      "owner": "Business Unit / Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_9a2acd16ab",
+      "activity": "Close BPC consolidation",
+      "day": "WD4",
+      "time": "16:00",
+      "owner": "Conso.",
+      "signoffOwner": "Gabriel"
+    },
+    {
+      "id": "ho_627438a223",
+      "activity": "Final flash - Sales & EBIT conso.",
+      "day": "WD4",
+      "time": "17:00",
+      "owner": "FP&A Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_e0e62e882f",
+      "activity": "Monthly results Presentation",
+      "day": "WD5",
+      "time": "12:00",
+      "owner": "Business unit",
+      "signoffOwner": "Martin"
+    },
+    {
+      "id": "ho_c30eb3996a",
+      "activity": "FX Exposure monthly actuals",
+      "day": "WD6",
+      "time": "17:00",
+      "owner": "Business Unit / Corp",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_ebf37f77a7",
+      "activity": "Executive Slides",
+      "day": "WD7",
+      "time": "12:00",
+      "owner": "Business Unit",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_23497c827b",
+      "activity": "Executive Presentation",
+      "day": "WD8",
+      "time": "17:00",
+      "owner": "FP&A Corp.",
+      "signoffOwner": "Cécile"
+    },
+    {
+      "id": "ho_93778caf11",
+      "activity": "DIO report",
+      "day": "TBD",
+      "time": "TBD",
+      "owner": "Business Unit",
+      "signoffOwner": "Martin"
+    },
+    {
+      "id": "ho_3ed648e93e",
+      "activity": "Segment Margins report",
+      "day": "TBD",
+      "time": "TBD",
+      "owner": "Business Unit",
+      "signoffOwner": "Martin"
+    }
+  ],
+  "headOfficeHistory": {
+    "2026-01": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 3,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 1,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": 1,
+        "Executive Presentation": null,
+        "DIO report": 3,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 3,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": 2,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 3,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 2,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": 1,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": 3,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": 3,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": 1,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": 1,
+        "Sales & Inventory Flash - Week 2": 1,
+        "Sales & Inventory Flash - Week 3": 1,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": 1,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": 1,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": 1,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": 1,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-02": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 1,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 1,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 3,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": 1,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 1,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 3,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": 3,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 1,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 1,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 2,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": 3,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": 3,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": 3,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": 1,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": 1,
+        "Sales & Inventory Flash - Week 2": 1,
+        "Sales & Inventory Flash - Week 3": 1,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": 1,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": 1,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": 1,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": 3,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-03": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 3,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 1,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": 3,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 3,
+        "Initial BPC submission (incl. Tons and FX template)": 2,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": 1,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 3,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": "?",
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": 2,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": 1,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": 3,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": 1,
+        "Sales & Inventory Flash - Week 2": 1,
+        "Sales & Inventory Flash - Week 3": 1,
+        "Sales & Inventory Flash - Week 4": 1,
+        "Sales & Inventory Flash Month End": 1,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": 0,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": 1,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": 3,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-04": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 2,
+        "Initial BPC submission (incl. Tons and FX template)": 2,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 1,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": 1,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 2,
+        "Initial BPC submission (incl. Tons and FX template)": 2,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 2,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 3,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": 3,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 2,
+        "Initial BPC submission (incl. Tons and FX template)": 2,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": 1,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": 3,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": 3,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": 3,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": 1,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": "Not sent",
+        "Sales & Inventory Flash - Week 2": 1,
+        "Sales & Inventory Flash - Week 3": 1,
+        "Sales & Inventory Flash - Week 4": 1,
+        "Sales & Inventory Flash Month End": 1,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": 1,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": 2,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": 1,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-05": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 3,
+        "Initial BPC submission (incl. Tons and FX template)": 2,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 1,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": 1,
+        "Executive Presentation": null,
+        "DIO report": 0,
+        "Segment Margins report": 0
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 3,
+        "Initial BPC submission (incl. Tons and FX template)": 3,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 1,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 0,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": 1,
+        "Executive Presentation": null,
+        "DIO report": 0,
+        "Segment Margins report": 0
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": 2,
+        "Initial BPC submission (incl. Tons and FX template)": 3,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 3,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": 1,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": 3,
+        "Executive Presentation": null,
+        "DIO report": 0,
+        "Segment Margins report": 0
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": 3,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": 3,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": 1,
+        "Close BPC consolidation": 3,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": 3,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": 1,
+        "Sales & Inventory Flash - Week 3": 1,
+        "Sales & Inventory Flash - Week 4": 1,
+        "Sales & Inventory Flash Month End": 3,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": 1,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": 1,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": 0,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-06": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-07": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-09": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-10": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-11": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    },
+    "2026-12": {
+      "IRM": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "SWG": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Ifast": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      },
+      "FP&A Corp.": {
+        "Sales & Inventory Flash - Week 1": null,
+        "Sales & Inventory Flash - Week 2": null,
+        "Sales & Inventory Flash - Week 3": null,
+        "Sales & Inventory Flash - Week 4": null,
+        "Sales & Inventory Flash Month End": null,
+        "CAN Management Fees and charges": null,
+        "Interco. Balances MPG": null,
+        "Initial BPC submission (incl. Tons and FX template)": null,
+        "Preliminary flash - Sales & EBIT conso.": null,
+        "Close BPC submission (incl. Tons and FX template)": null,
+        "Close BPC consolidation": null,
+        "Final flash - Sales & EBIT conso.": null,
+        "Monthly results Presentation": null,
+        "FX Exposure monthly actuals": null,
+        "Executive Slides": null,
+        "Executive Presentation": null,
+        "DIO report": null,
+        "Segment Margins report": null
+      }
+    }
+  },
+  "corrections": [],
+  "manualJEs": [],
+  "improvements": []
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Finance Department Performance Dashboard",
+  "short_name": "Finance Close",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09111f",
+  "theme_color": "#0b1323"
+}

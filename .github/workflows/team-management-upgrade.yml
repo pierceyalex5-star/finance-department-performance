@@ -1,0 +1,56 @@
+name: Team Management Upgrade
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/team-management-upgrade.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Add team management and open-access messaging
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          old='''      <div class="card">\n        <div class="section"><h2>Live mode</h2></div>\n        <p id="liveModeText"></p>\n        <div class="help">When run with the included <b>server.js</b>, changes are saved centrally and pushed live to all connected browsers. The standalone HTML fallback stores data only in that browser.</div>\n        <div class="section"><h2>Notifications</h2></div>\n        <p class="small">Browser notifications can fire while the dashboard is open or running in the background. Fully closed-app push requires an external Web Push service and user subscriptions.</p>\n      </div>\n    </div>\n  </section>'''
+          new='''      <div class="card">\n        <div class="section"><h2>Live mode</h2></div>\n        <p id="liveModeText"></p>\n        <div class="help">Open-access shared mode: anyone with the dashboard link can update the shared data. No sign-in is required.</div>\n        <div class="section"><h2>Notifications</h2></div>\n        <p class="small">Browser notifications can fire while the dashboard is open or running in the background. Fully closed-app push requires an external Web Push service and user subscriptions.</p>\n      </div>\n    </div>\n    <div class="section"><h2>Team Management</h2><button class="btn" id="addUserBtn">+ Add team member</button></div>\n    <div class="table-wrap"><table><thead><tr><th>Team member</th><th>Assigned tasks</th><th>Workflow stages owned</th><th></th></tr></thead><tbody id="userBody"></tbody></table></div>\n    <div class="help" style="margin-top:10px">Rename migrates task ownership and current assignments. Deactivate removes the person from team selectors while preserving historical records.</div>\n  </section>'''
+          if old in s: s=s.replace(old,new)
+          old2=''' if(a.type==="settings_update")state.settings={...state.settings,...a.settings};\n if(a.type==="replace_state")state=a.state;'''
+          new2=''' if(a.type==="settings_update")state.settings={...state.settings,...a.settings};\n if(a.type==="user_add"){state.users??=[];if(a.name&&!state.users.includes(a.name))state.users.push(a.name)}\n if(a.type==="user_update"){const oldName=a.oldName,newName=a.newName;if(oldName&&newName&&oldName!==newName){state.users=(state.users||[]).map(u=>u===oldName?newName:u);for(const t of state.taskTemplates||[]){if(t.person===oldName)t.person=newName;for(const st of Object.keys(t.stageOwners||{}))if(t.stageOwners[st]===oldName)t.stageOwners[st]=newName}for(const x of state.corrections||[])if(x.owner===oldName)x.owner=newName;for(const x of state.manualJEs||[])if(x.preparer===oldName)x.preparer=newName;for(const x of state.improvements||[])if(x.owner===oldName)x.owner=newName}}\n if(a.type==="user_delete"){state.users=(state.users||[]).filter(u=>u!==a.name)}\n if(a.type==="replace_state")state=a.state;'''
+          if old2 in s: s=s.replace(old2,new2)
+          old3='''function renderAll(){initUsers();renderCockpit();renderWorkflow();renderHeadOffice();renderTeam();renderQuality();renderAutomation();renderImprovements();renderSettings();updateAlertBanner()}'''
+          new3='''function renderTeamManagement(){const body=$("userBody");if(!body)return;body.innerHTML=(state.users||[]).map(u=>{const tasks=(state.taskTemplates||[]).filter(t=>t.active!==false&&t.person===u).length;const stages=(state.taskTemplates||[]).reduce((n,t)=>n+Object.values(t.stageOwners||{}).filter(x=>x===u).length,0);return `<tr><td><b>${esc(u)}</b></td><td>${tasks}</td><td>${stages}</td><td class="right"><button class="btn ghost" onclick="editUser('${u.replace(/'/g,"\\\\'")}')">Rename</button> <button class="btn ghost" onclick="deactivateUser('${u.replace(/'/g,"\\\\'")}')">Deactivate</button></td></tr>`}).join("")||`<tr><td colspan="4" class="empty">No active team members.</td></tr>`}\nfunction userForm(name=""){return `<div class="form-grid"><div class="field full"><label>Team member name</label><input name="name" required value="${esc(name)}" placeholder="First Last"></div></div><div class="modal-actions"><button class="btn" type="submit">Save</button></div>`}\nfunction addUser(){openModal("Add team member",userForm(),async fd=>{const name=String(fd.get("name")||"").trim();if(!name)return;if((state.users||[]).some(u=>u.toLowerCase()===name.toLowerCase()))return toast("Team member already exists");await action({type:"user_add",name});closeModal();toast("Team member added")})}\nfunction editUser(oldName){openModal("Rename team member",userForm(oldName),async fd=>{const newName=String(fd.get("name")||"").trim();if(!newName)return;if(newName!==oldName&&(state.users||[]).some(u=>u.toLowerCase()===newName.toLowerCase()))return toast("Team member already exists");await action({type:"user_update",oldName,newName});if(currentUser===oldName){currentUser=newName;localStorage.setItem("finance-current-user",currentUser)}closeModal();toast("Team member renamed")})}\nasync function deactivateUser(name){if(!confirm(`Deactivate ${name}? Historical data will be kept.`))return;await action({type:"user_delete",name});if(currentUser===name){currentUser="Manager View";localStorage.setItem("finance-current-user",currentUser)}toast("Team member deactivated")}\nfunction renderAll(){initUsers();renderCockpit();renderWorkflow();renderHeadOffice();renderTeam();renderQuality();renderAutomation();renderImprovements();renderSettings();renderTeamManagement();updateAlertBanner()}'''
+          if old3 in s: s=s.replace(old3,new3)
+          marker='''$("saveSettingsBtn").onclick=()=>action({type:"settings_update",settings:{warnMinutes:Number($("warnMinutes").value||60),repeatMinutes:Number($("repeatMinutes").value||60),closeTargetWD:Number($("targetWD").value||2),closeTargetTime:$("targetTime").value||"18:00",holidays:$("holidayInput").value.split(",").map(x=>x.trim()).filter(Boolean)}});'''
+          if marker in s and '$("addUserBtn").onclick=addUser;' not in s: s=s.replace(marker,marker+'\n$("addUserBtn").onclick=addUser;')
+          p.write_text(s)
+
+          p=Path('api/_store.js'); s=p.read_text()
+          old='''  else if (a.type === 'settings_update') state.settings = { ...state.settings, ...a.settings };\n  else if (a.type === 'replace_state') state = a.state;'''
+          new='''  else if (a.type === 'settings_update') state.settings = { ...state.settings, ...a.settings };\n  else if (a.type === 'user_add') { state.users ??= []; if (a.name && !state.users.includes(a.name)) state.users.push(a.name); }\n  else if (a.type === 'user_update') {\n    const oldName=a.oldName, newName=a.newName;\n    if (oldName && newName && oldName !== newName) {\n      state.users=(state.users||[]).map(u=>u===oldName?newName:u);\n      for (const t of state.taskTemplates||[]) { if (t.person===oldName) t.person=newName; for (const st of Object.keys(t.stageOwners||{})) if (t.stageOwners[st]===oldName) t.stageOwners[st]=newName; }\n      for (const x of state.corrections||[]) if (x.owner===oldName) x.owner=newName;\n      for (const x of state.manualJEs||[]) if (x.preparer===oldName) x.preparer=newName;\n      for (const x of state.improvements||[]) if (x.owner===oldName) x.owner=newName;\n    }\n  }\n  else if (a.type === 'user_delete') state.users=(state.users||[]).filter(u=>u!==a.name);\n  else if (a.type === 'replace_state') state = a.state;'''
+          if old in s: s=s.replace(old,new)
+          p.write_text(s)
+          PY
+      - name: Verify JavaScript syntax
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'); const s=fs.readFileSync('index.html','utf8'); const m=s.match(/<script>([\s\S]*)<\/script>/); new Function(m[1]); require('./api/_store.js'); console.log('syntax ok');
+          NODE
+      - name: Commit upgraded dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html api/_store.js
+          git diff --cached --quiet || git commit -m "Add open-access team management"
+          git push

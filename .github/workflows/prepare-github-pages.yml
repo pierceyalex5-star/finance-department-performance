@@ -1,0 +1,54 @@
+name: Prepare GitHub Pages Front End
+
+on:
+  push:
+    paths:
+      - '.github/workflows/prepare-github-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Patch front end for external API and Pages paths
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          s=s.replace('<link rel="manifest" href="/manifest.json">','<link rel="manifest" href="./manifest.json">')
+          if '<script src="./config.js"></script>' not in s:
+              s=s.replace('\n<script>\nconst INITIAL_STATE', '\n<script src="./config.js"></script>\n<script>\nconst INITIAL_STATE', 1)
+          marker='const $=id=>document.getElementById(id);'
+          api='''const API_BASE=String(window.FINANCE_API_BASE||"").replace(/\\/$/,"");\nconst apiUrl=path=>API_BASE?API_BASE+path:path;'''
+          if 'const API_BASE=' not in s:
+              s=s.replace(marker, marker+'\n'+api, 1)
+          s=s.replace('fetch("/api/state"', 'fetch(apiUrl("/api/state")')
+          s=s.replace('fetch("/api/action"', 'fetch(apiUrl("/api/action")')
+          s=s.replace('new EventSource("/api/events")', 'new EventSource(apiUrl("/api/events"))')
+          s=s.replace('navigator.serviceWorker.register("/sw.js")', 'navigator.serviceWorker.register("./sw.js")')
+          p.write_text(s)
+          PY
+      - name: Verify browser JavaScript
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const s=fs.readFileSync('index.html','utf8');
+          const blocks=[...s.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x=>x[1]).filter(Boolean);
+          for(const b of blocks) new Function(b);
+          console.log('browser JavaScript syntax ok');
+          NODE
+      - name: Commit Pages compatibility changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Prepare dashboard for GitHub Pages and external API"
+          git push

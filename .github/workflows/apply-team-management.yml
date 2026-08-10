@@ -1,0 +1,46 @@
+name: Apply Team Management
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-team-management.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Apply upgrade script
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          wf=Path('.github/workflows/team-management-upgrade.yml').read_text()
+          block=wf.split("python - <<'PY'\n",1)[1].split("\n          PY",1)[0]
+          script='\n'.join(line[10:] if line.startswith('          ') else line for line in block.splitlines())
+          exec(compile(script,'team-management-upgrade','exec'))
+          PY
+      - name: Verify JavaScript syntax
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const s=fs.readFileSync('index.html','utf8');
+          const m=s.match(/<script>([\s\S]*)<\/script>/);
+          if(!m) throw new Error('script not found');
+          new Function(m[1]);
+          console.log('index syntax ok');
+          NODE
+          node --check api/_store.js
+      - name: Commit upgraded dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html api/_store.js
+          git diff --cached --quiet || git commit -m "Add open-access team management"
+          git push

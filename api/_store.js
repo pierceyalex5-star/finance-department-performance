@@ -82,6 +82,18 @@ function applyAction(state, a) {
   else if (a.type === 'improvement_add') state.improvements.push(a.item);
   else if (a.type === 'improvement_delete') state.improvements = state.improvements.filter(x => x.id !== a.id);
   else if (a.type === 'settings_update') state.settings = { ...state.settings, ...a.settings };
+  else if (a.type === 'user_add') { state.users ??= []; if (a.name && !state.users.includes(a.name)) state.users.push(a.name); }
+  else if (a.type === 'user_update') {
+    const oldName=a.oldName, newName=a.newName;
+    if (oldName && newName && oldName !== newName) {
+      state.users=(state.users||[]).map(u=>u===oldName?newName:u);
+      for (const t of state.taskTemplates||[]) { if (t.person===oldName) t.person=newName; for (const st of Object.keys(t.stageOwners||{})) if (t.stageOwners[st]===oldName) t.stageOwners[st]=newName; }
+      for (const x of state.corrections||[]) if (x.owner===oldName) x.owner=newName;
+      for (const x of state.manualJEs||[]) if (x.preparer===oldName) x.preparer=newName;
+      for (const x of state.improvements||[]) if (x.owner===oldName) x.owner=newName;
+    }
+  }
+  else if (a.type === 'user_delete') state.users=(state.users||[]).filter(u=>u!==a.name);
   else if (a.type === 'replace_state') state = a.state;
   else throw new Error('Unknown action');
   return state;

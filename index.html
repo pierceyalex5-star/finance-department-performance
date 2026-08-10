@@ -210,11 +210,14 @@ tr:last-child td{border-bottom:0}.right{text-align:right}.center{text-align:cent
       <div class="card">
         <div class="section"><h2>Live mode</h2></div>
         <p id="liveModeText"></p>
-        <div class="help">When run with the included <b>server.js</b>, changes are saved centrally and pushed live to all connected browsers. The standalone HTML fallback stores data only in that browser.</div>
+        <div class="help">Open-access shared mode: anyone with the dashboard link can update the shared data. No sign-in is required.</div>
         <div class="section"><h2>Notifications</h2></div>
         <p class="small">Browser notifications can fire while the dashboard is open or running in the background. Fully closed-app push requires an external Web Push service and user subscriptions.</p>
       </div>
     </div>
+    <div class="section"><h2>Team Management</h2><button class="btn" id="addUserBtn">+ Add team member</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Team member</th><th>Assigned tasks</th><th>Workflow stages owned</th><th></th></tr></thead><tbody id="userBody"></tbody></table></div>
+    <div class="help" style="margin-top:10px">Rename migrates task ownership and current assignments. Deactivate removes the person from team selectors while preserving historical records.</div>
   </section>
 </main>
 </div>
@@ -314,6 +317,9 @@ function applyLocal(a){
  if(a.type==="je_add")state.manualJEs.push(a.item); if(a.type==="je_delete")state.manualJEs=state.manualJEs.filter(x=>x.id!==a.id);
  if(a.type==="improvement_add")state.improvements.push(a.item); if(a.type==="improvement_delete")state.improvements=state.improvements.filter(x=>x.id!==a.id);
  if(a.type==="settings_update")state.settings={...state.settings,...a.settings};
+ if(a.type==="user_add"){state.users??=[];if(a.name&&!state.users.includes(a.name))state.users.push(a.name)}
+ if(a.type==="user_update"){const oldName=a.oldName,newName=a.newName;if(oldName&&newName&&oldName!==newName){state.users=(state.users||[]).map(u=>u===oldName?newName:u);for(const t of state.taskTemplates||[]){if(t.person===oldName)t.person=newName;for(const st of Object.keys(t.stageOwners||{}))if(t.stageOwners[st]===oldName)t.stageOwners[st]=newName}for(const x of state.corrections||[])if(x.owner===oldName)x.owner=newName;for(const x of state.manualJEs||[])if(x.preparer===oldName)x.preparer=newName;for(const x of state.improvements||[])if(x.owner===oldName)x.owner=newName}}
+ if(a.type==="user_delete"){state.users=(state.users||[]).filter(u=>u!==a.name)}
  if(a.type==="replace_state")state=a.state;
  saveLocal()
 }
@@ -427,7 +433,12 @@ function renderSettings(){
  $("warnMinutes").value=state.settings.warnMinutes||60;$("repeatMinutes").value=state.settings.repeatMinutes||60;$("targetWD").value=state.settings.closeTargetWD??2;$("targetTime").value=state.settings.closeTargetTime||"18:00";$("holidayInput").value=(state.settings.holidays||[]).join(", ");
  $("liveModeText").innerHTML=serverMode?'<span class="pill good">Shared live mode active</span> Changes are synchronized to every connected browser.':'<span class="pill warn">Standalone browser mode</span> Changes are stored only on this device.'
 }
-function renderAll(){initUsers();renderCockpit();renderWorkflow();renderHeadOffice();renderTeam();renderQuality();renderAutomation();renderImprovements();renderSettings();updateAlertBanner()}
+function renderTeamManagement(){const body=$("userBody");if(!body)return;body.innerHTML=(state.users||[]).map(u=>{const tasks=(state.taskTemplates||[]).filter(t=>t.active!==false&&t.person===u).length;const stages=(state.taskTemplates||[]).reduce((n,t)=>n+Object.values(t.stageOwners||{}).filter(x=>x===u).length,0);return `<tr><td><b>${esc(u)}</b></td><td>${tasks}</td><td>${stages}</td><td class="right"><button class="btn ghost" onclick="editUser('${u.replace(/'/g,"\\'")}')">Rename</button> <button class="btn ghost" onclick="deactivateUser('${u.replace(/'/g,"\\'")}')">Deactivate</button></td></tr>`}).join("")||`<tr><td colspan="4" class="empty">No active team members.</td></tr>`}
+function userForm(name=""){return `<div class="form-grid"><div class="field full"><label>Team member name</label><input name="name" required value="${esc(name)}" placeholder="First Last"></div></div><div class="modal-actions"><button class="btn" type="submit">Save</button></div>`}
+function addUser(){openModal("Add team member",userForm(),async fd=>{const name=String(fd.get("name")||"").trim();if(!name)return;if((state.users||[]).some(u=>u.toLowerCase()===name.toLowerCase()))return toast("Team member already exists");await action({type:"user_add",name});closeModal();toast("Team member added")})}
+function editUser(oldName){openModal("Rename team member",userForm(oldName),async fd=>{const newName=String(fd.get("name")||"").trim();if(!newName)return;if(newName!==oldName&&(state.users||[]).some(u=>u.toLowerCase()===newName.toLowerCase()))return toast("Team member already exists");await action({type:"user_update",oldName,newName});if(currentUser===oldName){currentUser=newName;localStorage.setItem("finance-current-user",currentUser)}closeModal();toast("Team member renamed")})}
+async function deactivateUser(name){if(!confirm(`Deactivate ${name}? Historical data will be kept.`))return;await action({type:"user_delete",name});if(currentUser===name){currentUser="Manager View";localStorage.setItem("finance-current-user",currentUser)}toast("Team member deactivated")}
+function renderAll(){initUsers();renderCockpit();renderWorkflow();renderHeadOffice();renderTeam();renderQuality();renderAutomation();renderImprovements();renderSettings();renderTeamManagement();updateAlertBanner()}
 function openModal(title,html,onSubmit){$("modalTitle").textContent=title;$("modalForm").innerHTML=html;$("modalBg").classList.add("show");$("modalForm").onsubmit=async e=>{e.preventDefault();await onSubmit(new FormData(e.target))}}
 function closeModal(){$("modalBg").classList.remove("show");$("modalForm").innerHTML=""}
 function formatTime(t){if(!t)return"";let [h,m]=t.split(":").map(Number);return new Date(2000,0,1,h,m).toLocaleTimeString("en-CA",{hour:"numeric",minute:"2-digit"})}
@@ -473,6 +484,7 @@ $("notifyBtn").onclick=async()=>{if(!("Notification" in window))return toast("No
 $("exportBtn").onclick=downloadState;$("importFile").onchange=async e=>{try{await importState(e.target.files[0]);toast("Backup imported")}catch(err){toast("Import failed: "+err.message)}e.target.value=""};
 $("markCloseBtn").onclick=()=>action({type:"close_set",period:selectedPeriod,at:new Date().toISOString()});$("clearCloseBtn").onclick=()=>action({type:"close_clear",period:selectedPeriod});
 $("saveSettingsBtn").onclick=()=>action({type:"settings_update",settings:{warnMinutes:Number($("warnMinutes").value||60),repeatMinutes:Number($("repeatMinutes").value||60),closeTargetWD:Number($("targetWD").value||2),closeTargetTime:$("targetTime").value||"18:00",holidays:$("holidayInput").value.split(",").map(x=>x.trim()).filter(Boolean)}});
+$("addUserBtn").onclick=addUser;
 
 (async function init(){
  initPeriods();serverMode=await detectServer();if(!serverMode)loadLocal();initUsers();$("connectionState").innerHTML=serverMode?'<span class="dot"></span>Shared live server':'Standalone browser mode';$("liveModeText").textContent=serverMode?"Shared server active":"Standalone browser storage";connectEvents();renderAll();allTemplates().forEach(t=>readySnapshot[t.id]=currentStage(t,currentPeriod()));setInterval(()=>{renderCockpit();renderWorkflow();updateAlertBanner();checkAlerts(false)},60000);

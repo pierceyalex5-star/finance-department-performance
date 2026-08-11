@@ -2,8 +2,8 @@ import { neon } from '@neondatabase/serverless';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type,X-File-Name,X-Uploaded-By',
   'Cache-Control': 'no-store'
 };
 
@@ -25,6 +25,20 @@ async function getState(env) {
   if (!rows.length) throw new Error('Dashboard state has not been initialized');
   return rows[0].state;
 }
+
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+async function ensureFilesTable(env) {
+  const sql = sqlFor(env);
+  await sql`CREATE TABLE IF NOT EXISTS dashboard_files (id text PRIMARY KEY, period text NOT NULL, item_type text NOT NULL, item_id text NOT NULL, file_name text NOT NULL, content_type text NOT NULL, size_bytes integer NOT NULL, uploaded_at timestamptz NOT NULL DEFAULT now(), uploaded_by text, data bytea NOT NULL)`;
+  await sql`CREATE INDEX IF NOT EXISTS dashboard_files_lookup_idx ON dashboard_files (period, item_type, item_id, uploaded_at DESC)`;
+}
+function arrayBufferToBase64(buffer){const bytes=new Uint8Array(buffer);let binary='';for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+0x8000,bytes.length)));return btoa(binary)}
+function base64ToBytes(value){const binary=atob(String(value||'')),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes}
+function decodeHeader(value,fallback=''){try{return decodeURIComponent(String(value||''))||fallback}catch{return String(value||'')||fallback}}
+async function listFiles(env,period,itemType,itemId){await ensureFilesTable(env);const sql=sqlFor(env);return await sql`SELECT id,file_name,content_type,size_bytes,uploaded_at,uploaded_by FROM dashboard_files WHERE period=${period} AND item_type=${itemType} AND item_id=${itemId} ORDER BY uploaded_at DESC`}
+async function uploadFile(env,request,url){const period=url.searchParams.get('period')||'',itemType=url.searchParams.get('itemType')||'',itemId=url.searchParams.get('itemId')||'';if(!period||!['task','deliverable'].includes(itemType)||!itemId)return json({error:'Missing or invalid file target'},400);const state=await getState(env),exists=itemType==='task'?(state.taskTemplates||[]).some(x=>x.id===itemId):(state.headOfficeTemplate||[]).some(x=>x.id===itemId);if(!exists)return json({error:'Task or deliverable not found'},404);const buffer=await request.arrayBuffer();if(!buffer.byteLength)return json({error:'Empty file'},400);if(buffer.byteLength>MAX_FILE_BYTES)return json({error:'File exceeds 10 MB limit'},413);const id=crypto.randomUUID(),fileName=decodeHeader(request.headers.get('X-File-Name'),'backup-file'),uploadedBy=decodeHeader(request.headers.get('X-Uploaded-By'),''),contentType=request.headers.get('Content-Type')||'application/octet-stream',base64=arrayBufferToBase64(buffer);await ensureFilesTable(env);const sql=sqlFor(env);const rows=await sql`INSERT INTO dashboard_files (id,period,item_type,item_id,file_name,content_type,size_bytes,uploaded_by,data) VALUES (${id},${period},${itemType},${itemId},${fileName},${contentType},${buffer.byteLength},${uploadedBy},decode(${base64},'base64')) RETURNING id,file_name,content_type,size_bytes,uploaded_at,uploaded_by`;return json(rows[0],201)}
+async function downloadFile(env,id){await ensureFilesTable(env);const sql=sqlFor(env);const rows=await sql`SELECT file_name,content_type,encode(data,'base64') AS data_base64 FROM dashboard_files WHERE id=${id}`;if(!rows.length)return json({error:'File not found'},404);const row=rows[0],bytes=base64ToBytes(row.data_base64);return new Response(bytes,{status:200,headers:{...CORS,'Content-Type':row.content_type||'application/octet-stream','Content-Disposition':`attachment; filename*=UTF-8''${encodeURIComponent(row.file_name||'backup-file')}`}})}
+async function deleteFile(env,id){await ensureFilesTable(env);const sql=sqlFor(env);const rows=await sql`DELETE FROM dashboard_files WHERE id=${id} RETURNING id`;return rows.length?json({ok:true}):json({error:'File not found'},404)}
 
 function enabledStages(t) {
   return ['Preparation','Approval','Entry','Review'].filter(s => t.stageEnabled?.[s] !== false);
@@ -125,6 +139,9 @@ function applyAction(input, a) {
     state.headOfficeHistory[a.period][a.bu] ??= {};
     if (a.value === '' || a.value === null) delete state.headOfficeHistory[a.period][a.bu][a.activity];
     else state.headOfficeHistory[a.period][a.bu][a.activity] = a.value;
+    const scoreItem = (state.headOfficeTemplate || []).find(x => x.activity === a.activity);
+    const scoreState = scoreItem ? state.deliverableStates?.[a.period]?.[scoreItem.id] : null;
+    if (scoreState && scoreState.autoScoreBu === a.bu && scoreState.autoScoreActivity === a.activity) scoreState.manualScoreOverride = true;
   } else if (a.type === 'ho_template_add') {
     state.headOfficeTemplate ??= [];
     state.headOfficeTemplate.push(a.item);
@@ -162,10 +179,23 @@ function applyAction(input, a) {
     } else if (a.stage === 'Review' && ds.preparedAt) {
       ds.reviewedAt = a.at || new Date().toISOString();
       ds.reviewedDoneBy = a.doneBy || '';
+      const h = (state.headOfficeTemplate || []).find(x => x.id === a.id);
+      if (a.autoScore !== null && a.autoScore !== undefined && a.bu && h) {
+        state.headOfficeHistory ??= {};
+        state.headOfficeHistory[a.period] ??= {};
+        state.headOfficeHistory[a.period][a.bu] ??= {};
+        state.headOfficeHistory[a.period][a.bu][h.activity] = Number(a.autoScore);
+        ds.autoScore = Number(a.autoScore); ds.autoScoreBu = a.bu; ds.autoScoreActivity = h.activity; ds.autoMinutesLate = Number(a.autoMinutesLate || 0); ds.autoDueAt = a.dueAt || null; ds.manualScoreOverride = false;
+      }
     }
   } else if (a.type === 'ho_stage_undo') {
     const ds = state.deliverableStates?.[a.period]?.[a.id];
     if (ds) {
+      if (ds.autoScore !== null && ds.autoScore !== undefined && !ds.manualScoreOverride) {
+        const scores = state.headOfficeHistory?.[a.period]?.[ds.autoScoreBu];
+        if (scores && Number(scores[ds.autoScoreActivity]) === Number(ds.autoScore)) delete scores[ds.autoScoreActivity];
+      }
+      delete ds.autoScore; delete ds.autoScoreBu; delete ds.autoScoreActivity; delete ds.autoMinutesLate; delete ds.autoDueAt; delete ds.manualScoreOverride;
       if (a.stage === 'Preparation') {
         delete ds.preparedAt; delete ds.preparedDoneBy; delete ds.reviewedAt; delete ds.reviewedDoneBy;
       } else {
@@ -257,6 +287,12 @@ export default {
       if (url.pathname === '/' || url.pathname === '/health') {
         return json({ ok: true, service: 'finance-performance-api' });
       }
+      if (url.pathname === '/api/files' && request.method === 'GET') {
+        return json(await listFiles(env, url.searchParams.get('period') || '', url.searchParams.get('itemType') || '', url.searchParams.get('itemId') || ''));
+      }
+      if (url.pathname === '/api/files' && request.method === 'POST') return await uploadFile(env, request, url);
+      if (url.pathname.startsWith('/api/files/') && request.method === 'GET') return await downloadFile(env, decodeURIComponent(url.pathname.slice('/api/files/'.length)));
+      if (url.pathname.startsWith('/api/files/') && request.method === 'DELETE') return await deleteFile(env, decodeURIComponent(url.pathname.slice('/api/files/'.length)));
       if (url.pathname === '/api/state' && request.method === 'GET') {
         return json(await getState(env));
       }

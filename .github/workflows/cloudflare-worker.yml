@@ -1,4 +1,4 @@
-# deployment refresh: Teams handoff integration
+# deployment refresh: valid Teams Adaptive Card payload
 name: Deploy Cloudflare Live API
 
 on:

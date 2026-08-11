@@ -5,7 +5,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'scripts/add-backups-timestamps-auto-score.py'
+      - 'scripts/add-backups-timestamps-auto-score-v2.py'
       - '.github/workflows/apply-backup-timestamps-score.yml'
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Apply dashboard changes
-        run: python scripts/add-backups-timestamps-auto-score.py
+        run: python scripts/add-backups-timestamps-auto-score-v2.py
       - name: Commit generated app changes
         run: |
           git config user.name "github-actions[bot]"

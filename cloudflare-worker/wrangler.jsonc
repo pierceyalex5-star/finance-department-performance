@@ -1,5 +1,5 @@
 {
-  // refresh: frozen close post-mortem snapshots
+  // refresh: reliable Teams webhook acceptance
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "finance-performance-api",
   "main": "src/index.js",

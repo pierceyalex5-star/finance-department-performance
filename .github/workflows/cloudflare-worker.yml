@@ -1,4 +1,4 @@
-# deployment refresh: deliverable workflow actions
+# deployment refresh: Teams handoff integration
 name: Deploy Cloudflare Live API
 
 on:
@@ -53,3 +53,13 @@ jobs:
         run: printf '%s' "$DATABASE_URL" | npx wrangler secret put DATABASE_URL
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Configure Teams workflow secret
+        shell: bash
+        env:
+          TEAMS_WORKFLOW_URL: ${{ secrets.TEAMS_WORKFLOW_URL }}
+        run: |
+          if [ -n "$TEAMS_WORKFLOW_URL" ]; then
+            printf '%s' "$TEAMS_WORKFLOW_URL" | npx wrangler secret put TEAMS_WORKFLOW_URL
+          else
+            echo 'TEAMS_WORKFLOW_URL is not configured; Teams push remains disabled.'
+          fi

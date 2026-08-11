@@ -1,0 +1,42 @@
+name: Apply Dashboard Adjustments
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/adjust_dashboard_20260810.py'
+      - '.github/workflows/apply-dashboard-adjustments.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply requested dashboard changes
+        run: python scripts/adjust_dashboard_20260810.py
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html cloudflare-worker/src/index.js
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+          git commit -m "Add deliverable workflow SOP links and Quebec workdays"
+          git push origin HEAD:main
+      - name: Set shared holiday defaults
+        run: |
+          curl -fsS -X POST 'https://finance-performance-api.pierceyalex5.workers.dev/api/action' \
+            -H 'Content-Type: application/json' \
+            --data '{"type":"settings_update","settings":{"holidayRegion":"QC","easterHoliday":"good_friday"}}' >/dev/null
+          echo "Shared settings updated to Quebec calendar with Good Friday default."

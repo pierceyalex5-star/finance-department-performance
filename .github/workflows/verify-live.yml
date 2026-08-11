@@ -17,12 +17,22 @@ jobs:
           API: https://finance-performance-api.pierceyalex5.workers.dev
         run: |
           set -euo pipefail
-          curl -fsS "$API/health" | jq -e '.ok == true and .service == "finance-performance-api"' >/dev/null
 
-          status=$(curl -sS -o /tmp/original.json -w '%{http_code}' "$API/api/state")
+          echo '--- repeated health checks ---'
+          healthy=0
+          for i in 1 2 3 4 5; do
+            code=$(curl -sS -o "/tmp/health-$i.json" -w '%{http_code}' "$API/health" || echo 000)
+            echo "health[$i] HTTP $code: $(cat "/tmp/health-$i.json" 2>/dev/null || true)"
+            if [ "$code" = "200" ] && jq -e '.ok == true and .service == "finance-performance-api"' "/tmp/health-$i.json" >/dev/null 2>&1; then healthy=1; fi
+            sleep 1
+          done
+          test "$healthy" = "1" || { echo 'No successful health response.'; exit 1; }
+
+          echo '--- state check ---'
+          status=$(curl -sS -o /tmp/original.json -w '%{http_code}' "$API/api/state" || echo 000)
+          echo "state HTTP $status"
           if [ "$status" != "200" ]; then
-            echo "State endpoint returned HTTP $status"
-            jq -r '.error // .' /tmp/original.json
+            cat /tmp/original.json || true
             exit 1
           fi
           jq -e '.users | length > 0' /tmp/original.json >/dev/null
@@ -34,12 +44,24 @@ jobs:
           }
           trap restore EXIT
 
-          jq -n --arg marker "$marker" '{type:"settings_update",settings:{migrationProbe:$marker}}' \
-            | curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @- -o /tmp/write.json
+          echo '--- write check ---'
+          jq -n --arg marker "$marker" '{type:"settings_update",settings:{migrationProbe:$marker}}' > /tmp/action.json
+          write_status=$(curl -sS -o /tmp/write.json -w '%{http_code}' -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @/tmp/action.json || echo 000)
+          echo "write HTTP $write_status"
+          if [ "$write_status" != "200" ]; then cat /tmp/write.json || true; exit 1; fi
           jq -e --arg marker "$marker" '.settings.migrationProbe == $marker' /tmp/write.json >/dev/null
-          curl -fsS "$API/api/state" -o /tmp/readback.json
+
+          echo '--- readback check ---'
+          read_status=$(curl -sS -o /tmp/readback.json -w '%{http_code}' "$API/api/state" || echo 000)
+          echo "readback HTTP $read_status"
+          if [ "$read_status" != "200" ]; then cat /tmp/readback.json || true; exit 1; fi
           jq -e --arg marker "$marker" '.settings.migrationProbe == $marker' /tmp/readback.json >/dev/null
-          curl -fsS "$API/api/events" | grep -q '^data:'
+
+          echo '--- events check ---'
+          events_status=$(curl -sS -o /tmp/events.txt -w '%{http_code}' "$API/api/events" || echo 000)
+          echo "events HTTP $events_status"
+          test "$events_status" = "200"
+          grep -q '^data:' /tmp/events.txt
 
           restore
           trap - EXIT

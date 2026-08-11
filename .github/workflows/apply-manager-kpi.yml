@@ -1,0 +1,44 @@
+name: Apply Manager KPI View
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/add-manager-kpi-view.py'
+      - '.github/workflows/apply-manager-kpi.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply manager KPI changes
+        run: python scripts/add-manager-kpi-view.py
+      - name: Validate inline JavaScript
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text()
+          blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          Path('/tmp/dashboard-inline.js').write_text('\n'.join(blocks))
+          PY
+          node --check /tmp/dashboard-inline.js
+      - name: Commit generated app changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No generated changes."
+          else
+            git commit -m "Add manager KPI view"
+            git push
+          fi

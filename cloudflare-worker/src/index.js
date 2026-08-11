@@ -88,18 +88,23 @@ function handoffPayload(state, action) {
 }
 
 async function sendTeamsHandoff(env, state, action) {
-  if (!env.TEAMS_WORKFLOW_URL) return;
+  if (!env.TEAMS_WORKFLOW_URL) return { attempted: false, ok: false, reason: 'not_configured' };
   const payload = handoffPayload(state, action);
-  if (!payload) return;
+  if (!payload) return { attempted: false, ok: false, reason: 'no_recipient' };
   try {
     const r = await fetch(env.TEAMS_WORKFLOW_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    if (!r.ok) console.error('Teams workflow returned', r.status, await r.text());
+    if (!r.ok) {
+      console.error('Teams workflow returned', r.status, await r.text());
+      return { attempted: true, ok: false, status: r.status };
+    }
+    return { attempted: true, ok: true, status: r.status };
   } catch (error) {
     console.error('Teams workflow push failed', error);
+    return { attempted: true, ok: false, status: 0 };
   }
 }
 
@@ -305,8 +310,16 @@ export default {
       if (url.pathname === '/api/action' && request.method === 'POST') {
         const action = await request.json();
         const next = await mutateState(env, action);
-        if (action.type === 'stage_complete' || action.type === 'ho_stage_complete') sendTeamsHandoff(env, next, action);
-        return json(next);
+        let teamsResult = null;
+        if (action.type === 'stage_complete' || action.type === 'ho_stage_complete') teamsResult = await sendTeamsHandoff(env, next, action);
+        const response = json(next);
+        if (teamsResult?.attempted) {
+          const headers = new Headers(response.headers);
+          headers.set('X-Teams-Push', teamsResult.ok ? 'accepted' : 'failed');
+          headers.set('X-Teams-Status', String(teamsResult.status || 0));
+          return new Response(response.body, { status: response.status, headers });
+        }
+        return response;
       }
       if (url.pathname === '/api/events' && request.method === 'GET') {
         const state = await getState(env);

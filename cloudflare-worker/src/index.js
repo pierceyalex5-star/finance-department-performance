@@ -205,8 +205,11 @@ function applyAction(input, a) {
   } else if (a.type === 'close_set') {
     state.closeActual ??= {};
     state.closeActual[a.period] = a.at;
+    state.closeSnapshots ??= {};
+    if (a.snapshot) state.closeSnapshots[a.period] = a.snapshot;
   } else if (a.type === 'close_clear') {
     if (state.closeActual) delete state.closeActual[a.period];
+    if (state.closeSnapshots) delete state.closeSnapshots[a.period];
   } else if (a.type === 'correction_add') {
     state.corrections ??= [];
     state.corrections.push(a.item);

@@ -1,0 +1,36 @@
+name: Apply Teams Adaptive Payload
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/patch_teams_adaptive_payload_20260810.py'
+      - '.github/workflows/apply-teams-adaptive-payload.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Patch Teams payload
+        run: python scripts/patch_teams_adaptive_payload_20260810.py
+      - name: Validate Worker JavaScript
+        run: node --check cloudflare-worker/src/index.js
+      - name: Commit generated Worker change
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add cloudflare-worker/src/index.js
+          git diff --cached --quiet && exit 0
+          git commit -m 'Send Teams handoffs as Adaptive Card payloads'
+          git push

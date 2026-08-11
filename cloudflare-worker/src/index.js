@@ -141,14 +141,15 @@ function applyAction(input, a) {
 async function mutateState(env, action) {
   const sql = sqlFor(env);
   for (let attempt = 0; attempt < 4; attempt++) {
-    const rows = await sql`SELECT state, updated_at FROM dashboard_state WHERE id = 1`;
+    const rows = await sql`SELECT state FROM dashboard_state WHERE id = 1`;
     if (!rows.length) throw new Error('Dashboard state has not been initialized');
     const current = rows[0].state;
-    const stamp = rows[0].updated_at;
+    const currentVersion = Number(current?.version || 0);
     const next = applyAction(current, action);
     const updated = await sql`UPDATE dashboard_state
       SET state = ${JSON.stringify(next)}::jsonb, updated_at = now()
-      WHERE id = 1 AND updated_at = ${stamp}
+      WHERE id = 1
+        AND COALESCE((state->>'version')::bigint, 0) = ${currentVersion}
       RETURNING state`;
     if (updated.length) return updated[0].state;
   }

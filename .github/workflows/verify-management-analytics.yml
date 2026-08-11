@@ -1,0 +1,40 @@
+name: Verify Management Analytics Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-management-analytics.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify production UI and frozen close snapshot persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAGE='https://pierceyalex5-star.github.io/finance-department-performance/'
+          API='https://finance-performance-api.pierceyalex5.workers.dev'
+          html="$(curl -fsSL "$PAGE")"
+          for token in 'scoreDecompBody' 'workloadBody' 'bottleneckBody' 'postmortemCards' 'drillManager' 'buildCloseSnapshot'; do
+            grep -q "$token" <<<"$html" || { echo "Missing production UI token: $token"; exit 1; }
+          done
+          test_period='2099-12'
+          curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data "{\"type\":\"close_set\",\"period\":\"$test_period\",\"at\":\"2099-12-31T17:00:00.000Z\",\"snapshot\":{\"period\":\"$test_period\",\"verification\":true,\"completion\":1,\"avgScore\":3}}" >/tmp/set.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/set.json'))
+          snap=s.get('closeSnapshots',{}).get('2099-12')
+          assert snap and snap.get('verification') is True, 'close snapshot was not persisted'
+          assert s.get('closeActual',{}).get('2099-12'), 'close actual was not persisted'
+          PY
+          curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data "{\"type\":\"close_clear\",\"period\":\"$test_period\"}" >/tmp/clear.json
+          python - <<'PY'
+          import json
+          s=json.load(open('/tmp/clear.json'))
+          assert '2099-12' not in s.get('closeSnapshots',{}), 'close snapshot was not cleared'
+          assert '2099-12' not in s.get('closeActual',{}), 'close actual was not cleared'
+          PY
+          echo 'Management analytics production verification passed.'

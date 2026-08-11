@@ -1,4 +1,4 @@
-# deployment refresh: workflow, SOP, Quebec workdays
+# deployment refresh: reversible actions and Teams recipient settings
 name: Deploy Dashboard to GitHub Pages
 
 on:

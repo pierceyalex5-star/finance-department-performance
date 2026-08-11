@@ -30,6 +30,65 @@ function enabledStages(t) {
   return ['Preparation','Approval','Entry','Review'].filter(s => t.stageEnabled?.[s] !== false);
 }
 
+function currentTaskStage(t, state, period) {
+  const stages = enabledStages(t);
+  const ps = state.periodStates?.[period]?.[t.id]?.stages || {};
+  return stages.find(s => !ps[s]?.doneAt) || null;
+}
+
+function deliverableCurrentStage(h, state, period) {
+  const ds = state.deliverableStates?.[period]?.[h.id] || {};
+  if (!ds.preparedAt) return 'Preparation';
+  if (!ds.reviewedAt) return 'Review';
+  return null;
+}
+
+function teamsEmail(state, owner) {
+  return String(state.settings?.teamsEmails?.[owner] || '').trim();
+}
+
+function handoffPayload(state, action) {
+  let owner = '', itemName = '', nextStage = '', itemType = '';
+  if (action.type === 'stage_complete') {
+    const t = (state.taskTemplates || []).find(x => x.id === action.taskId);
+    if (!t) return null;
+    nextStage = currentTaskStage(t, state, action.period) || '';
+    if (!nextStage) return null;
+    owner = t.stageOwners?.[nextStage] || 'Unassigned';
+    itemName = t.name || 'Finance task';
+    itemType = 'Task';
+  } else if (action.type === 'ho_stage_complete') {
+    const h = (state.headOfficeTemplate || []).find(x => x.id === action.id);
+    if (!h) return null;
+    nextStage = deliverableCurrentStage(h, state, action.period) || '';
+    if (!nextStage) return null;
+    owner = nextStage === 'Preparation' ? (h.preparedBy || h.owner || 'Unassigned') : (h.reviewedBy || h.signoffOwner || 'Unassigned');
+    itemName = h.activity || 'Finance deliverable';
+    itemType = 'Deliverable';
+  } else return null;
+  const recipientEmail = teamsEmail(state, owner);
+  if (!recipientEmail || owner === 'Unassigned') return null;
+  const completedBy = action.doneBy || 'Finance team';
+  const message = `Finance close handoff: ${itemName}. ${action.stage} completed by ${completedBy}. Your next step is ${nextStage} for period ${action.period}. Open dashboard: https://pierceyalex5-star.github.io/finance-department-performance/`;
+  return { event: 'finance_handoff', recipientEmail, recipientName: owner, itemType, itemName, completedStage: action.stage, nextStage, completedBy, period: action.period, message, dashboardUrl: 'https://pierceyalex5-star.github.io/finance-department-performance/' };
+}
+
+async function sendTeamsHandoff(env, state, action) {
+  if (!env.TEAMS_WORKFLOW_URL) return;
+  const payload = handoffPayload(state, action);
+  if (!payload) return;
+  try {
+    const r = await fetch(env.TEAMS_WORKFLOW_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) console.error('Teams workflow returned', r.status, await r.text());
+  } catch (error) {
+    console.error('Teams workflow push failed', error);
+  }
+}
+
 function applyAction(input, a) {
   let state = structuredClone(input);
   state.version = (state.version || 0) + 1;
@@ -150,7 +209,18 @@ function applyAction(input, a) {
       for (const x of state.corrections || []) if (x.owner === oldName) x.owner = newName;
       for (const x of state.manualJEs || []) if (x.preparer === oldName) x.preparer = newName;
       for (const x of state.improvements || []) if (x.owner === oldName) x.owner = newName;
+      state.settings ??= {};
+      state.settings.teamsEmails ??= {};
+      if (Object.prototype.hasOwnProperty.call(state.settings.teamsEmails, oldName)) {
+        state.settings.teamsEmails[newName] = state.settings.teamsEmails[oldName];
+        delete state.settings.teamsEmails[oldName];
+      }
     }
+  } else if (a.type === 'user_teams_email_update') {
+    state.settings ??= {};
+    state.settings.teamsEmails ??= {};
+    if (a.email) state.settings.teamsEmails[a.name] = a.email;
+    else delete state.settings.teamsEmails[a.name];
   } else if (a.type === 'user_delete') {
     state.users = (state.users || []).filter(u => u !== a.name);
   } else if (a.type === 'replace_state') {
@@ -190,9 +260,14 @@ export default {
       if (url.pathname === '/api/state' && request.method === 'GET') {
         return json(await getState(env));
       }
+      if (url.pathname === '/api/integrations' && request.method === 'GET') {
+        return json({ teamsPushConfigured: Boolean(env.TEAMS_WORKFLOW_URL) });
+      }
       if (url.pathname === '/api/action' && request.method === 'POST') {
         const action = await request.json();
-        return json(await mutateState(env, action));
+        const next = await mutateState(env, action);
+        if (action.type === 'stage_complete' || action.type === 'ho_stage_complete') sendTeamsHandoff(env, next, action);
+        return json(next);
       }
       if (url.pathname === '/api/events' && request.method === 'GET') {
         const state = await getState(env);

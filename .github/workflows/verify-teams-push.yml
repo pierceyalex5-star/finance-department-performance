@@ -28,7 +28,8 @@ jobs:
               data = json.dumps(action).encode()
               req = urllib.request.Request(BASE + '/api/action', data=data, headers={'Content-Type':'application/json','User-Agent':UA,'Accept':'application/json'}, method='POST')
               with urllib.request.urlopen(req, timeout=30) as r:
-                  return json.loads(r.read().decode())
+                  body = json.loads(r.read().decode())
+                  return body, dict(r.headers.items())
 
           integrations = get('/api/integrations')
           if not integrations.get('teamsPushConfigured'):
@@ -49,15 +50,26 @@ jobs:
                   candidate = ('deliverable', h, reviewer)
                   break
 
+          def verify_acceptance(headers):
+              push = headers.get('X-Teams-Push') or headers.get('x-teams-push')
+              status = headers.get('X-Teams-Status') or headers.get('x-teams-status')
+              print(f'Microsoft webhook acceptance: {push or "unknown"} (HTTP {status or "unknown"})')
+              if push != 'accepted':
+                  raise RuntimeError(f'Teams webhook was not accepted; status={status or "unknown"}')
+
           if candidate:
               _, h, reviewer = candidate
-              post({'type':'ho_stage_complete','period':period,'id':h['id'],'stage':'Preparation','doneBy':'Teams integration test'})
-              post({'type':'ho_stage_undo','period':period,'id':h['id'],'stage':'Preparation'})
-              print(f"Test handoff sent to configured Teams recipient: {reviewer}")
+              _, headers = post({'type':'ho_stage_complete','period':period,'id':h['id'],'stage':'Preparation','doneBy':'Teams integration test'})
+              try:
+                  verify_acceptance(headers)
+              finally:
+                  post({'type':'ho_stage_undo','period':period,'id':h['id'],'stage':'Preparation'})
+              print(f"Test handoff accepted for configured Teams recipient: {reviewer}")
               print(f"Test item: {h.get('activity','Deliverable')}")
               print('Dashboard action was undone immediately after the push.')
           else:
               stages_order = ['Preparation','Approval','Entry','Review']
+              sent = False
               for t in state.get('taskTemplates') or []:
                   if t.get('active') is False:
                       continue
@@ -70,12 +82,16 @@ jobs:
                   first, second = enabled[0], enabled[1]
                   next_owner = (t.get('stageOwners') or {}).get(second) or ''
                   if next_owner and emails.get(next_owner) and next_owner != 'Unassigned':
-                      post({'type':'stage_complete','period':period,'taskId':t['id'],'stage':first,'doneBy':'Teams integration test'})
-                      post({'type':'stage_undo','period':period,'taskId':t['id'],'stage':first})
-                      print(f"Test handoff sent to configured Teams recipient: {next_owner}")
+                      _, headers = post({'type':'stage_complete','period':period,'taskId':t['id'],'stage':first,'doneBy':'Teams integration test'})
+                      try:
+                          verify_acceptance(headers)
+                      finally:
+                          post({'type':'stage_undo','period':period,'taskId':t['id'],'stage':first})
+                      print(f"Test handoff accepted for configured Teams recipient: {next_owner}")
                       print(f"Test item: {t.get('name','Task')}")
                       print('Dashboard action was undone immediately after the push.')
+                      sent = True
                       break
-              else:
+              if not sent:
                   print('Teams endpoint is connected, but no untouched task/deliverable currently has an eligible next-step Teams recipient.')
                   print('Add Teams email / UPN values in Settings > Team Management, then the next real handoff will push automatically.')

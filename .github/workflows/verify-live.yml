@@ -18,13 +18,19 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsS "$API/health" | jq -e '.ok == true and .service == "finance-performance-api"' >/dev/null
-          curl -fsS "$API/api/state" -o /tmp/original.json
+
+          status=$(curl -sS -o /tmp/original.json -w '%{http_code}' "$API/api/state")
+          if [ "$status" != "200" ]; then
+            echo "State endpoint returned HTTP $status"
+            jq -r '.error // .' /tmp/original.json
+            exit 1
+          fi
           jq -e '.users | length > 0' /tmp/original.json >/dev/null
 
           marker="github-live-probe-${GITHUB_RUN_ID}"
           restore() {
             jq -n --slurpfile s /tmp/original.json '{type:"replace_state",state:$s[0]}' \
-              | curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @- -o /dev/null || true
+              | curl -sS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @- -o /dev/null || true
           }
           trap restore EXIT
 

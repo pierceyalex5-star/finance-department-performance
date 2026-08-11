@@ -2,6 +2,11 @@ name: Deploy Cloudflare Live API
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare-worker/**'
+      - '.github/workflows/cloudflare-worker.yml'
 
 jobs:
   deploy:

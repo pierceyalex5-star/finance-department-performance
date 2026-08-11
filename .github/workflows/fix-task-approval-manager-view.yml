@@ -1,0 +1,61 @@
+name: Repair Task Approval and Manager View
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-task-approval-manager-view.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  repair-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply workflow and view repair
+        run: python scripts/fix_task_approval_manager_view_20260811.py
+      - name: Validate patched dashboard
+        run: |
+          grep -q 'Prepared → Approved → Entered → Reviewed' index.html
+          grep -q 'function taskStageCell' index.html
+          grep -q 'function applyViewMode' index.html
+          grep -q "navigateToPage(manager?'managerKpi':'workflow')" index.html
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          Path('/tmp/dashboard-inline.js').write_text(blocks[-1],encoding='utf-8')
+          PY
+          node --check /tmp/dashboard-inline.js
+      - name: Commit repaired dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Restore task approval workflow and Manager View"
+          git push
+      - uses: actions/configure-pages@v5
+      - name: Build static site
+        run: |
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js _site/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

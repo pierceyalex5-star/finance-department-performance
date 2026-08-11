@@ -1,0 +1,40 @@
+name: Verify Live Dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-live.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: End-to-end Cloudflare + Neon probe
+        shell: bash
+        env:
+          API: https://finance-performance-api.pierceyalex5.workers.dev
+        run: |
+          set -euo pipefail
+          curl -fsS "$API/health" | jq -e '.ok == true and .service == "finance-performance-api"' >/dev/null
+          curl -fsS "$API/api/state" -o /tmp/original.json
+          jq -e '.users | length > 0' /tmp/original.json >/dev/null
+
+          marker="github-live-probe-${GITHUB_RUN_ID}"
+          restore() {
+            jq -n --slurpfile s /tmp/original.json '{type:"replace_state",state:$s[0]}' \
+              | curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @- -o /dev/null || true
+          }
+          trap restore EXIT
+
+          jq -n --arg marker "$marker" '{type:"settings_update",settings:{migrationProbe:$marker}}' \
+            | curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @- -o /tmp/write.json
+          jq -e --arg marker "$marker" '.settings.migrationProbe == $marker' /tmp/write.json >/dev/null
+          curl -fsS "$API/api/state" -o /tmp/readback.json
+          jq -e --arg marker "$marker" '.settings.migrationProbe == $marker' /tmp/readback.json >/dev/null
+          curl -fsS "$API/api/events" | grep -q '^data:'
+
+          restore
+          trap - EXIT
+          echo 'Live API read/write/restore verification passed.'

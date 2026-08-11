@@ -197,9 +197,13 @@ tr:last-child td{border-bottom:0}.right{text-align:right}.center{text-align:cent
 
 
   <section id="managerKpi" class="page">
-    <div class="section"><h2>Manager KPI · Akram, Dumitru & Alex</h2></div>
-    <div class="help">Task accountability follows the recurring <b>Person / task list</b> owner. A task is Done only when every enabled workflow stage is signed off. Average performance score combines completed task timing with deliverables where the manager is <b>Prepared by</b>: 3 = on time, 2 = up to 1h late, 1 = more than 1h late; deliverable manual overrides and 0 / Not sent are preserved.</div>
-    <div id="managerKpiCards" class="grid three" style="margin-top:13px"></div>
+    <div class="section"><h2>Manager KPI · Team performance</h2></div>
+    <div class="help">This management view is intended for <b>Akram, Dumitru and Alex</b> and compares every active finance team member. Task accountability follows the recurring <b>Person / task list</b> owner. A task is Done only when every enabled workflow stage is signed off. Average performance score combines completed task timing with deliverables where the person is <b>Prepared by</b>: 3 = on time, 2 = up to 1h late, 1 = more than 1h late; deliverable manual overrides and 0 / Not sent are preserved.</div>
+    <div class="grid three" style="margin-top:13px">
+      <div class="card"><div class="kpi-label">Team tasks done</div><div class="kpi-value" id="managerTeamDone">0</div><div class="kpi-meta" id="managerTeamDoneMeta">—</div></div>
+      <div class="card"><div class="kpi-label">Team completion rate</div><div class="kpi-value" id="managerTeamCompletion">—</div><div class="kpi-meta">Fully signed-off recurring tasks</div></div>
+      <div class="card"><div class="kpi-label">Team average score</div><div class="kpi-value" id="managerTeamAvg">—</div><div class="kpi-meta">Weighted by completed task/deliverable observations</div></div>
+    </div>
     <div class="section"><h2>Current month comparison</h2></div>
     <div class="table-wrap"><table><thead><tr><th>Manager</th><th>Assigned tasks</th><th>Tasks done</th><th>Completion %</th><th>Task timing score</th><th>Deliverable score</th><th>Average score</th></tr></thead><tbody id="managerKpiBody"></tbody></table></div>
     <div class="grid two" style="margin-top:13px">
@@ -506,11 +510,7 @@ function userForm(name=""){return `<div class="form-grid"><div class="field full
 function addUser(){openModal("Add team member",userForm(),async fd=>{const name=String(fd.get("name")||"").trim();if(!name)return;if((state.users||[]).some(u=>u.toLowerCase()===name.toLowerCase()))return toast("Team member already exists");await action({type:"user_add",name});closeModal();toast("Team member added")})}
 function editUser(oldName){openModal("Rename team member",userForm(oldName),async fd=>{const newName=String(fd.get("name")||"").trim();if(!newName)return;if(newName!==oldName&&(state.users||[]).some(u=>u.toLowerCase()===newName.toLowerCase()))return toast("Team member already exists");await action({type:"user_update",oldName,newName});if(currentUser===oldName){currentUser=newName;localStorage.setItem("finance-current-user",currentUser)}closeModal();toast("Team member renamed")})}
 async function deactivateUser(name){if(!confirm(`Deactivate ${name}? Historical data will be kept.`))return;await action({type:"user_delete",name});if(currentUser===name){currentUser="Manager View";localStorage.setItem("finance-current-user",currentUser)}toast("Team member deactivated")}
-const MANAGER_KPI_FIRST_NAMES=["Akram","Dumitru","Alex"];
-function managerKpiUsers(){
- const users=state.users||[];
- return MANAGER_KPI_FIRST_NAMES.map(first=>users.find(u=>String(u).toLowerCase().startsWith(first.toLowerCase()))).filter(Boolean)
-}
+function managerKpiUsers(){return (state.users||[]).slice()}
 function managerTimingScore(at,due){
  if(!at||!due)return null;const mins=(new Date(at)-due)/60000;return mins<=0?3:mins<=60?2:1
 }
@@ -531,11 +531,12 @@ function managerMetrics(person,period){
  return {person,task,deliverableScores,deliverableAvg:deliverableScores.length?deliverableScores.reduce((a,b)=>a+b,0)/deliverableScores.length:null,avg:combined.length?combined.reduce((a,b)=>a+b,0)/combined.length:null,n:combined.length}
 }
 function managerTrendPeriods(period){const [y,m]=period.split('-').map(Number);return Array.from({length:m},(_,i)=>`${y}-${String(i+1).padStart(2,'0')}`)}
-function managerLegendHTML(managers){const colors=['#68a8ff','#45cf9a','#f4c75c'];return managers.map((m,i)=>`<span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${colors[i%colors.length]};margin-right:5px"></span>${esc(m)}</span>`).join('')}
+function managerLegendHTML(managers){const colors=['#68a8ff','#45cf9a','#f4c75c','#b89cff','#f28bb3','#7dd3fc','#a3e635','#fb923c'];return managers.map((m,i)=>`<span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${colors[i%colors.length]};margin-right:5px"></span>${esc(m)}</span>`).join('')}
 function renderManagerKPI(){
  const managers=managerKpiUsers(),metrics=managers.map(m=>managerMetrics(m,selectedPeriod));
- $("managerKpiCards").innerHTML=metrics.map(x=>`<div class="card"><div class="kpi-label">${esc(x.person)}</div><div class="kpi-value">${x.task.done} / ${x.task.assigned}</div><div class="kpi-meta">Tasks done · ${x.task.completion===null?'—':Math.round(x.task.completion*100)+'%'} complete</div><div style="margin-top:12px"><span class="pill ${x.avg===null?'neutral':x.avg>=2.5?'good':x.avg>=1.5?'warn':'bad'}">Avg score ${x.avg===null?'—':x.avg.toFixed(2)}</span></div></div>`).join('')||'<div class="card"><div class="empty">Manager names were not found in Team Management.</div></div>';
- $("managerKpiBody").innerHTML=metrics.map(x=>`<tr><td><b>${esc(x.person)}</b></td><td>${x.task.assigned}</td><td>${x.task.done}</td><td>${x.task.completion===null?'—':Math.round(x.task.completion*100)+'%'}</td><td>${x.task.avg===null?'—':x.task.avg.toFixed(2)}</td><td>${x.deliverableAvg===null?'—':x.deliverableAvg.toFixed(2)}${x.deliverableScores.length?` <span class="small">(${x.deliverableScores.length})</span>`:''}</td><td><b>${x.avg===null?'—':x.avg.toFixed(2)}</b></td></tr>`).join('')||'<tr><td colspan="7" class="empty">No manager KPI data.</td></tr>';
+ const assigned=metrics.reduce((a,x)=>a+x.task.assigned,0),done=metrics.reduce((a,x)=>a+x.task.done,0),scoreN=metrics.reduce((a,x)=>a+x.n,0),scoreSum=metrics.reduce((a,x)=>a+(x.avg===null?0:x.avg*x.n),0),teamAvg=scoreN?scoreSum/scoreN:null;
+ $("managerTeamDone").textContent=`${done} / ${assigned}`;$("managerTeamDoneMeta").textContent=`${managers.length} active team members`;$("managerTeamCompletion").textContent=assigned?Math.round(done/assigned*100)+'%':'—';$("managerTeamAvg").textContent=teamAvg===null?'—':teamAvg.toFixed(2);
+ $("managerKpiBody").innerHTML=metrics.map(x=>`<tr><td><b>${esc(x.person)}</b></td><td>${x.task.assigned}</td><td>${x.task.done}</td><td>${x.task.completion===null?'—':Math.round(x.task.completion*100)+'%'}</td><td>${x.task.avg===null?'—':x.task.avg.toFixed(2)}</td><td>${x.deliverableAvg===null?'—':x.deliverableAvg.toFixed(2)}${x.deliverableScores.length?` <span class="small">(${x.deliverableScores.length})</span>`:''}</td><td><b>${x.avg===null?'—':x.avg.toFixed(2)}</b></td></tr>`).join('')||'<tr><td colspan="7" class="empty">No team KPI data.</td></tr>';
  const periods=managerTrendPeriods(selectedPeriod),labels=periods.map(p=>new Date(Number(p.slice(0,4)),Number(p.slice(5))-1,1).toLocaleDateString('en-CA',{month:'short'}));
  const taskSeries=managers.map(m=>({values:periods.map(p=>managerTaskMetrics(m,p).done)}));const maxTasks=Math.max(1,...taskSeries.flatMap(s=>s.values));drawLine('managerTaskTrendCanvas',labels,taskSeries,0,Math.ceil(maxTasks));
  const scoreSeries=managers.map(m=>({values:periods.map(p=>managerMetrics(m,p).avg)}));drawLine('managerScoreTrendCanvas',labels,scoreSeries,0,3);
@@ -549,7 +550,7 @@ function drawLine(canvasId,labels,series,min=0,max=3){
  const c=$(canvasId),dpr=devicePixelRatio||1,w=c.clientWidth||600,h=c.clientHeight||250;c.width=w*dpr;c.height=h*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,w,h);const pad={l:40,r:15,t:18,b:35},cw=w-pad.l-pad.r,ch=h-pad.t-pad.b;x.strokeStyle="#29415f";x.lineWidth=1;
  for(let i=0;i<=3;i++){let yy=pad.t+ch*i/3;x.beginPath();x.moveTo(pad.l,yy);x.lineTo(w-pad.r,yy);x.stroke();x.fillStyle="#8fa5c2";x.font="10px sans-serif";x.fillText((max-(max-min)*i/3).toFixed(1),5,yy+3)}
  const n=Math.max(labels.length,2);labels.forEach((lab,i)=>{let xx=pad.l+cw*i/(n-1);x.fillStyle="#8fa5c2";x.fillText(lab,xx-8,h-10)});
- series.forEach((s,si)=>{x.strokeStyle=["#68a8ff","#45cf9a","#f4c75c","#b89cff"][si%4];x.lineWidth=2;x.beginPath();let started=false;s.values.forEach((v,i)=>{if(v==null)return;let xx=pad.l+cw*i/(n-1),yy=pad.t+ch*(max-v)/(max-min);if(!started){x.moveTo(xx,yy);started=true}else x.lineTo(xx,yy);x.fillStyle=x.strokeStyle;x.fillRect(xx-2,yy-2,4,4)});x.stroke()})
+ series.forEach((s,si)=>{x.strokeStyle=["#68a8ff","#45cf9a","#f4c75c","#b89cff","#f28bb3","#7dd3fc","#a3e635","#fb923c"][si%8];x.lineWidth=2;x.beginPath();let started=false;s.values.forEach((v,i)=>{if(v==null)return;let xx=pad.l+cw*i/(n-1),yy=pad.t+ch*(max-v)/(max-min);if(!started){x.moveTo(xx,yy);started=true}else x.lineTo(xx,yy);x.fillStyle=x.strokeStyle;x.fillRect(xx-2,yy-2,4,4)});x.stroke()})
 }
 function drawHOTrend(id,bu){
  const periods=Object.keys(state.headOfficeHistory).filter(p=>p.startsWith("2026-")).sort();const labels=periods.map(p=>new Date(Number(p.slice(0,4)),Number(p.slice(5))-1,1).toLocaleDateString("en-CA",{month:"short"}));const values=periods.map(p=>hoMetrics(p,bu).avg);drawLine(id,labels,[{values}],0,3)

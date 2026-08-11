@@ -83,8 +83,27 @@ function handoffPayload(state, action) {
   const recipientEmail = teamsEmail(state, owner);
   if (!recipientEmail || owner === 'Unassigned') return null;
   const completedBy = action.doneBy || 'Finance team';
-  const message = `Finance close handoff: ${itemName}. ${action.stage} completed by ${completedBy}. Your next step is ${nextStage} for period ${action.period}. Open dashboard: https://pierceyalex5-star.github.io/finance-department-performance/`;
-  return { event: 'finance_handoff', recipientEmail, recipientName: owner, itemType, itemName, completedStage: action.stage, nextStage, completedBy, period: action.period, message, dashboardUrl: 'https://pierceyalex5-star.github.io/finance-department-performance/' };
+  const message = `Finance close handoff: ${itemName}. ${action.stage} completed by ${completedBy}. Your next step is ${nextStage} for period ${action.period}.`;
+  return {
+    type: 'message',
+    attachments: [{
+      contentType: 'application/vnd.microsoft.card.adaptive',
+      contentUrl: null,
+      content: {
+        '$schema': 'http://adaptivecards.io/schemas/adaptive-card.json',
+        type: 'AdaptiveCard',
+        version: '1.2',
+        body: [
+          { type: 'TextBlock', text: recipientEmail, wrap: true },
+          { type: 'TextBlock', text: message, wrap: true },
+          { type: 'TextBlock', text: owner, wrap: true },
+          { type: 'TextBlock', text: itemName, wrap: true },
+          { type: 'TextBlock', text: nextStage, wrap: true }
+        ],
+        actions: [{ type: 'Action.OpenUrl', title: 'Open Finance Dashboard', url: 'https://pierceyalex5-star.github.io/finance-department-performance/' }]
+      }
+    }]
+  };
 }
 
 async function sendTeamsHandoff(env, state, action) {

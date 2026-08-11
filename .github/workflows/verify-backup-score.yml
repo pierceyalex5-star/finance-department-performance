@@ -1,0 +1,114 @@
+name: Verify Backup Files Timestamps and Automatic Scoring
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-backup-score.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify production UI API files and workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          SITE='https://pierceyalex5-star.github.io/finance-department-performance/'
+          API='https://finance-performance-api.pierceyalex5.workers.dev'
+
+          curl -fsS "$SITE" -o page.html
+          grep -q 'Backup' page.html
+          grep -q 'step-stamp' page.html
+          grep -q 'autoDeliverableScore' page.html
+          grep -q 'function renderTeam' page.html
+          grep -q 'function safeSOPUrl' page.html
+
+          curl -fsS "$API/api/state" -o original.json
+          python - <<'PY'
+          import json
+          s=json.load(open('original.json'))
+          t=next(x for x in s['taskTemplates'] if x.get('active') is not False)
+          h=next(x for x in s['headOfficeTemplate'] if x.get('active') is not False)
+          open('task_id.txt','w').write(t['id'])
+          open('ho_id.txt','w').write(h['id'])
+          open('ho_name.txt','w').write(h['activity'])
+          PY
+          TASK_ID=$(cat task_id.txt)
+          HO_ID=$(cat ho_id.txt)
+          HO_NAME=$(cat ho_name.txt)
+          PERIOD='__verification__'
+
+          printf 'finance backup verification' > verification.txt
+          curl -fsS -X POST "$API/api/files?period=$PERIOD&itemType=task&itemId=$TASK_ID" \
+            -H 'Content-Type: text/plain' \
+            -H 'X-File-Name: verification.txt' \
+            -H 'X-Uploaded-By: Verification' \
+            --data-binary @verification.txt -o uploaded.json
+          FILE_ID=$(python -c "import json; print(json.load(open('uploaded.json'))['id'])")
+          curl -fsS "$API/api/files?period=$PERIOD&itemType=task&itemId=$TASK_ID" -o files.json
+          python - <<'PY'
+          import json
+          x=json.load(open('files.json'))
+          assert any(f['file_name']=='verification.txt' for f in x), x
+          PY
+          curl -fsS "$API/api/files/$FILE_ID" -o downloaded.txt
+          cmp verification.txt downloaded.txt
+          curl -fsS -X DELETE "$API/api/files/$FILE_ID" -o deleted.json
+
+          AT_PREP='2028-12-01T12:00:00.000Z'
+          AT_REVIEW='2028-12-01T12:30:00.000Z'
+          python - <<PY > prep.json
+          import json
+          print(json.dumps({'type':'ho_stage_complete','period':'$PERIOD','id':'$HO_ID','stage':'Preparation','doneBy':'Verification','at':'$AT_PREP','bu':'Ifast'}))
+          PY
+          curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @prep.json -o after_prep.json
+          python - <<PY
+          import json
+          s=json.load(open('after_prep.json')); ds=s['deliverableStates']['$PERIOD']['$HO_ID']
+          assert ds['preparedAt']=='$AT_PREP' and ds['preparedDoneBy']=='Verification', ds
+          PY
+
+          python - <<PY > review.json
+          import json
+          print(json.dumps({'type':'ho_stage_complete','period':'$PERIOD','id':'$HO_ID','stage':'Review','doneBy':'Verification','at':'$AT_REVIEW','bu':'Ifast','autoScore':3,'autoMinutesLate':0,'dueAt':'2028-12-01T13:00:00.000Z'}))
+          PY
+          curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @review.json -o after_review.json
+          python - <<PY
+          import json
+          s=json.load(open('after_review.json')); ds=s['deliverableStates']['$PERIOD']['$HO_ID']
+          assert ds['reviewedAt']=='$AT_REVIEW' and ds['reviewedDoneBy']=='Verification', ds
+          assert ds['autoScore']==3, ds
+          assert s['headOfficeHistory']['$PERIOD']['Ifast']['$HO_NAME']==3
+          PY
+
+          python - <<PY > undo_review.json
+          import json
+          print(json.dumps({'type':'ho_stage_undo','period':'$PERIOD','id':'$HO_ID','stage':'Review'}))
+          PY
+          curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @undo_review.json -o after_undo_review.json
+          python - <<PY
+          import json
+          s=json.load(open('after_undo_review.json')); ds=s['deliverableStates']['$PERIOD']['$HO_ID']
+          assert 'reviewedAt' not in ds, ds
+          assert '$HO_NAME' not in s.get('headOfficeHistory',{}).get('$PERIOD',{}).get('Ifast',{}), s.get('headOfficeHistory',{}).get('$PERIOD',{})
+          PY
+
+          python - <<PY > undo_prep.json
+          import json
+          print(json.dumps({'type':'ho_stage_undo','period':'$PERIOD','id':'$HO_ID','stage':'Preparation'}))
+          PY
+          curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @undo_prep.json -o after_undo_prep.json
+          python - <<PY
+          import json
+          s=json.load(open('after_undo_prep.json')); ds=s['deliverableStates']['$PERIOD']['$HO_ID']
+          assert 'preparedAt' not in ds, ds
+          PY
+
+          python - <<'PY' > restore.json
+          import json
+          print(json.dumps({'type':'replace_state','state':json.load(open('original.json'))}))
+          PY
+          curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @restore.json -o restored.json
+          echo 'Live verification passed: UI, file backup, timestamps, auto score, undo, and restore.'

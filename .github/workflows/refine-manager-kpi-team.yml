@@ -1,0 +1,44 @@
+name: Refine Manager KPI Team View
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/refine-manager-kpi-team-view.py'
+      - '.github/workflows/refine-manager-kpi-team.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refine manager KPI to full team view
+        run: python scripts/refine-manager-kpi-team-view.py
+      - name: Validate inline JavaScript
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text()
+          blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          Path('/tmp/dashboard-inline.js').write_text('\n'.join(blocks))
+          PY
+          node --check /tmp/dashboard-inline.js
+      - name: Commit generated app changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No generated changes."
+          else
+            git commit -m "Refine manager KPI to full team view"
+            git push
+          fi

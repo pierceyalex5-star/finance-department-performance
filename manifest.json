@@ -1,6 +1,6 @@
 {
-  "name": "Finance Department Performance Dashboard",
-  "short_name": "Finance Close",
+  "name": "Finance Control Tower",
+  "short_name": "Finance Tower",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

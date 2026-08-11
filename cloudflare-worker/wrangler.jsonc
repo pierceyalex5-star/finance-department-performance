@@ -1,5 +1,5 @@
 {
-  // refresh: backup file storage + auto scoring
+  // refresh: frozen close post-mortem snapshots
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "finance-performance-api",
   "main": "src/index.js",

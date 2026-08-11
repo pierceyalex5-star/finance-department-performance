@@ -1,0 +1,34 @@
+name: Rebrand Finance Control Tower
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/rebrand-finance-control-tower.py'
+      - '.github/workflows/rebrand-finance-control-tower.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rebrand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply branding
+        run: python scripts/rebrand-finance-control-tower.py
+      - name: Commit branding changes
+        run: |
+          if git diff --quiet; then
+            echo 'No branding changes required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html manifest.json
+          git commit -m 'Rebrand dashboard as Finance Control Tower'
+          git push

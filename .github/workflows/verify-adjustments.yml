@@ -1,0 +1,61 @@
+name: Verify Dashboard Adjustments
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-adjustments.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live UI and shared deliverable workflow
+        shell: bash
+        env:
+          SITE: https://pierceyalex5-star.github.io/finance-department-performance/
+          API: https://finance-performance-api.pierceyalex5.workers.dev
+        run: |
+          set -euo pipefail
+
+          echo 'Checking deployed UI markers...'
+          ok=0
+          for i in $(seq 1 12); do
+            curl -fsS "$SITE" -o /tmp/site.html
+            if grep -q 'id="hoPersonFilter"' /tmp/site.html \
+              && grep -q '<th>Prepared by</th>' /tmp/site.html \
+              && grep -q 'id="holidayRegion"' /tmp/site.html \
+              && grep -q 'SOP link' /tmp/site.html; then
+              ok=1; break
+            fi
+            sleep 5
+          done
+          test "$ok" = "1"
+
+          curl -fsS "$API/api/state" -o /tmp/original.json
+          jq -e '.settings.holidayRegion == "QC" and .settings.easterHoliday == "good_friday"' /tmp/original.json >/dev/null
+          id=$(jq -r '.headOfficeTemplate[] | select(.active != false) | .id' /tmp/original.json | head -1)
+          test -n "$id"
+          period='2026-08'
+
+          restore() {
+            jq -n --slurpfile s /tmp/original.json '{type:"replace_state",state:$s[0]}' \
+              | curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @- -o /dev/null || true
+          }
+          trap restore EXIT
+
+          jq -n --arg id "$id" --arg period "$period" '{type:"ho_stage_complete",period:$period,id:$id,stage:"Preparation",doneBy:"Verification",at:"2026-08-10T22:00:00-04:00"}' \
+            | curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @- -o /tmp/prepared.json
+          jq -e --arg id "$id" --arg period "$period" '.deliverableStates[$period][$id].preparedDoneBy == "Verification"' /tmp/prepared.json >/dev/null
+
+          jq -n --arg id "$id" --arg period "$period" '{type:"ho_stage_complete",period:$period,id:$id,stage:"Review",doneBy:"Verification",at:"2026-08-10T22:01:00-04:00"}' \
+            | curl -fsS -X POST "$API/api/action" -H 'Content-Type: application/json' --data-binary @- -o /tmp/reviewed.json
+          jq -e --arg id "$id" --arg period "$period" '.deliverableStates[$period][$id].reviewedDoneBy == "Verification"' /tmp/reviewed.json >/dev/null
+
+          curl -fsS "$API/api/state" -o /tmp/readback.json
+          jq -e --arg id "$id" --arg period "$period" '.deliverableStates[$period][$id].preparedDoneBy == "Verification" and .deliverableStates[$period][$id].reviewedDoneBy == "Verification"' /tmp/readback.json >/dev/null
+
+          restore
+          trap - EXIT
+          echo 'UI markers, Quebec defaults, and Prepared -> Reviewed persistence passed.'

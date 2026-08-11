@@ -146,11 +146,11 @@ tr:last-child td{border-bottom:0}.right{text-align:right}.center{text-align:cent
     </div>
     <div class="section">
       <h2>Deliverables & monthly performance</h2>
-      <div class="controls"><select id="buSelect"><option>IRM</option><option>SWG</option><option selected>Ifast</option><option>Corp.</option><option>FP&A Corp.</option></select><button class="btn" id="addHODeliverableBtn">+ Add deliverable</button></div>
+      <div class="controls"><select id="buSelect"><option>IRM</option><option>SWG</option><option selected>Ifast</option><option>Corp.</option><option>FP&A Corp.</option></select><select id="hoPersonFilter"></select><button class="btn" id="addHODeliverableBtn">+ Add deliverable</button></div>
     </div>
     <div class="help">Imported from <b>Infasco_Month-End_Dashboard.xlsx</b>. Historical values are retained. You can update the selected month directly: 3 = on time/error-free, 2 = &lt;1h late/minor error, 1 = &gt;1h late/correction required, 0 = not sent.</div>
     <div class="section"><h2>Monthly scorecard</h2></div>
-    <div class="table-wrap"><table><thead><tr><th>Deliverable</th><th>Day</th><th>Time ET</th><th>Owner</th><th>Sign-off</th><th>Score</th><th>Interpretation</th><th></th></tr></thead><tbody id="hoBody"></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>Deliverable</th><th>Day</th><th>Time ET</th><th>Function</th><th>Prepared by</th><th>Reviewed by</th><th>Workflow</th><th>SOP</th><th>Score</th><th>Interpretation</th><th></th></tr></thead><tbody id="hoBody"></tbody></table></div>
     <div class="grid two" style="margin-top:13px">
       <div class="card chart-card"><div class="section"><h2>Monthly performance trend</h2></div><canvas class="chart" id="hoBUCanvas"></canvas></div>
       <div class="card"><div class="section"><h2>Legend</h2></div>
@@ -164,7 +164,7 @@ tr:last-child td{border-bottom:0}.right{text-align:right}.center{text-align:cent
     <div class="person-tabs" id="personTabs"></div>
     <div class="help">Alex P. and Akram L. are intentionally left open: add, remove or change their tasks here. Edits become the recurring template used for future monthly periods.</div>
     <div class="section"><h2 id="teamTitle">Tasks</h2></div>
-    <div class="table-wrap"><table><thead><tr><th>Task</th><th>Deadline</th><th>Workbook owner</th><th>Preparation</th><th>Approval</th><th>Entry</th><th>Review</th><th>Close critical</th><th></th></tr></thead><tbody id="teamBody"></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>Task</th><th>Deadline</th><th>Workbook owner</th><th>Preparation</th><th>Approval</th><th>Entry</th><th>Review</th><th>SOP</th><th>Close critical</th><th></th></tr></thead><tbody id="teamBody"></tbody></table></div>
   </section>
 
   <section id="quality" class="page">
@@ -203,7 +203,7 @@ tr:last-child td{border-bottom:0}.right{text-align:right}.center{text-align:cent
           <div class="field"><label>Repeat reminder after (minutes)</label><input id="repeatMinutes" type="number" min="15"></div>
           <div class="field"><label>Close target working day</label><input id="targetWD" type="number" min="0" max="10"></div>
           <div class="field"><label>Close target time ET</label><input id="targetTime" type="time"></div>
-          <div class="field full"><label>Holidays / non-working dates (YYYY-MM-DD, comma separated)</label><input id="holidayInput" placeholder="2026-09-07, 2026-10-12"></div>
+          <div class="field"><label>Holiday calendar</label><select id="holidayRegion"><option value="QC">Québec, Canada</option><option value="manual">Manual dates only</option></select></div><div class="field"><label>Easter statutory holiday</label><select id="easterHoliday"><option value="good_friday">Good Friday</option><option value="easter_monday">Easter Monday</option></select></div><div class="field full"><label>Additional company holidays / non-working dates (YYYY-MM-DD, comma separated)</label><input id="holidayInput" placeholder="2026-12-24, 2026-12-31"></div><div class="field full"><div class="small">WD always excludes Saturday and Sunday. Québec mode also excludes CNESST statutory holidays; add plant/company shutdown dates above when needed.</div></div>
         </div>
         <div class="modal-actions"><button class="btn" id="saveSettingsBtn">Save settings</button></div>
       </div>
@@ -242,7 +242,23 @@ const fmtDate=d=>d?new Date(d).toLocaleString("en-CA",{month:"short",day:"numeri
 const monthName=p=>new Date(Number(p.slice(0,4)),Number(p.slice(5,7))-1,1).toLocaleDateString("en-CA",{month:"long",year:"numeric"});
 function currentPeriod(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`}
 function toast(msg){$("toast").textContent=msg;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2200)}
-function isBusinessDay(d){const day=d.getDay();const iso=d.toISOString().slice(0,10);return day!==0&&day!==6&&!(state.settings.holidays||[]).includes(iso)}
+function localISO(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function easterSunday(year){
+ const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),month=Math.floor((h+l-7*m+114)/31),day=((h+l-7*m+114)%31)+1;
+ return new Date(year,month-1,day,12,0,0)
+}
+function mondayBeforeMay25(year){let d=new Date(year,4,24,12,0,0);while(d.getDay()!==1)d.setDate(d.getDate()-1);return d}
+function nthWeekday(year,month,weekday,n){let d=new Date(year,month,1,12,0,0),count=0;while(true){if(d.getDay()===weekday&&++count===n)return d;d.setDate(d.getDate()+1)}}
+function quebecHolidayDates(year){
+ if((state.settings.holidayRegion||"QC")!=="QC")return [];
+ const dates=[new Date(year,0,1,12),mondayBeforeMay25(year),new Date(year,5,24,12),new Date(year,6,1,12),nthWeekday(year,8,1,1),nthWeekday(year,9,1,2),new Date(year,11,25,12)];
+ const easter=easterSunday(year),easterChoice=state.settings.easterHoliday||"good_friday";dates.push(addDays(easter,easterChoice==="easter_monday"?1:-2));
+ const june24=dates[2];if(june24.getDay()===0)dates.push(new Date(year,5,25,12));
+ const july1=dates[3];if(july1.getDay()===0)dates.push(new Date(year,6,2,12));
+ return dates.map(localISO)
+}
+function isBusinessDay(d){const day=d.getDay(),iso=localISO(d),manual=state.settings.holidays||[],qc=quebecHolidayDates(d.getFullYear());return day!==0&&day!==6&&!manual.includes(iso)&&!qc.includes(iso)}
 function businessDay(period,n){
   const [y,m]=period.split("-").map(Number); let d=new Date(y,m,0,12,0,0);
   if(n===0){while(!isBusinessDay(d))d.setDate(d.getDate()-1);return d}
@@ -314,6 +330,8 @@ function applyLocal(a){
  if(a.type==="ho_template_add")state.headOfficeTemplate.push(a.item);
  if(a.type==="ho_template_update"){const i=state.headOfficeTemplate.findIndex(x=>x.id===a.item.id);if(i>=0){const old=state.headOfficeTemplate[i].activity;state.headOfficeTemplate[i]={...state.headOfficeTemplate[i],...a.item};const neu=state.headOfficeTemplate[i].activity;if(a.oldActivity&&a.oldActivity!==neu){for(const p of Object.keys(state.headOfficeHistory||{}))for(const bu of Object.keys(state.headOfficeHistory[p]||{})){const scores=state.headOfficeHistory[p][bu];if(Object.prototype.hasOwnProperty.call(scores,a.oldActivity)&&!Object.prototype.hasOwnProperty.call(scores,neu)){scores[neu]=scores[a.oldActivity];delete scores[a.oldActivity]}}}}}
  if(a.type==="ho_template_delete"){const h=state.headOfficeTemplate.find(x=>x.id===a.id);if(h)h.active=false}
+ if(a.type==="ho_stage_complete"){state.deliverableStates??={};state.deliverableStates[a.period]??={};state.deliverableStates[a.period][a.id]??={};const ds=state.deliverableStates[a.period][a.id];if(a.stage==="Preparation"){ds.preparedAt=a.at||new Date().toISOString();ds.preparedDoneBy=a.doneBy||currentUser;delete ds.reviewedAt;delete ds.reviewedDoneBy}else if(a.stage==="Review"&&ds.preparedAt){ds.reviewedAt=a.at||new Date().toISOString();ds.reviewedDoneBy=a.doneBy||currentUser}}
+ if(a.type==="ho_stage_undo"){const ds=state.deliverableStates?.[a.period]?.[a.id];if(ds){if(a.stage==="Preparation"){delete ds.preparedAt;delete ds.preparedDoneBy;delete ds.reviewedAt;delete ds.reviewedDoneBy}else{delete ds.reviewedAt;delete ds.reviewedDoneBy}}}
  if(a.type==="close_set")state.closeActual[a.period]=a.at;
  if(a.type==="close_clear")delete state.closeActual[a.period];
  if(a.type==="correction_add")state.corrections.push(a.item); if(a.type==="correction_delete")state.corrections=state.corrections.filter(x=>x.id!==a.id);
@@ -343,10 +361,10 @@ function initPeriods(){
 }
 function initUsers(){
  const opts=["Manager View",...state.users];
- for(const id of ["currentUser","workflowPersonFilter"]){
-   const el=$(id), previous=el.value || (id==="currentUser"?currentUser:"Manager View");
+ for(const id of ["currentUser","workflowPersonFilter","hoPersonFilter"]){
+   const el=$(id);if(!el)continue;const previous=el.value || (id==="currentUser"?currentUser:"Manager View");
    el.innerHTML="";
-   opts.forEach(u=>{const o=document.createElement("option");o.value=u;o.textContent=u;if(previous===u)o.selected=true;el.appendChild(o)})
+   opts.forEach(u=>{const o=document.createElement("option");o.value=u;o.textContent=(id==="hoPersonFilter"&&u==="Manager View")?"All people":u;if(previous===u)o.selected=true;el.appendChild(o)})
  }
 }
 function renderCockpit(){
@@ -371,7 +389,7 @@ function renderWorkflow(){
  const person=$("workflowPersonFilter").value||"Manager View",filter=$("workflowStatusFilter").value;let rows=[];
  for(const t of periodTasks()){if(person!=="Manager View"&&t.person!==person&&!personMatches(stageOwner(t,currentStage(t,selectedPeriod)),person))continue;const st=currentStage(t,selectedPeriod),status=taskStatus(t,selectedPeriod);if(filter==="risk"&&!["late","risk"].includes(status.code))continue;if(filter==="done"&&status.code!=="done")continue;if(filter==="ready"&&status.code!=="ready")continue;rows.push({t,st,status})}
  $("wfDone").textContent=rows.filter(x=>x.status.code==="done").length;$("wfReady").textContent=rows.filter(x=>x.status.code==="ready").length;$("wfBad").textContent=rows.filter(x=>["late","risk"].includes(x.status.code)).length;
- $("workflowBody").innerHTML=rows.map(x=>{const d=finalDue(x.t,selectedPeriod),sd=x.st?stageDue(x.t,x.st,selectedPeriod):null,owner=x.st?stageOwner(x.t,x.st):"—";return `<tr><td><b>${esc(x.t.name)}</b><div class="small">${esc(x.t.source||"")}</div></td><td>${esc(x.t.person)}</td><td>${fmtDate(d)}</td><td>${workflowMarkup(x.t)}</td><td>${esc(owner)}</td><td>${fmtDate(sd)}</td><td><span class="pill ${x.status.cls}">${esc(x.status.label)}</span></td><td>${x.st?`<button class="btn secondary" onclick="completeStage('${x.t.id}')">Done</button> <button class="btn ghost" onclick="editTask('${x.t.id}')">Edit</button>`:`<button class="btn ghost" onclick="undoLast('${x.t.id}')">Undo last</button>`}</td></tr>`}).join("")||`<tr><td colspan="8" class="empty">No tasks match this filter.</td></tr>`
+ $("workflowBody").innerHTML=rows.map(x=>{const d=finalDue(x.t,selectedPeriod),sd=x.st?stageDue(x.t,x.st,selectedPeriod):null,owner=x.st?stageOwner(x.t,x.st):"—";return `<tr><td><b>${esc(x.t.name)}</b><div class="small">${esc(x.t.source||"")}${safeSOPUrl(x.t.sopUrl)?` · <a href="${esc(safeSOPUrl(x.t.sopUrl))}" target="_blank" rel="noopener">SOP</a>`:""}</div></td><td>${esc(x.t.person)}</td><td>${fmtDate(d)}</td><td>${workflowMarkup(x.t)}</td><td>${esc(owner)}</td><td>${fmtDate(sd)}</td><td><span class="pill ${x.status.cls}">${esc(x.status.label)}</span></td><td>${x.st?`<button class="btn secondary" onclick="completeStage('${x.t.id}')">Done</button> <button class="btn ghost" onclick="editTask('${x.t.id}')">Edit</button>`:`<button class="btn ghost" onclick="undoLast('${x.t.id}')">Undo last</button>`}</td></tr>`}).join("")||`<tr><td colspan="8" class="empty">No tasks match this filter.</td></tr>`
 }
 async function completeStage(id){
  const t=state.taskTemplates.find(x=>x.id===id),st=currentStage(t,selectedPeriod);if(!st)return;await action({type:"stage_complete",period:selectedPeriod,taskId:id,stage:st,doneBy:currentUser,at:new Date().toISOString()});toast(`${t.name}: ${st} completed`)
@@ -380,22 +398,33 @@ async function undoLast(id){
  const t=state.taskTemplates.find(x=>x.id===id),ps=pstate(selectedPeriod,id),done=enabledStages(t).filter(s=>ps.stages?.[s]?.doneAt);if(!done.length)return;await action({type:"stage_undo",period:selectedPeriod,taskId:id,stage:done[done.length-1]})
 }
 function renderHeadOffice(){
- const bu=$("buSelect").value||"Ifast",m=hoMetrics(selectedPeriod,bu);$("hoAvg").textContent=m.avg===null?"—":m.avg.toFixed(2);$("hoGreen").textContent=m.green===null?"—":Math.round(m.green*100)+"%";$("hoRed").textContent=m.n?m.red:"—";
- const scores=hoScores(selectedPeriod,bu), rows=state.headOfficeTemplate.filter(h=>h.active!==false);
- $("hoBody").innerHTML=rows.map(h=>{const v=scores[h.activity]??"",[lab,cls]=scoreLabel(v);return `<tr><td><b>${esc(h.activity)}</b></td><td>${esc(h.day||"—")}</td><td>${esc(h.time||"—")}</td><td>${esc(h.owner)}</td><td><input style="min-width:120px" value="${esc(h.signoffOwner||"")}" onchange="updateHOSignoff('${h.id}',this.value)" placeholder="Sign-off owner"></td><td><select class="score-select ${cls}" onchange="setHOScore('${escAttr(h.activity)}',this.value)"><option value="" ${v===""?"selected":""}>Not scored</option><option value="3" ${Number(v)===3?"selected":""}>3</option><option value="2" ${Number(v)===2?"selected":""}>2</option><option value="1" ${Number(v)===1?"selected":""}>1</option><option value="0" ${Number(v)===0||String(v).toLowerCase().includes("not sent")?"selected":""}>0 / Not sent</option></select></td><td><span class="pill ${cls}">${lab}</span></td><td><button class="btn secondary" onclick="editHODeliverable('${h.id}')">Edit</button> <button class="btn ghost" onclick="deleteHODeliverable('${h.id}')">Delete</button></td></tr>`}).join("")||`<tr><td colspan="8" class="empty">No active head-office deliverables. Use + Add deliverable to create one.</td></tr>`;drawHOTrend("hoBUCanvas",bu)
+ const bu=$("buSelect").value||"Ifast",person=$("hoPersonFilter")?.value||"Manager View",m=hoMetrics(selectedPeriod,bu);$("hoAvg").textContent=m.avg===null?"—":m.avg.toFixed(2);$("hoGreen").textContent=m.green===null?"—":Math.round(m.green*100)+"%";$("hoRed").textContent=m.n?m.red:"—";
+ const scores=hoScores(selectedPeriod,bu), rows=state.headOfficeTemplate.filter(h=>h.active!==false).filter(h=>person==="Manager View"||personMatches(hoPrepOwner(h),person)||personMatches(hoReviewOwner(h),person));
+ $("hoBody").innerHTML=rows.map(h=>{const v=scores[h.activity]??"",[lab,cls]=scoreLabel(v),ds=hoPState(selectedPeriod,h.id);return `<tr><td><b>${esc(h.activity)}</b></td><td>${esc(h.day||"—")}</td><td>${esc(h.time||"—")}</td><td>${esc(h.owner||"—")}</td><td>${ownerProgress(hoPrepOwner(h),ds.preparedAt,ds.preparedDoneBy)}</td><td>${ownerProgress(hoReviewOwner(h),ds.reviewedAt,ds.reviewedDoneBy)}</td><td>${hoWorkflowMarkup(h)}</td><td>${sopButton(h.sopUrl)}</td><td><select class="score-select ${cls}" onchange="setHOScore('${escAttr(h.activity)}',this.value)"><option value="" ${v===""?"selected":""}>Not scored</option><option value="3" ${Number(v)===3?"selected":""}>3</option><option value="2" ${Number(v)===2?"selected":""}>2</option><option value="1" ${Number(v)===1?"selected":""}>1</option><option value="0" ${Number(v)===0||String(v).toLowerCase().includes("not sent")?"selected":""}>0 / Not sent</option></select></td><td><span class="pill ${cls}">${lab}</span></td><td><button class="btn secondary" onclick="editHODeliverable('${h.id}')">Edit</button> <button class="btn ghost" onclick="deleteHODeliverable('${h.id}')">Delete</button></td></tr>`}).join("")||`<tr><td colspan="11" class="empty">No active deliverables match this filter.</td></tr>`;drawHOTrend("hoBUCanvas",bu)
 }
+function deliverablePersonOptions(value){const list=["Unassigned",...(state.users||[])];if(value&&!list.includes(value))list.push(value);return list.map(u=>`<option value="${esc(u)}" ${u===value?"selected":""}>${esc(u)}</option>`).join("")}
 function hoDeliverableForm(h={}){
- return `<div class="form-grid"><div class="field full"><label>Deliverable</label><input name="activity" required value="${esc(h.activity||"")}"></div><div class="field"><label>Working day / due day</label><input name="day" value="${esc(h.day||"")}" placeholder="WD1, WD2, etc."></div><div class="field"><label>Time ET</label><input name="time" type="time" value="${esc(h.time||"12:00")}"></div><div class="field"><label>Owner / function</label><input name="owner" value="${esc(h.owner||"")}" placeholder="FP&A Corp., Ifast, etc."></div><div class="field"><label>Sign-off owner</label><input name="signoffOwner" value="${esc(h.signoffOwner||"")}" placeholder="Name or role"></div></div><div class="modal-actions"><button type="button" class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" type="submit">Save deliverable</button></div>`
+ const prep=h.preparedBy||((state.users||[]).includes(h.owner)?h.owner:"Unassigned"),review=h.reviewedBy||h.signoffOwner||"Unassigned";
+ return `<div class="form-grid"><div class="field full"><label>Deliverable</label><input name="activity" required value="${esc(h.activity||"")}"></div><div class="field"><label>Working day / due day</label><input name="day" value="${esc(h.day||"")}" placeholder="WD1, WD2, etc."></div><div class="field"><label>Time ET</label><input name="time" type="time" value="${esc(h.time||"12:00")}"></div><div class="field"><label>Owner / function</label><input name="owner" value="${esc(h.owner||"")}" placeholder="FP&A Corp., Ifast, etc."></div><div class="field"><label>Prepared by</label><select name="preparedBy">${deliverablePersonOptions(prep)}</select></div><div class="field"><label>Reviewed by</label><select name="reviewedBy">${deliverablePersonOptions(review)}</select></div><div class="field full"><label>SOP link</label><input name="sopUrl" type="url" value="${esc(h.sopUrl||"")}" placeholder="https://... (SharePoint, OneDrive, Google Drive, PDF, etc.)"></div></div><div class="modal-actions"><button type="button" class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" type="submit">Save deliverable</button></div>`
 }
-function addHODeliverable(){openModal("Add head-office deliverable",hoDeliverableForm(),async fd=>{const o=Object.fromEntries(fd.entries());await action({type:"ho_template_add",item:{id:uid("ho"),activity:o.activity.trim(),day:o.day.trim(),time:o.time,owner:o.owner.trim(),signoffOwner:o.signoffOwner.trim(),active:true}});closeModal();toast("Head-office deliverable added")})}
-function editHODeliverable(id){const h=state.headOfficeTemplate.find(x=>x.id===id);if(!h)return;openModal("Edit head-office deliverable",hoDeliverableForm(h),async fd=>{const o=Object.fromEntries(fd.entries()),oldActivity=h.activity,newActivity=o.activity.trim();await action({type:"ho_template_update",item:{id,activity:newActivity,day:o.day.trim(),time:o.time,owner:o.owner.trim(),signoffOwner:o.signoffOwner.trim(),active:true},oldActivity});closeModal();toast("Head-office deliverable updated")})}
-function updateHOSignoff(id,value){const h=state.headOfficeTemplate.find(x=>x.id===id);if(!h)return;action({type:"ho_template_update",item:{id,signoffOwner:value.trim()}})}
+function addHODeliverable(){openModal("Add deliverable",hoDeliverableForm(),async fd=>{const o=Object.fromEntries(fd.entries());await action({type:"ho_template_add",item:{id:uid("ho"),activity:o.activity.trim(),day:o.day.trim(),time:o.time,owner:o.owner.trim(),preparedBy:o.preparedBy,reviewedBy:o.reviewedBy,signoffOwner:o.reviewedBy,sopUrl:o.sopUrl.trim(),active:true}});closeModal();toast("Deliverable added")})}
+function editHODeliverable(id){const h=state.headOfficeTemplate.find(x=>x.id===id);if(!h)return;openModal("Edit deliverable",hoDeliverableForm(h),async fd=>{const o=Object.fromEntries(fd.entries()),oldActivity=h.activity,newActivity=o.activity.trim();await action({type:"ho_template_update",item:{id,activity:newActivity,day:o.day.trim(),time:o.time,owner:o.owner.trim(),preparedBy:o.preparedBy,reviewedBy:o.reviewedBy,signoffOwner:o.reviewedBy,sopUrl:o.sopUrl.trim(),active:true},oldActivity});closeModal();toast("Deliverable updated")})}
 function deleteHODeliverable(id){const h=state.headOfficeTemplate.find(x=>x.id===id);if(!h)return;if(confirm(`Remove "${h.activity}" from the active head-office deliverable list? Historical monthly scores will be retained.`))action({type:"ho_template_delete",id})}
 function escAttr(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(/\n/g," ")}
 function setHOScore(activity,value){action({type:"ho_score",period:selectedPeriod,bu:$("buSelect").value,activity,value:value===""?"":Number(value)})}
+function hoPState(period,id){return state.deliverableStates?.[period]?.[id]||{}}
+function hoPrepOwner(h){return h.preparedBy||((state.users||[]).includes(h.owner)?h.owner:"Unassigned")}
+function hoReviewOwner(h){return h.reviewedBy||h.signoffOwner||"Unassigned"}
+function hoCurrentStage(h,period){const ds=hoPState(period,h.id);if(!ds.preparedAt)return "Preparation";if(!ds.reviewedAt)return "Review";return null}
+function ownerProgress(owner,at,doneBy){return `<b>${esc(owner||"Unassigned")}</b>${at?`<div class="small">✓ ${esc(doneBy||"")} · ${fmtDate(at)}</div>`:'<div class="small">Pending</div>'}`}
+function hoWorkflowMarkup(h){const ds=hoPState(selectedPeriod,h.id),st=hoCurrentStage(h,selectedPeriod);return `<div class="workflow"><span class="step ${ds.preparedAt?'done':st==='Preparation'?'ready':'locked'}">Prepared${ds.preparedAt?' ✓':''}</span><span class="arrow">→</span><span class="step ${ds.reviewedAt?'done':st==='Review'?'ready':'locked'}">Reviewed${ds.reviewedAt?' ✓':''}</span></div><div style="margin-top:6px">${st?`<button class="btn secondary" onclick="completeHOStage('${h.id}')">Mark ${st==='Preparation'?'prepared':'reviewed'}</button>`:`<button class="btn ghost" onclick="undoHOLast('${h.id}')">Undo review</button>`}${ds.preparedAt&&!ds.reviewedAt?` <button class="btn ghost" onclick="undoHOLast('${h.id}')">Undo prepared</button>`:''}</div>`}
+async function completeHOStage(id){const h=state.headOfficeTemplate.find(x=>x.id===id);if(!h)return;const st=hoCurrentStage(h,selectedPeriod);if(!st)return;await action({type:"ho_stage_complete",period:selectedPeriod,id,stage:st,doneBy:currentUser,at:new Date().toISOString()});toast(`${h.activity}: ${st==='Preparation'?'prepared':'reviewed'}`)}
+async function undoHOLast(id){const h=state.headOfficeTemplate.find(x=>x.id===id);if(!h)return;const ds=hoPState(selectedPeriod,id),stage=ds.reviewedAt?"Review":"Preparation";await action({type:"ho_stage_undo",period:selectedPeriod,id,stage})}
+function safeSOPUrl(u){try{const x=new URL(String(u||""),location.href);return (x.protocol==="https:"||x.protocol==="http:")?x.href:""}catch(e){return ""}}
+function sopButton(u){const href=safeSOPUrl(u);return href?`<a class="btn ghost" href="${esc(href)}" target="_blank" rel="noopener">Open SOP</a>`:'<span class="small">—</span>'}
 function renderTeam(){
  const tabs=$("personTabs");tabs.innerHTML=state.users.map(p=>`<button class="${p===teamPerson?'active':''}" onclick="setTeamPerson('${escAttr(p)}')">${esc(p)}</button>`).join("");$("teamTitle").textContent=`${teamPerson} · recurring task template`;
- const rows=allTemplates().filter(t=>t.person===teamPerson);$("teamBody").innerHTML=rows.map(t=>`<tr><td><b>${esc(t.name)}</b><div class="small">${esc(t.source||"Internal Close")}</div></td><td>${esc(t.day||"—")} ${esc(t.time||"")}</td><td>${esc(t.workbookOwner||"—")}</td>${STAGES.map(s=>`<td>${t.stageEnabled?.[s]===false?'<span class="small">Skipped</span>':esc(stageOwner(t,s))}</td>`).join("")}<td>${t.closeCritical?'<span class="pill warn">Yes</span>':'No'}</td><td><button class="btn secondary" onclick="editTask('${t.id}')">Edit</button> <button class="btn ghost" onclick="deleteTask('${t.id}')">Remove</button></td></tr>`).join("")||`<tr><td colspan="9"><div class="empty"><b>No fixed tasks yet.</b><br>Add tasks for ${esc(teamPerson)} directly in the dashboard.</div></td></tr>`
+ const rows=allTemplates().filter(t=>t.person===teamPerson);$("teamBody").innerHTML=rows.map(t=>`<tr><td><b>${esc(t.name)}</b><div class="small">${esc(t.source||"Internal Close")}</div></td><td>${esc(t.day||"—")} ${esc(t.time||"")}</td><td>${esc(t.workbookOwner||"—")}</td>${STAGES.map(s=>`<td>${t.stageEnabled?.[s]===false?'<span class="small">Skipped</span>':esc(stageOwner(t,s))}</td>`).join("")}<td>${sopButton(t.sopUrl)}</td><td>${t.closeCritical?'<span class="pill warn">Yes</span>':'No'}</td><td><button class="btn secondary" onclick="editTask('${t.id}')">Edit</button> <button class="btn ghost" onclick="deleteTask('${t.id}')">Remove</button></td></tr>`).join("")||`<tr><td colspan="10"><div class="empty"><b>No fixed tasks yet.</b><br>Add tasks for ${esc(teamPerson)} directly in the dashboard.</div></td></tr>`
 }
 function setTeamPerson(p){teamPerson=p;renderTeam()}
 function taskForm(t={}){
@@ -408,13 +437,14 @@ function taskForm(t={}){
  <div class="field"><label>Final deadline time ET</label><input name="time" type="time" value="${esc(t.time||"17:00")}"></div>
  <div class="field"><label>Close critical?</label><select name="closeCritical"><option value="true" ${t.closeCritical?"selected":""}>Yes</option><option value="false" ${!t.closeCritical?"selected":""}>No</option></select></div>
  <div class="field"><label>Source</label><input name="source" value="${esc(t.source||"Internal Close")}"></div>
+ <div class="field full"><label>SOP link</label><input name="sopUrl" type="url" value="${esc(t.sopUrl||"")}" placeholder="https://... (SharePoint, OneDrive, Google Drive, PDF, etc.)"></div>
  <div class="field full"><label>Workflow ownership and deadline offsets</label><div class="small">Offset = minutes before the final task deadline. A disabled stage is skipped automatically.</div></div>
  ${STAGES.map(s=>`<div class="stage-grid full"><b>${s}</b><select name="owner_${s}">${opts(t.stageOwners?.[s]||((s==="Preparation")?(t.person||teamPerson):"Unassigned"))}</select><input type="number" min="0" name="offset_${s}" value="${Number(t.stageOffsets?.[s]??({Preparation:180,Approval:120,Entry:60,Review:0}[s]))}"><label><input type="checkbox" name="enabled_${s}" ${t.stageEnabled?.[s]===false?"":"checked"}> Enabled</label></div>`).join("")}
  </div><div class="modal-actions"><button type="button" class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" type="submit">Save task</button></div>`
 }
 function editTask(id){const t=state.taskTemplates.find(x=>x.id===id);openModal("Edit task",taskForm(t),async fd=>{const task=formTask(fd,t.id);await action({type:"template_update",task});closeModal();toast("Task updated")})}
 function addTask(){openModal("Add recurring task",taskForm(),async fd=>{const task=formTask(fd,uid("task"));await action({type:"template_add",task});teamPerson=task.person;closeModal();toast("Task added")})}
-function formTask(fd,id){const o=Object.fromEntries(fd.entries()),stageOwners={},stageOffsets={},stageEnabled={};STAGES.forEach(s=>{stageOwners[s]=o["owner_"+s];stageOffsets[s]=Number(o["offset_"+s]||0);stageEnabled[s]=o["enabled_"+s]==="on"});return {id,name:o.name,person:o.person,workbookOwner:o.workbookOwner,day:o.day,time:o.time,closeCritical:o.closeCritical==="true",source:o.source||"Internal Close",active:true,stageOwners,stageOffsets,stageEnabled}}
+function formTask(fd,id){const o=Object.fromEntries(fd.entries()),stageOwners={},stageOffsets={},stageEnabled={};STAGES.forEach(s=>{stageOwners[s]=o["owner_"+s];stageOffsets[s]=Number(o["offset_"+s]||0);stageEnabled[s]=o["enabled_"+s]==="on"});return {id,name:o.name,person:o.person,workbookOwner:o.workbookOwner,day:o.day,time:o.time,closeCritical:o.closeCritical==="true",source:o.source||"Internal Close",sopUrl:(o.sopUrl||"").trim(),active:true,stageOwners,stageOffsets,stageEnabled}}
 function deleteTask(id){if(confirm("Remove this recurring task? Historical completion data will remain in the saved state."))action({type:"template_delete",taskId:id})}
 function renderQuality(){
  const rows=state.corrections.filter(x=>x.period===selectedPeriod);$("qCount").textContent=rows.length;$("qValue").textContent=money(rows.reduce((a,x)=>a+Math.abs(Number(x.amount||0)),0));$("qMaterial").textContent=rows.filter(x=>x.material).length;
@@ -433,7 +463,7 @@ function renderImprovements(){
 }
 function improvementForm(){return `<div class="form-grid"><div class="field full"><label>Issue</label><input name="issue" required></div><div class="field full"><label>Root cause</label><textarea name="rootCause"></textarea></div><div class="field full"><label>Corrective action</label><textarea name="actionText" required></textarea></div><div class="field"><label>Owner</label><select name="owner">${state.users.map(u=>`<option>${esc(u)}</option>`).join("")}</select></div><div class="field"><label>Due date</label><input name="due" type="date"></div><div class="field"><label>Annual hours benefit</label><input name="benefitHours" type="number" step="0.1"></div><div class="field"><label>Status</label><select name="status"><option>Open</option><option>In progress</option><option>Blocked</option><option>Done</option></select></div></div><div class="modal-actions"><button class="btn" type="submit">Add action</button></div>`}
 function renderSettings(){
- $("warnMinutes").value=state.settings.warnMinutes||60;$("repeatMinutes").value=state.settings.repeatMinutes||60;$("targetWD").value=state.settings.closeTargetWD??2;$("targetTime").value=state.settings.closeTargetTime||"18:00";$("holidayInput").value=(state.settings.holidays||[]).join(", ");
+ $("warnMinutes").value=state.settings.warnMinutes||60;$("repeatMinutes").value=state.settings.repeatMinutes||60;$("targetWD").value=state.settings.closeTargetWD??2;$("targetTime").value=state.settings.closeTargetTime||"18:00";$("holidayRegion").value=state.settings.holidayRegion||"QC";$("easterHoliday").value=state.settings.easterHoliday||"good_friday";$("holidayInput").value=(state.settings.holidays||[]).join(", ");
  $("liveModeText").innerHTML=serverMode?'<span class="pill good">Shared live mode active</span> Changes are synchronized to every connected browser.':'<span class="pill warn">Standalone browser mode</span> Changes are stored only on this device.'
 }
 function renderTeamManagement(){const body=$("userBody");if(!body)return;body.innerHTML=(state.users||[]).map(u=>{const tasks=(state.taskTemplates||[]).filter(t=>t.active!==false&&t.person===u).length;const stages=(state.taskTemplates||[]).reduce((n,t)=>n+Object.values(t.stageOwners||{}).filter(x=>x===u).length,0);return `<tr><td><b>${esc(u)}</b></td><td>${tasks}</td><td>${stages}</td><td class="right"><button class="btn ghost" onclick="editUser('${u.replace(/'/g,"\\'")}')">Rename</button> <button class="btn ghost" onclick="deactivateUser('${u.replace(/'/g,"\\'")}')">Deactivate</button></td></tr>`}).join("")||`<tr><td colspan="4" class="empty">No active team members.</td></tr>`}
@@ -469,14 +499,17 @@ function notify(title,body,key){
 function checkAlerts(fromLive=false){
  if(!("Notification" in window)||Notification.permission!=="granted")return;const p=currentPeriod(),now=new Date();
  for(const t of allTemplates()){const st=currentStage(t,p);if(!st)continue;const owner=stageOwner(t,st);if(!personMatches(owner,currentUser))continue;const due=stageDue(t,st,p);if(!due)continue;const mins=(due-now)/60000;if(mins<=Number(state.settings.warnMinutes||60)){notify(mins<0?"Finance task overdue":"Finance task due soon",`${t.name} · ${st} · ${owner} · ${mins<0?Math.ceil(-mins)+" min late":Math.floor(mins)+" min remaining"}`,`${p}-${t.id}-${st}-${mins<0?"late":"soon"}`)}}
- if(fromLive){for(const t of allTemplates()){const st=currentStage(t,p),k=t.id,owner=st?stageOwner(t,st):"";if(readySnapshot[k]&&readySnapshot[k]!==st&&st&&personMatches(owner,currentUser))notify("Task ready for you",`${t.name} moved to ${st}.`,`${p}-${t.id}-${st}-ready`);readySnapshot[k]=st}}
+ if(fromLive){
+  for(const t of allTemplates()){const st=currentStage(t,p),k=t.id,owner=st?stageOwner(t,st):"";if(readySnapshot[k]&&readySnapshot[k]!==st&&st&&personMatches(owner,currentUser))notify("Task ready for you",`${t.name} moved to ${st}.`,`${p}-${t.id}-${st}-ready`);readySnapshot[k]=st}
+  for(const h of (state.headOfficeTemplate||[]).filter(x=>x.active!==false)){const st=hoCurrentStage(h,p),key=`ho-stage-${p}-${h.id}`,prev=localStorage.getItem(key)||"",owner=st==="Preparation"?hoPrepOwner(h):st==="Review"?hoReviewOwner(h):"";if(prev&&prev!==String(st||"done")&&st&&personMatches(owner,currentUser))notify("Deliverable ready for you",`${h.activity} is ready for ${st==='Preparation'?'preparation':'review'}.`,`${p}-${h.id}-${st}-ready`);localStorage.setItem(key,String(st||"done"))}
+ }
 }
 function downloadState(){const b=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`finance-dashboard-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href)}
 async function importState(file){const txt=await file.text(),s=JSON.parse(txt);if(!s.taskTemplates)throw new Error("Invalid dashboard backup");if(serverMode)await action({type:"replace_state",state:s});else{state=s;saveLocal();renderAll()}}
 
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));$(b.dataset.page).classList.add("active");$("pageTitle").textContent=b.textContent.replace(/^\d+\s*·\s*/,"")});
 $("periodSelect").onchange=e=>{selectedPeriod=e.target.value;renderAll()};$("currentUser").onchange=e=>{currentUser=e.target.value;localStorage.setItem("finance-current-user",currentUser);renderAll();checkAlerts(true)};
-$("workflowPersonFilter").onchange=renderWorkflow;$("workflowStatusFilter").onchange=renderWorkflow;$("buSelect").onchange=renderHeadOffice;
+$("workflowPersonFilter").onchange=renderWorkflow;$("workflowStatusFilter").onchange=renderWorkflow;$("buSelect").onchange=renderHeadOffice;$("hoPersonFilter").onchange=renderHeadOffice;
 $("modalClose").onclick=closeModal;$("modalBg").onclick=e=>{if(e.target===$("modalBg"))closeModal()};
 $("addTaskBtn").onclick=addTask;
 $("addHODeliverableBtn").onclick=addHODeliverable;
@@ -486,11 +519,11 @@ $("addImprovementBtn").onclick=()=>openModal("Add improvement action",improvemen
 $("notifyBtn").onclick=async()=>{if(!("Notification" in window))return toast("Notifications are not supported in this browser.");const p=await Notification.requestPermission();toast(p==="granted"?"Notifications enabled":"Notification permission not granted");checkAlerts()};
 $("exportBtn").onclick=downloadState;$("importFile").onchange=async e=>{try{await importState(e.target.files[0]);toast("Backup imported")}catch(err){toast("Import failed: "+err.message)}e.target.value=""};
 $("markCloseBtn").onclick=()=>action({type:"close_set",period:selectedPeriod,at:new Date().toISOString()});$("clearCloseBtn").onclick=()=>action({type:"close_clear",period:selectedPeriod});
-$("saveSettingsBtn").onclick=()=>action({type:"settings_update",settings:{warnMinutes:Number($("warnMinutes").value||60),repeatMinutes:Number($("repeatMinutes").value||60),closeTargetWD:Number($("targetWD").value||2),closeTargetTime:$("targetTime").value||"18:00",holidays:$("holidayInput").value.split(",").map(x=>x.trim()).filter(Boolean)}});
+$("saveSettingsBtn").onclick=()=>action({type:"settings_update",settings:{warnMinutes:Number($("warnMinutes").value||60),repeatMinutes:Number($("repeatMinutes").value||60),closeTargetWD:Number($("targetWD").value||2),closeTargetTime:$("targetTime").value||"18:00",holidayRegion:$("holidayRegion").value||"QC",easterHoliday:$("easterHoliday").value||"good_friday",holidays:$("holidayInput").value.split(",").map(x=>x.trim()).filter(Boolean)}});
 $("addUserBtn").onclick=addUser;
 
 (async function init(){
- initPeriods();serverMode=await detectServer();if(!serverMode)loadLocal();initUsers();$("connectionState").innerHTML=serverMode?'<span class="dot"></span>Shared live server':'Standalone browser mode';$("liveModeText").textContent=serverMode?"Shared server active":"Standalone browser storage";connectEvents();renderAll();allTemplates().forEach(t=>readySnapshot[t.id]=currentStage(t,currentPeriod()));setInterval(()=>{renderCockpit();renderWorkflow();updateAlertBanner();checkAlerts(false)},60000);
+ initPeriods();serverMode=await detectServer();if(!serverMode)loadLocal();initUsers();$("connectionState").innerHTML=serverMode?'<span class="dot"></span>Shared live server':'Standalone browser mode';$("liveModeText").textContent=serverMode?"Shared server active":"Standalone browser storage";connectEvents();renderAll();allTemplates().forEach(t=>readySnapshot[t.id]=currentStage(t,currentPeriod()));(state.headOfficeTemplate||[]).filter(h=>h.active!==false).forEach(h=>localStorage.setItem(`ho-stage-${currentPeriod()}-${h.id}`,String(hoCurrentStage(h,currentPeriod())||"done")));setInterval(()=>{renderCockpit();renderWorkflow();renderHeadOffice();updateAlertBanner();checkAlerts(false)},60000);
  if("serviceWorker" in navigator&&location.protocol!=="file:")navigator.serviceWorker.register("./sw.js").catch(()=>{});
  window.addEventListener("resize",()=>{drawHOTrend("hoTrendCanvas","Ifast");drawHOTrend("hoBUCanvas",$("buSelect").value);drawStageChart()})
 })();

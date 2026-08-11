@@ -90,6 +90,29 @@ function applyAction(input, a) {
   } else if (a.type === 'ho_template_delete') {
     const h = (state.headOfficeTemplate || []).find(x => x.id === a.id);
     if (h) h.active = false;
+  } else if (a.type === 'ho_stage_complete') {
+    state.deliverableStates ??= {};
+    state.deliverableStates[a.period] ??= {};
+    state.deliverableStates[a.period][a.id] ??= {};
+    const ds = state.deliverableStates[a.period][a.id];
+    if (a.stage === 'Preparation') {
+      ds.preparedAt = a.at || new Date().toISOString();
+      ds.preparedDoneBy = a.doneBy || '';
+      delete ds.reviewedAt;
+      delete ds.reviewedDoneBy;
+    } else if (a.stage === 'Review' && ds.preparedAt) {
+      ds.reviewedAt = a.at || new Date().toISOString();
+      ds.reviewedDoneBy = a.doneBy || '';
+    }
+  } else if (a.type === 'ho_stage_undo') {
+    const ds = state.deliverableStates?.[a.period]?.[a.id];
+    if (ds) {
+      if (a.stage === 'Preparation') {
+        delete ds.preparedAt; delete ds.preparedDoneBy; delete ds.reviewedAt; delete ds.reviewedDoneBy;
+      } else {
+        delete ds.reviewedAt; delete ds.reviewedDoneBy;
+      }
+    }
   } else if (a.type === 'close_set') {
     state.closeActual ??= {};
     state.closeActual[a.period] = a.at;

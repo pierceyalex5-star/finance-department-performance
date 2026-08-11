@@ -1,4 +1,4 @@
-# deployment refresh: reversible actions and Teams recipient settings
+# deployment refresh: manager KPI view
 name: Deploy Dashboard to GitHub Pages
 
 on:

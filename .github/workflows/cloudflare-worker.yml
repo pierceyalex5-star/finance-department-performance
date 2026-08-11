@@ -52,19 +52,3 @@ jobs:
         run: printf '%s' "$DATABASE_URL" | npx wrangler secret put DATABASE_URL
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      - name: Capture Worker runtime exception
-        shell: bash
-        run: |
-          set +e
-          rm -f /tmp/worker-tail.log
-          timeout 18s npx wrangler tail finance-performance-api --format=json > /tmp/worker-tail.log 2>&1 &
-          tail_pid=$!
-          sleep 5
-          echo '--- health response ---'
-          curl -sS -i https://finance-performance-api.pierceyalex5.workers.dev/health || true
-          sleep 6
-          kill "$tail_pid" 2>/dev/null || true
-          wait "$tail_pid" 2>/dev/null || true
-          echo '--- worker tail ---'
-          cat /tmp/worker-tail.log || true
-          exit 0

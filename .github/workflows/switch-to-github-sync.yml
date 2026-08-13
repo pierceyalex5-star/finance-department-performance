@@ -1,0 +1,64 @@
+name: Switch to GitHub Shared Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/switch-to-github-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  patch-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply GitHub-only shared-state patch
+        run: python scripts/switch_to_github_sync_20260813.py
+      - name: Validate
+        run: |
+          grep -q 'window.FINANCE_API_BASE = ""' config.js
+          grep -q 'return true;' auto-sync.js
+          grep -q 'var PULL_MS   = 10000;' auto-sync.js
+          grep -q 'GitHub shared-state mode' index.html
+          grep -q 'function checkAlerts(){ return; }' index.html
+          grep -q 'auto-sync.js' .github/workflows/pages.yml
+          grep -q 'state.json' .github/workflows/pages.yml
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          Path('/tmp/dashboard-inline.js').write_text(blocks[-2],encoding='utf-8')
+          PY
+          node --check /tmp/dashboard-inline.js
+      - name: Commit application changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html config.js auto-sync.js .github/workflows/pages.yml
+          git diff --cached --quiet || git commit -m "Use GitHub shared state and disable notifications"
+          git push
+      - uses: actions/configure-pages@v5
+      - name: Build site
+        run: |
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js auto-sync.js state.json _site/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

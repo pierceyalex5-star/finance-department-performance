@@ -24,7 +24,7 @@
   var GH_REPO   = "pierceyalex5-star/finance-department-performance";
   var GH_PATH   = "state.json";
   var GH_BRANCH = "main";
-  var PULL_MS   = 60000;   // how often viewers check for updates
+  var PULL_MS   = 10000;   // how often viewers check for updates
   var DEBOUNCE  = 1500;    // wait after last edit before committing
 
   var saveTimer = null;
@@ -59,10 +59,8 @@
   // Is this browser a "manager" (i.e., allowed to write)?
   // Rule: they have a token OR they’re not in read-only "Manager View" gate.
   function isEditor() {
-    // If the app uses currentUser === "Manager View" as the editing context,
-    // that's who should be able to save. Adjust here if your rule differs.
-    try { return typeof currentUser !== "undefined" && currentUser === "Manager View"; }
-    catch (e) { return true; }
+    // Any selected team member may edit. GitHub authorization is still required by commitNow().
+    return true;
   }
 
   // ---------- COMMIT (managers) ----------

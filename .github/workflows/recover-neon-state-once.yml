@@ -1,0 +1,122 @@
+name: One-time Recover Neon State
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/recover-neon-state-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  RECOVERY_REPORT: /tmp/recovery-report.txt
+
+jobs:
+  recover:
+    environment:
+      name: Production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+
+      - name: Pull latest Neon dashboard state
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          test -n "$DATABASE_URL" || { echo 'Missing DATABASE_URL'; exit 1; }
+          psql "$DATABASE_URL" -AtX -c "SELECT state::text FROM dashboard_state WHERE id=1" > /tmp/neon-state.json
+          python -m json.tool /tmp/neon-state.json >/dev/null
+
+      - name: Compare and prepare GitHub shared state
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from datetime import datetime, timezone
+
+          current_path = Path('state.json')
+          old = json.loads(current_path.read_text(encoding='utf-8')) if current_path.exists() else {}
+          new = json.loads(Path('/tmp/neon-state.json').read_text(encoding='utf-8'))
+
+          old_tasks = {x.get('id'): x for x in old.get('taskTemplates', []) if x.get('id')}
+          new_tasks = {x.get('id'): x for x in new.get('taskTemplates', []) if x.get('id')}
+          old_deliv = {x.get('id'): x for x in old.get('headOfficeTemplate', []) if x.get('id')}
+          new_deliv = {x.get('id'): x for x in new.get('headOfficeTemplate', []) if x.get('id')}
+
+          added_tasks = [new_tasks[k] for k in new_tasks.keys() - old_tasks.keys()]
+          changed_tasks = [new_tasks[k] for k in new_tasks.keys() & old_tasks.keys() if new_tasks[k] != old_tasks[k]]
+          removed_tasks = [old_tasks[k] for k in old_tasks.keys() - new_tasks.keys()]
+          added_deliv = [new_deliv[k] for k in new_deliv.keys() - old_deliv.keys()]
+          changed_deliv = [new_deliv[k] for k in new_deliv.keys() & old_deliv.keys() if new_deliv[k] != old_deliv[k]]
+
+          # Teams/notification routing is intentionally not carried into GitHub-only mode.
+          settings = new.setdefault('settings', {})
+          settings.pop('teamsEmails', None)
+
+          # Preserve the Neon updatedAt for chronology, but record recovery metadata separately.
+          new['recoveredFromNeonAt'] = datetime.now(timezone.utc).isoformat()
+          new['syncMode'] = 'github'
+
+          current_path.write_text(json.dumps(new, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+
+          def names(items, limit=30):
+              vals = [f"{x.get('person','?')}: {x.get('name') or x.get('activity') or x.get('id')}" for x in items]
+              return vals[:limit]
+
+          report = {
+              'old_updatedAt': old.get('updatedAt'),
+              'neon_updatedAt': new.get('updatedAt'),
+              'old_users': len(old.get('users', [])),
+              'new_users': len(new.get('users', [])),
+              'old_tasks': len(old.get('taskTemplates', [])),
+              'new_tasks': len(new.get('taskTemplates', [])),
+              'old_deliverables': len(old.get('headOfficeTemplate', [])),
+              'new_deliverables': len(new.get('headOfficeTemplate', [])),
+              'added_task_count': len(added_tasks),
+              'changed_task_count': len(changed_tasks),
+              'removed_task_count': len(removed_tasks),
+              'added_deliverable_count': len(added_deliv),
+              'changed_deliverable_count': len(changed_deliv),
+              'added_tasks': names(added_tasks),
+              'changed_tasks': names(changed_tasks),
+              'added_deliverables': names(added_deliv),
+          }
+          Path('/tmp/recovery-report.json').write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding='utf-8')
+          print(json.dumps(report, indent=2, ensure_ascii=False))
+          PY
+
+      - name: Commit recovered shared state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          if git diff --cached --quiet; then
+            echo 'No state changes to commit.'
+          else
+            git commit -m "Recover latest shared state from Neon"
+            git push
+          fi
+
+      - uses: actions/configure-pages@v5
+      - name: Build GitHub-only site
+        run: |
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js auto-sync.js state.json _site/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy recovered state
+        uses: actions/deploy-pages@v4
+
+      - name: Recovery summary
+        run: cat /tmp/recovery-report.json

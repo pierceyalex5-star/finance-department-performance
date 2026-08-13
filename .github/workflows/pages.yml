@@ -1,4 +1,4 @@
-# deployment refresh: manager KPI view
+# Finance Control Tower - GitHub Pages deployment
 name: Deploy Dashboard to GitHub Pages
 
 on:
@@ -9,6 +9,8 @@ on:
       - 'manifest.json'
       - 'sw.js'
       - 'config.js'
+      - 'auto-sync.js'
+      - 'state.json'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -33,7 +35,7 @@ jobs:
       - name: Build static site
         run: |
           mkdir -p _site
-          cp index.html manifest.json sw.js config.js _site/
+          cp index.html manifest.json sw.js config.js auto-sync.js state.json _site/
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4
         with:

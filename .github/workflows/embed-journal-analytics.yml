@@ -1,0 +1,61 @@
+name: Embed Journal Analytics
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/embed-journal-analytics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  embed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build self-contained dashboard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re
+          idx=Path('index.html')
+          s=idx.read_text(encoding='utf-8')
+          js=Path('journal-analytics.js').read_text(encoding='utf-8')
+          seed=json.loads(Path('journal-analytics-seed.json').read_text(encoding='utf-8'))
+          # Make the add-on use an embedded seed when state.json has not yet stored journal analytics.
+          old='''try{if(!state.journalAnalytics){const seed=await fetch("./journal-analytics-seed.json?_="+Date.now(),{cache:"no-store"}).then(r=>r.json());seed.divisionSummary=HIST_DIV.map(divObj);seed.details=[];window.__journalSeed=seed}else window.__journalSeed=state.journalAnalytics}catch(e){}renderAll();'''
+          new='''try{if(!state.journalAnalytics){const seed=window.__journalSeed||{summary:[],divisionSummary:[],details:[]};if(!seed.divisionSummary||!seed.divisionSummary.length)seed.divisionSummary=HIST_DIV.map(divObj);seed.details=seed.details||[];window.__journalSeed=seed}else window.__journalSeed=state.journalAnalytics}catch(e){}renderAll();'''
+          if old not in js: raise SystemExit('journal seed boot anchor not found')
+          js=js.replace(old,new,1)
+          seed['divisionSummary']=[]
+          seed['details']=[]
+          block='<script id="journal-seed-inline">window.__journalSeed='+json.dumps(seed,separators=(',',':'))+';</script>\n<script id="journal-analytics-inline">\n'+js+'\n</script>\n'
+          # Remove previous external or inline journal module.
+          s=re.sub(r'\n?<script src="\./journal-analytics\.js"></script>','',s)
+          s=re.sub(r'\n?<script id="journal-seed-inline">.*?</script>\s*<script id="journal-analytics-inline">.*?</script>','',s,flags=re.S)
+          marker='<script src="./auto-sync.js"></script>'
+          if marker not in s: raise SystemExit('auto-sync marker not found')
+          s=s.replace(marker,block+marker,1)
+          idx.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate embedded JavaScript
+        run: |
+          grep -q 'journal-analytics-inline' index.html
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          m=re.search(r'<script id="journal-analytics-inline">(.*?)</script>',s,re.S)
+          if not m: raise SystemExit('inline journal script missing')
+          Path('/tmp/journal-inline.js').write_text(m.group(1),encoding='utf-8')
+          PY
+          node --check /tmp/journal-inline.js
+      - name: Commit dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Add automated journal KPI analytics"
+          git push

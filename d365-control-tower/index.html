@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>D365 Transformation Control Tower</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">D365</div>
+      <div><strong>D365 Transformation Control Tower</strong><span id="dataMode">Static / local-first</span></div>
+    </div>
+    <div class="top-actions">
+      <button class="ghost" id="snapshotBtn">Save snapshot</button>
+      <button class="ghost" id="exportBtn">Export data</button>
+      <label class="ghost file-btn">Import data<input type="file" id="importFile" accept="application/json" hidden></label>
+      <button class="primary" id="refreshBtn">Refresh baseline</button>
+    </div>
+  </header>
+
+  <nav class="main-nav" id="mainNav">
+    <button data-view="cockpit" class="active">Cockpit</button>
+    <button data-view="streams">Value Streams</button>
+    <button data-view="people">People</button>
+    <button data-view="execution">Execution</button>
+    <button data-view="governance">Governance</button>
+    <button data-view="roadmap">Roadmap</button>
+  </nav>
+
+  <main id="app"></main>
+
+  <template id="modalTemplate">
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-head"><h3></h3><button class="icon-btn close-modal">×</button></div>
+        <div class="modal-body"></div>
+        <div class="modal-actions"></div>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>

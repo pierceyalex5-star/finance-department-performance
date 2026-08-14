@@ -45,16 +45,14 @@ rows=[
 def norm(x):
  x=unicodedata.normalize('NFKD',x or '').encode('ascii','ignore').decode().upper()
  x=x.replace('ANALISYS','ANALYSIS').replace('AMORTISATION','AMORTIZATION')
- x=re.sub(r'[^A-Z0-9]+',' ',x).strip()
- return x
+ x=re.sub(r'[^A-Z0-9]+',' ',x).strip(); return x
 
 def canon(x):
  t=norm(x).split(); t=[z for z in t if z not in {'JE','INUT'}]; return ' '.join(t)
 
 def similar(a,b):
  na,nb=canon(a),canon(b)
- if na==nb:return True
- return SequenceMatcher(None,na,nb).ratio()>=0.94
+ return na==nb or SequenceMatcher(None,na,nb).ratio()>=0.94
 
 tasks=s.get('taskTemplates',[]); dels=s.get('deliverableTemplates',[])
 report={'added':[],'skipped_existing_task':[],'skipped_deliverable':[]}
@@ -62,16 +60,14 @@ for name,day,time,stages in rows:
  if any(similar(name,x.get('name','')) for x in tasks): report['skipped_existing_task'].append(name); continue
  hit=next((x.get('name','') for x in dels if similar(name,x.get('name',''))),None)
  if hit: report['skipped_deliverable'].append({'screenshot':name,'deliverable':hit}); continue
- prep='Dumitru R.'
- if name=='JE LEASE INUT': prep='Feida F.'
- if name=='JE GSTIN (TAXES INUT)': prep='Line R.'
+ prep='Feida F.' if name=='JE LEASE INUT' else ('Line R.' if name=='JE GSTIN (TAXES INUT)' else 'Dumitru R.')
  enabled={k:(k in stages) for k in ['Preparation','Approval','Entry','Review']}
  owners={'Preparation':prep,'Approval':'Unassigned','Entry':'Dumitru R.' if 'Entry' in stages else 'Unassigned','Review':'Unassigned'}
- item={'id':'dr_'+uuid.uuid4().hex[:10],'day':day,'name':name,'time':time,'active':True,'person':'Dumitru R.','sopUrl':'','source':'Internal Close','stageOwners':owners,'stageEnabled':enabled,'stageOffsets':{'Preparation':180,'Approval':120,'Entry':60,'Review':0},'closeCritical':day in {'WD -2','WD -1','WD1','WD2'},'workbookOwner':'DR'}
- tasks.append(item); report['added'].append(name)
+ tasks.append({'id':'dr_'+uuid.uuid4().hex[:10],'day':day,'name':name,'time':time,'active':True,'person':'Dumitru R.','sopUrl':'','source':'Internal Close','stageOwners':owners,'stageEnabled':enabled,'stageOffsets':{'Preparation':180,'Approval':120,'Entry':60,'Review':0},'closeCritical':day in {'WD -2','WD -1','WD1','WD2'},'workbookOwner':'DR'}); report['added'].append(name)
 s['taskTemplates']=tasks; s['version']=int(s.get('version',0))+1
 from datetime import datetime,timezone
 s['updatedAt']=datetime.now(timezone.utc).isoformat().replace('+00:00','Z')
 p.write_text(json.dumps(s,ensure_ascii=False,indent=2),encoding='utf-8')
 Path('dumitru_reconcile_report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print(json.dumps(report,ensure_ascii=False,indent=2))
+# reconcile-v1

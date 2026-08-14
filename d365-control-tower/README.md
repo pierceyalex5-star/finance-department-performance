@@ -1,6 +1,6 @@
 # IFAST D365 Transformation Control Tower
 
-A shared, internal D365 implementation control tower organized around IFASTGROUP's enterprise value streams:
+A shared D365 implementation control tower organized around IFASTGROUP's enterprise value streams:
 
 - M2O - Market to Order
 - O2C - Order to Cash
@@ -13,31 +13,35 @@ A shared, internal D365 implementation control tower organized around IFASTGROUP
 
 ## Deployment model
 
-This application intentionally follows the lightweight deployment pattern used by the Finance Control Tower:
+This application follows the same lightweight deployment pattern as the Finance Control Tower:
 
-- GitHub stores and versions the application source.
-- One internal Windows/server computer runs the included Node.js server.
-- The live shared state is stored in `data/runtime-state.json` on that host.
-- Connected browsers receive live updates through Server-Sent Events (SSE).
-- No Vercel runtime, Neon database, Teams integration, browser notifications, or third-party application packages are required.
+- GitHub stores and versions the application code and baseline JSON data.
+- One approved internal Windows/server computer runs the included dependency-free Node.js server.
+- The live shared project state is stored locally on that host in `data/runtime-state.json`.
+- Connected browsers receive live changes through Server-Sent Events (SSE).
+- No Vercel runtime, Neon database, Teams integration, browser notifications, or third-party Node packages are used.
 
-`data/runtime-state.json` and local backups are ignored by Git so normal application updates do not overwrite live project data.
+`data/runtime-state.json` and `data/backups/` are ignored by Git, so a normal `git pull` updates the application without overwriting the team's live project data.
 
-## Start it
+## Start the shared dashboard
 
-Node.js and Git are the only prerequisites.
+Prerequisites on the internal host:
+
+- Git
+- Node.js
 
 ### Windows
 
-Double-click:
+From the cloned repository, open `d365-control-tower` and double-click:
 
 `start-d365.cmd`
 
-The script attempts `git pull --ff-only` first, then starts the server.
+The launcher attempts `git pull --ff-only` and then runs the shared server.
 
 ### Command line
 
 ```bash
+cd d365-control-tower
 node server.js
 ```
 
@@ -45,40 +49,54 @@ Default address on the host:
 
 `http://localhost:8090`
 
-Other users on the same network can use the host computer's network address, for example:
+Other team members on the same network use the host computer's network name or IP, for example:
 
 `http://192.168.1.25:8090`
 
-IT/network rules may require opening TCP port 8090 on the internal host.
+IT/network rules may require allowing inbound TCP 8090 on the internal host.
 
-## Shared data and backup
+## Baseline and live data
 
-On first launch, `data/seed.json` is copied to `data/runtime-state.json`.
+The GitHub baseline is modular and is loaded from:
 
-Every live edit updates the shared runtime file and is broadcast to connected users. The server also writes one local state backup per day under `data/backups/`.
+- `data/framework.json` - value streams, BPOs, SMEs and governance framework
+- `data/processes.json` - process hierarchy and As-Is process metadata
+- `data/registers.json` - pain points, opportunities, requirements, decisions and Fit/Gap
+- `data/tasks.json` - execution tasks
+- `data/milestones.json` - program milestones
+- `data/flows/manifest.json` and `data/flows/*.json` - editable process-flow objects
 
-The UI includes JSON Export and Import for manual backups / migration.
+On first launch, `server.js` assembles those files into `data/runtime-state.json`. From that point forward, the runtime file is the shared live source of truth for the team.
+
+Every successful edit:
+
+1. is checked against the current shared version of the affected data file / flow chunk;
+2. is written to `data/runtime-state.json`;
+3. is added to the local audit trail;
+4. is broadcast to connected browsers;
+5. is followed by a refresh from the shared state so concurrent changes in other areas are retained.
+
+The server writes a daily local backup under `data/backups/`. The UI also supports full JSON Export and Import.
 
 ## Current-state source package
 
-The seed data was prepared from the supplied `Process mapping.zip`, including:
+The baseline process library was prepared from the supplied `Process mapping.zip`, including the available current-state artifacts for:
 
-- Order to Cash process maps and Visio
-- Plan to Manufacture process maps and Visio
-- Procure to Pay process maps and Visio
-- Detailed Order to Ship Visio
-- 2022 pain points and opportunities register
-- 2022 process close-out and summary documents
-- 2024 Order to Ship current-state report
+- Order to Cash
+- Plan to Manufacture / Plan to Produce
+- Procure to Pay / Source to Pay
+- Detailed Order to Ship / Warehouse to Delivery
+- pain points and opportunities
+- process close-out and summary documentation
 
-The imported Visio pages have been converted into editable browser flow objects. These are a starting point and are explicitly marked as requiring BPO validation.
+Imported process-flow objects are working drafts and should be validated by the assigned BPO and SMEs before being treated as an approved As-Is baseline.
 
 ## Functional areas
 
 - Executive transformation cockpit and lifecycle heatmap
 - Value-stream workspaces
 - Editable As-Is process text
-- Editable flow diagrams imported from Visio
+- Editable flow diagrams derived from the current-state process maps
 - BPO / SME role and responsibility workspace
 - Pain point and opportunity register
 - Requirements traceability
@@ -88,10 +106,15 @@ The imported Visio pages have been converted into editable browser flow objects.
 - Program and task Gantt charts
 - Decision register
 - Cross-stream handoffs
-- Process version snapshots
-- Change audit trail
+- Process version / audit information
 - Linked source-document register
 
-## Important operating note
+## Collaboration behavior
 
-There is no authentication or role-based security in this prototype. Use it on the same trusted internal network pattern as the Finance Control Tower. If the organization later requires authenticated external access, that should be handled by the approved internal hosting / identity architecture rather than by adding Vercel or Neon.
+This is a shared-state application, not a browser-only static dashboard. Team members who open the same internal server address see the same runtime state.
+
+Changes are conflict-checked at the logical data-file level and process-flow-chunk level. Two people can work safely in different areas, but during workshops it is still preferable to use one designated editor for the same detailed process map at a time.
+
+## Security / infrastructure note
+
+The current deployment contains no application authentication or role-based access control. It is intended to run on the same approved/trusted internal-network pattern as the Finance Control Tower. If the organization later requires authenticated remote access, that should be added through the organization's approved hosting and identity architecture rather than by introducing Vercel or Neon.

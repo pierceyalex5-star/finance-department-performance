@@ -22,3 +22,5 @@ for p in FILES:
             changed+=1
     print(p, 'replacements', changed)
     p.write_text(s,encoding='utf-8')
+
+# trigger one-side methodology v3

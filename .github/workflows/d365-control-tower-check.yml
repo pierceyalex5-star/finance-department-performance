@@ -1,0 +1,28 @@
+name: D365 Control Tower Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'd365-control-tower/**'
+      - '.github/workflows/d365-control-tower-check.yml'
+  pull_request:
+    paths:
+      - 'd365-control-tower/**'
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: d365-control-tower
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: npm run check
+      - name: Validate baseline JSON
+        run: |
+          node -e "for (const f of ['data/framework.json','data/processes.json','data/registers.json','data/tasks.json','data/milestones.json','data/flows/manifest.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('Baseline JSON valid')"

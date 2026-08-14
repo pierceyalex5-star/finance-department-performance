@@ -30,14 +30,17 @@ function getToken(promptIfMissing=false){
   }
   return t;
 }
-function clearToken(){localStorage.removeItem(TOKEN_KEY);setSync('editor token cleared');render()}
+function clearToken(){localStorage.removeItem(TOKEN_KEY);setSync('editor token cleared · local changes kept');render()}
 function ghHeaders(token){const h={'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};if(token)h.Authorization=`Bearer ${token}`;return h}
 function b64d(s){const bin=atob(String(s||'').replace(/\n/g,'')),u=Uint8Array.from(bin,c=>c.charCodeAt(0));return new TextDecoder().decode(u)}
 function b64e(s){const u=new TextEncoder().encode(s);let b='';for(const x of u)b+=String.fromCharCode(x);return btoa(b)}
 async function ghRead(path,token=''){
   const api=`https://api.github.com/repos/${GH_REPO}/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(GH_BRANCH)}&_=${Date.now()}`;
-  const r=await fetch(api,{headers:ghHeaders(token),cache:'no-store'});
-  if(!r.ok)throw Error(`GitHub read failed (${r.status}) for ${path}`);
+  let r=await fetch(api,{headers:ghHeaders(token),cache:'no-store'});
+  // A stale/expired editor token should not block reads from this public repository.
+  // Retry the conflict-check read without Authorization; writes still require a valid token.
+  if(r.status===401&&token)r=await fetch(api,{headers:ghHeaders(''),cache:'no-store'});
+  if(!r.ok){const e=Error(`GitHub read failed (${r.status}) for ${path}`);e.status=r.status;throw e}
   const j=await r.json();return {sha:j.sha,value:JSON.parse(b64d(j.content))};
 }
 async function ghPut(path,value,sha,token,message){
@@ -45,7 +48,7 @@ async function ghPut(path,value,sha,token,message){
   const body={message,content:b64e(JSON.stringify(value,null,2)),branch:GH_BRANCH};if(sha)body.sha=sha;
   const r=await fetch(api,{method:'PUT',headers:{...ghHeaders(token),'Content-Type':'application/json'},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
-  if(!r.ok){const e=Error(j.message||`GitHub write failed (${r.status})`);e.status=r.status;throw e}
+  if(!r.ok){const e=Error(j.message||`GitHub write failed (${r.status})`);e.status=r.status;e.auth=[401,403].includes(r.status);throw e}
   return j;
 }
 async function writeSyncStamp(token,changedFiles){
@@ -71,7 +74,16 @@ async function pushGithub(silent=false){
     await writeSyncStamp(token,keys);saveLocal();setSync('saved for the team ✓');
   }catch(e){
     if(e.status===409){setSync('conflict · refresh required');if(!silent)alert(`${e.message}\n\nUse Refresh deployed to load the latest version, then re-apply your change.`)}
-    else{setSync('GitHub save error');if(!silent)alert(e.message)}
+    else if(e.auth){
+      // Keep the edited state in localStorage, remove the invalid credential, and offer an immediate retry.
+      localStorage.removeItem(TOKEN_KEY);saveLocal();setSync('editor token expired / unauthorized · local changes kept');
+      if(!silent){
+        const replacement=getToken(true);
+        if(replacement){setSync('retrying save with new editor token…');return pushGithub(false)}
+        alert('Your change is still saved locally in this browser. The GitHub editor token was invalid, expired, or did not have Contents: Read and write permission. Open GitHub sync and choose Save now when you have a valid token.');
+      }
+    }
+    else{setSync('GitHub save error · local changes kept');saveLocal();if(!silent)alert(`${e.message}\n\nYour local edit has been kept in this browser.`)}
   }
 }
 function schedulePush(){clearTimeout(syncTimer);syncTimer=setTimeout(()=>pushGithub(false),DEBOUNCE_MS)}
@@ -95,4 +107,4 @@ async function pollDeployed(){
 function setupPolling(){
   clearInterval(pollHandle);captureSyncBase();setTimeout(pollDeployed,2500);pollHandle=setInterval(pollDeployed,PULL_MS)
 }
-function renderSync(){const hasToken=!!getToken(false);return `<div class="page-head"><div><h1>GitHub Shared Sync</h1><p>Same deployment model as the Finance Control Tower: GitHub Pages hosts the dashboard and GitHub JSON files are the shared source of truth. There is no Vercel, Neon, Teams integration, notification service or application backend.</p></div>${badge(dirtyFiles.size?`${dirtyFiles.size} pending`:'Synced')}</div><div class="grid two-col"><div class="card pad"><h3>Team sync</h3><div class="mini-grid"><div><span>Editor access</span><strong>${hasToken?'Enabled':'Viewer'}</strong></div><div><span>Auto-refresh</span><strong>${PULL_MS/1000}s</strong></div></div><p class="muted">Everyone can view the public project data. Editing uses a fine-grained GitHub token stored only in that editor's browser, exactly like the Finance Control Tower.</p><div class="modal-actions"><button class="btn" id="pullGh">Refresh deployed</button><button class="btn primary" id="pushGh">Save now</button>${hasToken?'<button class="btn" onclick="clearToken()">Clear editor token</button>':''}</div></div><div class="card pad"><h3>How updates flow</h3><ol class="activity-list"><li>An editor changes a process, task, person, requirement or flowchart.</li><li>The affected JSON file is committed automatically to GitHub after a short debounce.</li><li>A lightweight sync timestamp triggers the existing GitHub Pages deployment.</li><li>Other browsers poll the deployed timestamp and reload the updated project automatically.</li><li>Git history provides the version trail; stale same-area edits are blocked instead of silently overwriting another editor.</li></ol><div class="notice"><b>Editing rule:</b> different areas can be edited in parallel. For the same detailed flowchart, use one designated editor during a workshop to minimize conflicts.</div></div></div>`}
+function renderSync(){const hasToken=!!getToken(false);return `<div class="page-head"><div><h1>GitHub Shared Sync</h1><p>Same deployment model as the Finance Control Tower: GitHub Pages hosts the dashboard and GitHub JSON files are the shared source of truth. There is no Vercel, Neon, Teams integration, notification service or application backend.</p></div>${badge(dirtyFiles.size?`${dirtyFiles.size} pending`:'Synced')}</div><div class="grid two-col"><div class="card pad"><h3>Team sync</h3><div class="mini-grid"><div><span>Editor access</span><strong>${hasToken?'Enabled':'Viewer'}</strong></div><div><span>Auto-refresh</span><strong>${PULL_MS/1000}s</strong></div></div><p class="muted">Everyone can view the public project data. Editing uses a fine-grained GitHub token stored only in that editor's browser, exactly like the Finance Control Tower. If a saved token expires, local edits are preserved and the dashboard asks for a replacement token instead of discarding the change.</p><div class="modal-actions"><button class="btn" id="pullGh">Refresh deployed</button><button class="btn primary" id="pushGh">Save now</button>${hasToken?'<button class="btn" onclick="clearToken()">Clear editor token</button>':''}</div></div><div class="card pad"><h3>How updates flow</h3><ol class="activity-list"><li>An editor changes a process, task, person, requirement or flowchart.</li><li>The affected JSON file is committed automatically to GitHub after a short debounce.</li><li>A lightweight sync timestamp triggers the existing GitHub Pages deployment.</li><li>Other browsers poll the deployed timestamp and reload the updated project automatically.</li><li>Git history provides the version trail; stale same-area edits are blocked instead of silently overwriting another editor.</li></ol><div class="notice"><b>Editing rule:</b> different areas can be edited in parallel. For the same detailed flowchart, use one designated editor during a workshop to minimize conflicts.</div></div></div>`}

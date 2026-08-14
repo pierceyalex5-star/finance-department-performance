@@ -29,3 +29,5 @@ for p in FILES:
         if old in s:
             s=s.replace(old,new)
     p.write_text(s,encoding='utf-8')
+
+# trigger v2

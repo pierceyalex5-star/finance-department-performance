@@ -1,25 +1,46 @@
-const KEY='d365-control-tower-shell-v1';
-let baseline,data,view='cockpit';
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const CFG={
+  framework:'data/framework.json',processes:'data/processes.json',registers:'data/registers.json',tasks:'data/tasks.json',milestones:'data/milestones.json',flowManifest:'data/flows/manifest.json'
+};
+const LS='ifast-d365-control-tower-v3',GHLS='ifast-d365-github-v3';
+let state={framework:{},processes:{subprocesses:{}},registers:{painPoints:[],opportunities:[],requirements:[],decisions:[],fitGap:[]},tasks:{tasks:[]},milestones:{milestones:[]}},flowManifest={},flowChunks={},flows=[];
+let view='cockpit',selectedStream='O2C',streamTab='overview',selectedFlowId=null,selectedNodeId=null,asIsMode='text',dirtyFiles=new Set(),syncTimer=null,pullTimer=null;
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clone=o=>JSON.parse(JSON.stringify(o));
-async function init(){baseline=await fetch('data/project.json',{cache:'no-store'}).then(r=>r.json());try{data=JSON.parse(localStorage.getItem(KEY))||clone(baseline)}catch{data=clone(baseline)};bind();render()}
-function save(){localStorage.setItem(KEY,JSON.stringify(data))}
-function bind(){
- $('#mainNav').onclick=e=>{const b=e.target.closest('[data-view]');if(!b)return;view=b.dataset.view;$$('#mainNav button').forEach(x=>x.classList.toggle('active',x===b));render()};
- $('#exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='D365-Control-Tower.json';a.click()};
- $('#importFile').onchange=e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.valueStreams)throw Error('Invalid project JSON');data=x;save();render()}catch(err){alert(err.message)}};r.readAsText(f)};
- $('#refreshBtn').onclick=()=>{if(confirm('Replace local data with the static baseline?')){data=clone(baseline);save();render()}};
- $('#snapshotBtn').onclick=()=>alert('This public shell stores edits locally only. Use Export data for a portable snapshot.');
+const uid=p=>`${p}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+const today=()=>new Date().toISOString().slice(0,10);
+const filePath=k=>`d365-control-tower/${CFG[k]}`;
+function mergeState(){return {...state.framework,...state.processes,...state.registers,...state.tasks,...state.milestones}}
+function data(){return mergeState()}
+function allStreams(){const d=data();return [...(d.valueStreams||[]),...(d.crossFunctional||[])]}
+function flowFor(id){return flows.find(f=>f.id===id)}
+function streamFlows(s){return flows.filter(f=>f.stream===s)}
+function flowFile(f){return f?._file||''}
+function setSync(t){const e=$('#dataMode');if(e)e.textContent=`GitHub-synced · ${t}`}
+function kpi(label,value,sub=''){return `<div class="card kpi-card"><div class="label">${esc(label)}</div><div class="value">${esc(value)}</div><div class="sub">${esc(sub)}</div></div>`}
+function badge(s){const x=String(s||'').toLowerCase(),c=x.includes('high')||x.includes('overdue')?'red':x.includes('progress')||x.includes('review')?'yellow':x.includes('approved')||x.includes('closed')||x.includes('imported')||x.includes('validated')?'green':'gray';return `<span class="badge ${c}">${esc(s||'—')}</span>`}
+function saveLocal(){const serialChunks={};for(const [p,fs] of Object.entries(flowChunks))serialChunks[p]=fs.map(({_file,...f})=>f);localStorage.setItem(LS,JSON.stringify({state,flowChunks:serialChunks}))}
+function mark(key){dirtyFiles.add(key);saveLocal();setSync(`${dirtyFiles.size} change set${dirtyFiles.size===1?'':'s'} pending`);schedulePush()}
+function markFlow(f){if(f?._file){dirtyFiles.add(f._file);saveLocal();setSync(`${dirtyFiles.size} change set${dirtyFiles.size===1?'':'s'} pending`);schedulePush()}}
+function rebuildFlows(){flows=[];for(const [p,fs] of Object.entries(flowChunks)){for(const f of fs){f._file=p;flows.push(f)}}if(!selectedFlowId||!flowFor(selectedFlowId))selectedFlowId=streamFlows(selectedStream)[0]?.id||flows[0]?.id||null}
+async function jfetch(path){const r=await fetch(path,{cache:'no-store'});if(!r.ok)throw Error(`Load failed: ${path}`);return r.json()}
+async function loadBaseline(){
+  const [framework,processes,registers,tasks,milestones,manifest]=await Promise.all([jfetch(CFG.framework),jfetch(CFG.processes),jfetch(CFG.registers),jfetch(CFG.tasks),jfetch(CFG.milestones),jfetch(CFG.flowManifest)]);
+  const chunks={};const paths=[...new Set(Object.values(manifest).flat())];await Promise.all(paths.map(async p=>{chunks[p]=await jfetch(p)}));
+  return {state:{framework,processes,registers,tasks,milestones},flowManifest:manifest,flowChunks:chunks};
 }
-function streamCard(v){const mapped=(v.status||'').includes('available');return `<div class="card stream-card" data-stream="${v.id}"><div class="num">${v.number?`0${v.number}`:'Cross-functional'}</div><h3>${esc(v.name)}</h3><div class="bpo">BPO: ${esc(v.bpo||'Not loaded')}</div><div class="status"><span class="badge ${mapped?'green':'gray'}">${esc(v.status||'Not loaded')}</span></div></div>`}
-function kpi(l,v,s){return `<div class="card kpi-card"><div class="label">${esc(l)}</div><div class="value">${esc(v)}</div><div class="sub">${esc(s)}</div></div>`}
-function render(){const app=$('#app');if(view==='cockpit')app.innerHTML=cockpit();else if(view==='streams')app.innerHTML=streams();else if(view==='people')app.innerHTML=people();else if(view==='execution')app.innerHTML=tasks();else if(view==='governance')app.innerHTML=governance();else app.innerHTML=roadmap();bindPage()}
-function cockpit(){const mapped=(data.valueStreams||[]).filter(v=>(v.status||'').includes('available')).length,proc=Object.values(data.subprocesses||{}).flat().length;return `<div class="notice warning"><strong>Static/local-first mode.</strong> This public code shell contains no confidential project data. Import the project JSON on your device to load the internal IFAST baseline. Browser edits are not centrally synchronized because no backend is used.</div><div class="page-head"><div><h1>Executive Cockpit</h1><p>D365 transformation governance shell.</p></div></div><div class="grid kpi">${kpi('As-Is mapped',`${mapped}/7`,'value streams')}${kpi('Processes loaded',proc,'process records')}${kpi('Pain points',(data.painPoints||[]).length,'register')}${kpi('Tasks',(data.tasks||[]).length,'execution')}${kpi('Decisions',(data.decisions||[]).length,'governance')}${kpi('Requirements',(data.requirements||[]).length,'traceability')}</div><div class="section-title"><h2>Enterprise value streams</h2></div><div class="stream-strip">${(data.valueStreams||[]).map(streamCard).join('')}</div><div class="cross-strip">${(data.crossFunctional||[]).map(streamCard).join('')}</div>`}
-function streams(){return `<div class="page-head"><div><h1>Value Streams</h1><p>Import the private project JSON to load As-Is maps, BPOs, pain points and Visio-derived flow records.</p></div></div><div class="grid three-col">${[...(data.valueStreams||[]),...(data.crossFunctional||[])].map(v=>`<div class="card pad"><h3 style="margin-top:0">${v.id} · ${esc(v.name)}</h3><p style="font-size:11px;color:var(--muted)">${esc(v.source_status||'')}</p><div class="chip-row">${(v.l2||[]).map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div><div class="section-title"><h2>Loaded subprocesses</h2><span>${(data.subprocesses?.[v.id]||[]).length}</span></div>${(data.subprocesses?.[v.id]||[]).slice(0,12).map(p=>`<div style="padding:7px 0;border-bottom:1px solid var(--line);font-size:11px"><strong>${esc(p.id)}</strong> ${esc(p.name)} ${p.flow?'<span class="badge green">Flow</span>':''}</div>`).join('')||'<div class="empty">No private data loaded.</div>'}</div>`).join('')}</div>`}
-function people(){return `<div class="page-head"><div><h1>People</h1><p>BPO and SME coverage from the imported project file.</p></div></div><div class="three-col">${(data.people||[]).map(p=>`<div class="card person-card"><h3>${esc(p.name)}</h3><div class="role">${esc(p.role)} · ${esc(p.stream)}</div><ul>${(p.responsibilities||[]).slice(0,7).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')||'<div class="card empty">No private people data loaded.</div>'}</div>`}
-function tasks(){return `<div class="page-head"><div><h1>Execution</h1><p>Task Control Tower snapshot from the imported project file.</p></div></div><div class="card table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Task</th><th>Stream</th><th>Owner</th><th>Status</th><th>Due</th></tr></thead><tbody>${(data.tasks||[]).map(t=>`<tr><td>${esc(t.id)}</td><td>${esc(t.title)}</td><td>${esc(t.stream)}</td><td>${esc(t.owner)}</td><td>${esc(t.status)}</td><td>${esc(t.due||'')}</td></tr>`).join('')}</tbody></table>${!(data.tasks||[]).length?'<div class="empty">No tasks loaded.</div>':''}</div>`}
-function governance(){return `<div class="page-head"><div><h1>Governance</h1><p>Pain point → requirement → fit/gap → decision traceability.</p></div></div><div class="grid kpi">${kpi('Pain points',(data.painPoints||[]).length,'loaded')}${kpi('Requirements',(data.requirements||[]).length,'loaded')}${kpi('Fit / Gap',(data.fitGap||[]).length,'loaded')}${kpi('Decisions',(data.decisions||[]).length,'loaded')}</div><div class="card table-wrap"><table class="data-table"><thead><tr><th>ID</th><th>Stream</th><th>Process</th><th>Pain point</th><th>Impact</th><th>Status</th></tr></thead><tbody>${(data.painPoints||[]).slice(0,100).map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.stream)}</td><td>${esc(x.subprocess)}</td><td>${esc(x.title)}</td><td>${esc(x.impact)}</td><td>${esc(x.status)}</td></tr>`).join('')}</tbody></table></div>`}
-function roadmap(){return `<div class="page-head"><div><h1>Roadmap</h1><p>Program milestone snapshot.</p></div></div><div class="card table-wrap"><table class="data-table"><thead><tr><th>Milestone</th><th>Stream</th><th>Start</th><th>End</th><th>Status</th></tr></thead><tbody>${(data.milestones||[]).map(m=>`<tr><td>${esc(m.name)}</td><td>${esc(m.stream)}</td><td>${esc(m.start)}</td><td>${esc(m.end)}</td><td>${esc(m.status)}</td></tr>`).join('')}</tbody></table></div>`}
-function bindPage(){$$('[data-stream]').forEach(x=>x.onclick=()=>{view='streams';$$('#mainNav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='streams'));render()})}
-init().catch(e=>{$('#app').innerHTML=`<div class="card empty">${esc(e.message)}</div>`})
+async function init(){
+  const b=await loadBaseline();state=b.state;flowManifest=b.flowManifest;flowChunks=b.flowChunks;
+  try{const l=JSON.parse(localStorage.getItem(LS)||'null');if(l?.state&&l?.flowChunks){state=l.state;flowChunks=l.flowChunks}}catch{}
+  rebuildFlows();bindShell();render();setupPolling();setSync('ready · no backend');
+}
+function bindShell(){
+  $('#mainNav').onclick=e=>{const b=e.target.closest('[data-view]');if(!b)return;view=b.dataset.view;$$('#mainNav button').forEach(x=>x.classList.toggle('active',x===b));render()};
+  $('#exportBtn').onclick=exportAll;$('#importFile').onchange=importAll;
+  $('#refreshBtn').onclick=async()=>{if(!confirm('Replace local edits with the latest deployed baseline?'))return;const b=await loadBaseline();state=b.state;flowManifest=b.flowManifest;flowChunks=b.flowChunks;dirtyFiles.clear();rebuildFlows();saveLocal();render();setSync('baseline refreshed')};
+  $('#snapshotBtn').onclick=()=>{view='sync';$$('#mainNav button').forEach(x=>x.classList.remove('active'));render()};
+}
+function exportAll(){const out={state,flowManifest,flowChunks:Object.fromEntries(Object.entries(flowChunks).map(([p,fs])=>[p,fs.map(({_file,...f})=>f)]))};const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}));a.download='IFAST-D365-Control-Tower.json';a.click();URL.revokeObjectURL(a.href)}
+function importAll(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.state||!x.flowChunks)throw Error('Unsupported D365 package');state=x.state;flowChunks=x.flowChunks;flowManifest=x.flowManifest||flowManifest;rebuildFlows();for(const k of ['framework','processes','registers','tasks','milestones'])dirtyFiles.add(k);for(const p of Object.keys(flowChunks))dirtyFiles.add(p);saveLocal();render();setSync('imported · pending sync')}catch(err){alert(err.message)}};r.readAsText(f)}
+function openStream(id){selectedStream=id;view='streams';streamTab='overview';selectedFlowId=streamFlows(id)[0]?.id||null;selectedNodeId=null;$$('#mainNav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='streams'));render()}
+function render(){const app=$('#app');const fn={cockpit:renderCockpit,streams:renderStreams,people:renderPeople,execution:renderExecution,governance:renderGovernance,roadmap:renderRoadmap,sync:renderSync}[view]||renderCockpit;app.innerHTML=fn();bindPage()}

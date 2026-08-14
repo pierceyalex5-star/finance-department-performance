@@ -35,6 +35,7 @@ jobs:
           node --check v2-executive.js
           node --check v2-bind.js
           node --check v2-boot.js
+          node --check v3-workplan.js
       - name: Validate baseline JSON
         run: |
           node - <<'NODE'

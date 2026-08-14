@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>IFAST D365 Transformation Control Tower</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="enhancements.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><div class="brand-mark">D365</div><div><strong>IFAST D365 Transformation Control Tower</strong><span id="dataMode">GitHub-synced · loading</span></div></div>
-    <div class="top-actions"><button class="ghost" id="snapshotBtn">GitHub sync</button><button class="ghost" id="exportBtn">Export data</button><label class="ghost file-btn">Import data<input type="file" id="importFile" accept="application/json" hidden></label><button class="primary" id="refreshBtn">Refresh baseline</button></div>
+    <div class="brand"><div class="brand-mark">D365</div><div><strong>IFAST D365 Transformation Control Tower</strong><span id="dataMode">Shared live · loading</span></div></div>
+    <div class="top-actions"><button class="ghost" id="snapshotBtn">Shared sync</button><button class="ghost" id="exportBtn">Export data</button><label class="ghost file-btn">Import data<input type="file" id="importFile" accept="application/json" hidden></label><button class="primary" id="refreshBtn">Refresh shared</button></div>
   </header>
   <nav class="main-nav" id="mainNav"><button data-view="cockpit" class="active">Cockpit</button><button data-view="streams">Value Streams</button><button data-view="people">People</button><button data-view="execution">Execution</button><button data-view="governance">Governance</button><button data-view="roadmap">Roadmap</button></nav>
   <main id="app"></main>

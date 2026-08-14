@@ -10,3 +10,4 @@ if tag.strip() not in s:
         raise SystemExit('auto-sync marker not found')
     s=s.replace(marker,tag+marker,1)
 p.write_text(s,encoding='utf-8')
+# trigger: SOP import/open UX

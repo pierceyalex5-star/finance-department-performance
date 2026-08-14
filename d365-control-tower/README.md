@@ -13,74 +13,63 @@ A shared D365 implementation control tower organized around IFASTGROUP's enterpr
 
 ## Deployment model
 
-This application follows the same lightweight deployment pattern as the Finance Control Tower:
+The D365 dashboard intentionally uses the same deployment pattern as the Finance Control Tower:
 
-- GitHub stores and versions the application code and baseline JSON data.
-- One approved internal Windows/server computer runs the included dependency-free Node.js server.
-- The live shared project state is stored locally on that host in `data/runtime-state.json`.
-- Connected browsers receive live changes through Server-Sent Events (SSE).
-- No Vercel runtime, Neon database, Teams integration, browser notifications, or third-party Node packages are used.
+- GitHub is the source repository and shared data store.
+- GitHub Pages hosts the web dashboard.
+- There is no Vercel deployment.
+- There is no Neon database.
+- There is no application server or external backend.
+- There is no Teams integration or notification service.
+- Viewers need no credentials because the project data is public.
+- Editors use a fine-grained GitHub token with `Contents: Read and write` permission for this repository. The token is stored only in that editor's browser and is never committed to the repository.
 
-`data/runtime-state.json` and `data/backups/` are ignored by Git, so a normal `git pull` updates the application without overwriting the team's live project data.
+The existing repository Pages workflow publishes the Finance Control Tower at the site root and the D365 Control Tower under `/d365-control-tower/`.
 
-## Start the shared dashboard
+## Shared editing and automatic synchronization
 
-Prerequisites on the internal host:
+The collaboration model mirrors the Finance Control Tower:
 
-- Git
-- Node.js
+1. The browser loads the deployed JSON baseline from GitHub Pages.
+2. When an editor changes a process, process step, task, BPO/SME, requirement, issue, decision, milestone or flowchart, the affected JSON file is marked dirty.
+3. After a short debounce, the browser commits the updated JSON directly to GitHub through the GitHub Contents API.
+4. Before overwriting a file, the app compares the current GitHub version with the version from which the editor started. If another editor changed that same area first, the save is blocked as a conflict rather than silently overwriting their work.
+5. A small `data/sync.json` marker is updated after the save.
+6. The existing GitHub Pages workflow redeploys the latest repository state.
+7. Other open browsers poll the deployed sync marker and automatically refresh when a newer version is available.
 
-### Windows
+Git history is therefore the version trail for shared edits.
 
-From the cloned repository, open `d365-control-tower` and double-click:
+## Editor setup
 
-`start-d365.cmd`
+For people who need to modify the shared dashboard:
 
-The launcher attempts `git pull --ff-only` and then runs the shared server.
+1. Create a fine-grained GitHub personal access token.
+2. Limit repository access to `pierceyalex5-star/finance-department-performance`.
+3. Grant `Contents: Read and write`.
+4. The first time that person edits something, the dashboard asks for the token.
+5. The token is saved only in browser local storage on that device.
 
-### Command line
+People who only need to view the dashboard do not need a token.
 
-```bash
-cd d365-control-tower
-node server.js
-```
+## Baseline data structure
 
-Default address on the host:
-
-`http://localhost:8090`
-
-Other team members on the same network use the host computer's network name or IP, for example:
-
-`http://192.168.1.25:8090`
-
-IT/network rules may require allowing inbound TCP 8090 on the internal host.
-
-## Baseline and live data
-
-The GitHub baseline is modular and is loaded from:
+The shared project model is modular to reduce editing conflicts:
 
 - `data/framework.json` - value streams, BPOs, SMEs and governance framework
 - `data/processes.json` - process hierarchy and As-Is process metadata
 - `data/registers.json` - pain points, opportunities, requirements, decisions and Fit/Gap
 - `data/tasks.json` - execution tasks
 - `data/milestones.json` - program milestones
-- `data/flows/manifest.json` and `data/flows/*.json` - editable process-flow objects
+- `data/flows/manifest.json` - list of process-flow chunks
+- `data/flows/*.json` - editable process diagrams
+- `data/sync.json` - lightweight synchronization marker
 
-On first launch, `server.js` assembles those files into `data/runtime-state.json`. From that point forward, the runtime file is the shared live source of truth for the team.
-
-Every successful edit:
-
-1. is checked against the current shared version of the affected data file / flow chunk;
-2. is written to `data/runtime-state.json`;
-3. is added to the local audit trail;
-4. is broadcast to connected browsers;
-5. is followed by a refresh from the shared state so concurrent changes in other areas are retained.
-
-The server writes a daily local backup under `data/backups/`. The UI also supports full JSON Export and Import.
+Detailed flowcharts are stored separately by value stream / chunk so editing one detailed process does not require rewriting every process map.
 
 ## Current-state source package
 
-The baseline process library was prepared from the supplied `Process mapping.zip`, including the available current-state artifacts for:
+The current-state baseline was prepared from the supplied `Process mapping.zip`, including the available artifacts for:
 
 - Order to Cash
 - Plan to Manufacture / Plan to Produce
@@ -89,7 +78,9 @@ The baseline process library was prepared from the supplied `Process mapping.zip
 - pain points and opportunities
 - process close-out and summary documentation
 
-Imported process-flow objects are working drafts and should be validated by the assigned BPO and SMEs before being treated as an approved As-Is baseline.
+The enterprise value-stream structure and draft BPO assignments are based on the supplied `IFAST D365 Introduction.pdf`.
+
+Imported process-flow objects remain working As-Is drafts until the assigned BPO and SMEs validate them.
 
 ## Functional areas
 
@@ -106,15 +97,17 @@ Imported process-flow objects are working drafts and should be validated by the 
 - Program and task Gantt charts
 - Decision register
 - Cross-stream handoffs
-- Process version / audit information
+- Process / Git version trail
 - Linked source-document register
 
-## Collaboration behavior
+## Collaboration guideline
 
-This is a shared-state application, not a browser-only static dashboard. Team members who open the same internal server address see the same runtime state.
+Different value streams and different process-flow chunks can be edited in parallel. For a workshop where several people are discussing the same detailed process map, use one designated editor for that map at a time. This keeps the workshop simple and minimizes Git conflicts.
 
-Changes are conflict-checked at the logical data-file level and process-flow-chunk level. Two people can work safely in different areas, but during workshops it is still preferable to use one designated editor for the same detailed process map at a time.
+## URL structure
 
-## Security / infrastructure note
+Once the Pages deployment completes, the D365 dashboard is available beneath the existing Finance Control Tower GitHub Pages site at:
 
-The current deployment contains no application authentication or role-based access control. It is intended to run on the same approved/trusted internal-network pattern as the Finance Control Tower. If the organization later requires authenticated remote access, that should be added through the organization's approved hosting and identity architecture rather than by introducing Vercel or Neon.
+`/d365-control-tower/`
+
+The exact public Pages hostname is controlled by the repository's existing GitHub Pages configuration.

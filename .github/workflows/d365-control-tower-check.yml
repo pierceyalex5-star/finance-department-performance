@@ -32,6 +32,7 @@ jobs:
           node --check v2-views-gov.js
           node --check v2-editors-work.js
           node --check v2-editors-gov.js
+          node --check v2-executive.js
           node --check v2-bind.js
           node --check v2-boot.js
       - name: Validate baseline JSON

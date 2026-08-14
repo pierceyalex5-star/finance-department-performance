@@ -27,6 +27,13 @@ jobs:
           node --check sync.js
           node --check views.js
           node --check editors.js
+          node --check v2-model.js
+          node --check v2-views-work.js
+          node --check v2-views-gov.js
+          node --check v2-editors-work.js
+          node --check v2-editors-gov.js
+          node --check v2-bind.js
+          node --check v2-boot.js
       - name: Validate baseline JSON
         run: |
           node - <<'NODE'

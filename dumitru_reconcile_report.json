@@ -1,0 +1,43 @@
+{
+  "added": [
+    "JE HRACIN (couru labor Usine)",
+    "OS day 1 load",
+    "OS day 2 load",
+    "JE SLACIN (couru Labor Bureau)",
+    "JE PENALIN (ALLOCATIONS FRINGE BENEFITS)",
+    "JE ALLEN (ALLOCATION ELECTRICITY)",
+    "JE MANIN (ACCRUAL ELECTRICITY)",
+    "JE MONIN (PREPAID and Fixed Assets AMORTISATION, CAD)",
+    "JE MONINU (PREPAID AMORTISATION, USD)",
+    "JE PREPIN (PREPAID AMORTISATION, CAD)",
+    "JE LEASE INUT",
+    "JE TOOLIN (TOOLING ALLOCATIONS/AMORTISATION)",
+    "JE DAYSIN (STAT LABOR DAYS)",
+    "JE STATIN (STAT TONS sales/purchases/production/ending inv.)",
+    "JE INVENTORY RECONCILIATION INUT",
+    "JE GSTIN (TAXES INUT)",
+    "JE FORX (FOREIGN EXCHANGE INUT)",
+    "JE SALARY BONUS INUT",
+    "JE OTHER ACCRUALS INUT",
+    "JE OTHER ADJUSTMENTS INUT",
+    "JE TRANSIT INVENTORY INUT (ACCRUAL)"
+  ],
+  "skipped_existing_task": [
+    "Receiving Info INUT",
+    "Fixed Assets INUT",
+    "Prepaid INUT",
+    "Purchases file INUT",
+    "ROD file INUT",
+    "Rolling Transit Inventory INUT",
+    "Rolling FG + WIP Inventory INUT",
+    "Sales analysis INUT",
+    "Snapshot INUT",
+    "Preliminary analysis INUT / ADJ",
+    "Inventory variance analysis INUT",
+    "EBIT variance analysis INUT",
+    "Bridge Infasco format",
+    "Bridge Heico format",
+    "Monthly results Presentation"
+  ],
+  "skipped_deliverable": []
+}

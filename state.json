@@ -11,7 +11,7 @@
     "William B.",
     "Anne B."
   ],
-  "version": 412,
+  "version": 413,
   "settings": {
     "holidays": [],
     "warnMinutes": 60,
@@ -22,7 +22,7 @@
     "closeTargetTime": "18:00"
   },
   "manualJEs": [],
-  "updatedAt": "2026-08-11T05:14:59.753Z",
+  "updatedAt": "2026-08-14T21:07:26.485487Z",
   "closeActual": {},
   "corrections": [],
   "improvements": [],
@@ -2340,6 +2340,636 @@
       },
       "closeCritical": false,
       "workbookOwner": "Alex P."
+    },
+    {
+      "id": "dr_2cff0be7ce",
+      "day": "WD -2",
+      "name": "JE HRACIN (couru labor Usine)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_3a21e42d5a",
+      "day": "WD3",
+      "name": "OS day 1 load",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": false,
+        "Review": false
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": false,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_c14f40cb57",
+      "day": "WD4",
+      "name": "OS day 2 load",
+      "time": "12:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Unassigned",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": false,
+        "Review": false
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": false,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_892a8e5cc4",
+      "day": "WD -2",
+      "name": "JE SLACIN (couru Labor Bureau)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_ffe0e73f82",
+      "day": "WD -2",
+      "name": "JE PENALIN (ALLOCATIONS FRINGE BENEFITS)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_d4f228c934",
+      "day": "WD1",
+      "name": "JE ALLEN (ALLOCATION ELECTRICITY)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_86dab3f8bc",
+      "day": "WD1",
+      "name": "JE MANIN (ACCRUAL ELECTRICITY)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_4f813306ee",
+      "day": "WD -1",
+      "name": "JE MONIN (PREPAID and Fixed Assets AMORTISATION, CAD)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_2ff15f8bf8",
+      "day": "WD -1",
+      "name": "JE MONINU (PREPAID AMORTISATION, USD)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_d7f7ee5baa",
+      "day": "WD -1",
+      "name": "JE PREPIN (PREPAID AMORTISATION, CAD)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_9931e5f077",
+      "day": "WD -1",
+      "name": "JE LEASE INUT",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Feida F.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_fb07193e44",
+      "day": "WD -1",
+      "name": "JE TOOLIN (TOOLING ALLOCATIONS/AMORTISATION)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_6295ef6bba",
+      "day": "WD -2",
+      "name": "JE DAYSIN (STAT LABOR DAYS)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_7304c9a17b",
+      "day": "WD2",
+      "name": "JE STATIN (STAT TONS sales/purchases/production/ending inv.)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_6239fdb6e3",
+      "day": "WD2",
+      "name": "JE INVENTORY RECONCILIATION INUT",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_963235aaf7",
+      "day": "WD -15",
+      "name": "JE GSTIN (TAXES INUT)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Line R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": false,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_2daba7e545",
+      "day": "WD1",
+      "name": "JE FORX (FOREIGN EXCHANGE INUT)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_948638f40c",
+      "day": "WD -2",
+      "name": "JE SALARY BONUS INUT",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_cfc9722176",
+      "day": "WD2",
+      "name": "JE OTHER ACCRUALS INUT",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_fb1cc4e961",
+      "day": "WD2",
+      "name": "JE OTHER ADJUSTMENTS INUT",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
+    },
+    {
+      "id": "dr_11d0bb614f",
+      "day": "WD2",
+      "name": "JE TRANSIT INVENTORY INUT (ACCRUAL)",
+      "time": "17:00",
+      "active": true,
+      "person": "Dumitru R.",
+      "sopUrl": "",
+      "source": "Internal Close",
+      "stageOwners": {
+        "Preparation": "Dumitru R.",
+        "Approval": "Unassigned",
+        "Entry": "Dumitru R.",
+        "Review": "Unassigned"
+      },
+      "stageEnabled": {
+        "Preparation": true,
+        "Approval": true,
+        "Entry": true,
+        "Review": true
+      },
+      "stageOffsets": {
+        "Preparation": 180,
+        "Approval": 120,
+        "Entry": 60,
+        "Review": 0
+      },
+      "closeCritical": true,
+      "workbookOwner": "DR"
     }
   ],
   "closeSnapshots": {},

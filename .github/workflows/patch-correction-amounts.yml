@@ -1,0 +1,31 @@
+name: Patch correction amount methodology
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'patch_correction_amounts.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch dashboard and journal analytics
+        run: python patch_correction_amounts.py
+      - name: Validate
+        run: |
+          grep -q 'Gross / pure error' index.html
+          grep -q 'correctionGrossAmount' journal-analytics.js
+          grep -q 'netCorrectionAmount' index.html
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html journal-analytics.js
+          git diff --cached --quiet || git commit -m "Show net and gross correction amounts"
+          git push

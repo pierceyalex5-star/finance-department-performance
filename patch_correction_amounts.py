@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 FILES=[Path('index.html'),Path('journal-analytics.js')]
 
@@ -21,6 +22,8 @@ repls=[
 ('details.sort((a,b)=>b.m-a.m).map(x=>`<tr><td>${esc(x.dt)}</td><td>${esc(x.d)}</td><td>${esc(x.n)}</td><td>${esc(x.c)}</td><td>${esc(x.x)}</td><td>${esc(x.g)}</td><td>${money(x.m)}</td></tr>`)', 'details.sort((a,b)=>(b.ga??b.m)-(a.ga??a.m)).map(x=>`<tr><td>${esc(x.dt)}</td><td>${esc(x.d)}</td><td>${esc(x.n)}</td><td>${esc(x.c)}</td><td>${esc(x.x)}</td><td>${esc(x.g)}</td><td>${money(x.m)}</td><td>${money(x.ga??x.m)}</td></tr>`)')
 ]
 
+hist_cat='const HIST_CAT=[["2026-01","Bank reconciliation",4,37860],["2026-01","GL coding / reclass",5,51905],["2026-01","Inventory / COGS",2,4123568],["2026-02","Bank reconciliation",4,157330],["2026-02","GL coding / reclass",3,94978],["2026-02","Inventory / COGS",2,19665601],["2026-02","Other",1,125526],["2026-03","Bank reconciliation",2,10792],["2026-03","Fixed assets / depreciation",1,306410],["2026-03","Inventory / COGS",1,104],["2026-04","Bank reconciliation",3,11602],["2026-04","GL coding / reclass",7,1746270],["2026-05","Bank reconciliation",4,1033012],["2026-05","Other",3,72225],["2026-05","Inventory / COGS",3,10502748],["2026-05","Payroll / benefits",1,291566],["2026-05","GL coding / reclass",1,7118],["2026-06","Bank reconciliation",4,13346],["2026-06","GL coding / reclass",3,460420],["2026-06","Inventory / COGS",1,526472],["2026-07","Bank reconciliation",3,1029013],["2026-07","GL coding / reclass",2,1915958],["2026-07","Other",2,63504],["2026-07","Payroll / benefits",2,20492]];'
+
 for p in FILES:
     if not p.exists():
         continue
@@ -28,6 +31,8 @@ for p in FILES:
     for old,new in repls:
         if old in s:
             s=s.replace(old,new)
+    s=re.sub(r'const HIST_CAT=.*?;\n',hist_cat+'\n',s,count=1)
+    s=s.replace('seed.divisionSummary=HIST_DIV.map(divObj);seed.details=[];window.__journalSeed=seed','if(!seed.divisionSummary?.length)seed.divisionSummary=HIST_DIV.map(divObj);seed.details=seed.details||[];window.__journalSeed=seed')
     p.write_text(s,encoding='utf-8')
 
-# trigger v2
+# trigger v3

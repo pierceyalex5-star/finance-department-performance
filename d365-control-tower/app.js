@@ -5,7 +5,7 @@ const LS='ifast-d365-control-tower-v3',GHLS='ifast-d365-github-v3';
 let state={framework:{},processes:{subprocesses:{}},registers:{painPoints:[],opportunities:[],requirements:[],decisions:[],fitGap:[]},tasks:{tasks:[]},milestones:{milestones:[]}},flowManifest={},flowChunks={},flows=[];
 let view='cockpit',selectedStream='O2C',streamTab='overview',selectedFlowId=null,selectedNodeId=null,asIsMode='text',dirtyFiles=new Set(),syncTimer=null,pullTimer=null;
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clone=o=>JSON.parse(JSON.stringify(o));
 const uid=p=>`${p}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
 const today=()=>new Date().toISOString().slice(0,10);

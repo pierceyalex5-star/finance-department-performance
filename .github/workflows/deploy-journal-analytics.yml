@@ -1,0 +1,75 @@
+name: Deploy Journal KPI Analytics
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'journal-analytics.js'
+      - 'journal-analytics-seed.json'
+      - '.github/workflows/deploy-journal-analytics.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  patch-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wire journal analytics into dashboard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<script src="./auto-sync.js"></script>'
+          tag='<script src="./journal-analytics.js"></script>\n'
+          if tag.strip() not in s:
+              if marker not in s: raise SystemExit('auto-sync marker not found')
+              s=s.replace(marker,tag+marker,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/pages.yml')
+          s=p.read_text(encoding='utf-8')
+          old='cp index.html manifest.json sw.js config.js auto-sync.js state.json _site/'
+          new='cp index.html manifest.json sw.js config.js auto-sync.js journal-analytics.js journal-analytics-seed.json state.json _site/'
+          if old in s: s=s.replace(old,new)
+          elif 'journal-analytics.js' not in s: raise SystemExit('pages copy command not found')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate JavaScript
+        run: |
+          node --check journal-analytics.js
+          grep -q 'journal-analytics.js' index.html
+          grep -q 'journal-analytics-seed.json' .github/workflows/pages.yml
+      - name: Commit application changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/pages.yml
+          git diff --cached --quiet || git commit -m "Enable automated journal KPI import"
+          git push
+      - uses: actions/configure-pages@v5
+      - name: Build site
+        run: |
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js auto-sync.js journal-analytics.js journal-analytics-seed.json state.json _site/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

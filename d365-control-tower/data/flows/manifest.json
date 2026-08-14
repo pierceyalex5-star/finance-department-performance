@@ -1,0 +1,9 @@
+{
+  "M2O": ["data/flows/M2O.json"],
+  "O2C": ["data/flows/O2C.json"],
+  "F2P": ["data/flows/F2P.json"],
+  "P2P": ["data/flows/P2P-1.json","data/flows/P2P-2.json","data/flows/P2P-3.json","data/flows/P2P-4.json","data/flows/P2P-5.json","data/flows/P2P-6.json","data/flows/P2P-7.json"],
+  "S2P": ["data/flows/S2P-1.json","data/flows/S2P-2.json","data/flows/S2P-3.json","data/flows/S2P-4.json"],
+  "W2D": ["data/flows/W2D-1.json","data/flows/W2D-2.json"],
+  "R2R": ["data/flows/R2R.json"]
+}

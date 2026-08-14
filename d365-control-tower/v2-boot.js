@@ -1,0 +1,1 @@
+render=function(){ensureV2State();const app=$('#app');const fn={cockpit:renderCockpit,streams:renderStreams,people:renderPeople,execution:renderExecution,governance:renderGovernance,architecture:renderArchitecture,steering:renderSteering,roadmap:renderRoadmap,sync:renderSync}[view]||renderCockpit;app.innerHTML=fn();bindPage()};

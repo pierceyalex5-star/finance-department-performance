@@ -14,6 +14,7 @@ on:
       - 'sops/**'
       - 'state.json'
       - 'journal-analytics-seed.json'
+      - 'd365-control-tower/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -40,6 +41,7 @@ jobs:
           mkdir -p _site
           cp index.html manifest.json sw.js config.js auto-sync.js sop-upload.js state.json journal-analytics-seed.json _site/
           if [ -d sops ]; then cp -R sops _site/; fi
+          if [ -d d365-control-tower ]; then cp -R d365-control-tower _site/; fi
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4
         with:

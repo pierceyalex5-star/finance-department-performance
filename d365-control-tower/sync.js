@@ -18,7 +18,8 @@ async function pushGithub(silent=false){
   setSync('saving shared changes…');
   try{
     const x=await serverJson('/api/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({updates,user:'Dashboard editor',summary:`D365 Control Tower update: ${updates.map(u=>u.key).join(', ')}`})});
-    sharedVersion=Number(x.version||sharedVersion);sharedFileVersions=x.fileVersions||sharedFileVersions;for(const u of updates)dirtyFiles.delete(u.key);saveLocal();setSync('synced');
+    sharedVersion=Number(x.version||sharedVersion);sharedFileVersions=x.fileVersions||sharedFileVersions;for(const u of updates)dirtyFiles.delete(u.key);saveLocal();
+    await pullGithub(true);
   }catch(e){
     if(e.status===409){setSync('edit conflict · pull required');if(!silent)alert(`${e.message}\n\nAnother editor changed the same shared file. Pull the latest shared state, then re-apply your change.`)}else{setSync('save error');if(!silent)alert(e.message)}
   }

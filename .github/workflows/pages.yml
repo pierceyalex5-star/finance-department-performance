@@ -58,6 +58,7 @@ jobs:
           node --check fastener-intelligence/intelligence-v13.js
           node --check fastener-intelligence/intelligence-v14.js
           node --check fastener-intelligence/intelligence-v15.js
+          node --check fastener-intelligence/intelligence-v16.js
           node --check fastener-intelligence/runtime-fix.js
       - name: Build static site
         run: |

@@ -1,0 +1,14 @@
+body.v25-ui .v13-tab-help{background:linear-gradient(180deg,#0d1929,#0a1625)!important;border:1px solid #1c324a!important;color:#dce9f7!important;box-shadow:none!important;border-radius:9px!important;margin:10px 0 12px!important;overflow:hidden!important}
+body.v25-ui .v13-tab-help>summary{background:#0d1929!important;color:#dce9f7!important;padding:10px 12px!important;border:0!important;min-height:42px!important}
+body.v25-ui .v13-tab-help>summary div span{color:#6f88a4!important;font-size:7px!important;letter-spacing:.08em!important}
+body.v25-ui .v13-tab-help>summary div b{color:#eaf3ff!important;font-size:9px!important;font-weight:650!important}
+body.v25-ui .v13-tab-help>summary em{color:#65c8f0!important;font-size:8px!important;font-style:normal!important}
+body.v25-ui .v13-tab-help[open]>summary{border-bottom:1px solid #1c324a!important;background:#0f1d2e!important}
+body.v25-ui .v13-help-grid{background:#0a1625!important;border:0!important;padding:10px 12px!important;gap:8px!important}
+body.v25-ui .v13-help-grid>div{background:#0d1b2c!important;border:1px solid #1b3048!important;border-radius:7px!important;padding:9px 10px!important}
+body.v25-ui .v13-help-grid h4{color:#9cb2ca!important;font-size:8px!important;margin:0 0 5px!important}
+body.v25-ui .v13-help-grid p{color:#8096af!important;font-size:8px!important;line-height:1.45!important;margin:0!important}
+body.v25-ui .v13-help-rule{background:#101e30!important;border-top:1px solid #1c324a!important;color:#8fa6c0!important;padding:9px 12px!important;font-size:8px!important}
+body.v25-ui .v13-help-rule b{color:#dce9f7!important}
+.v26-heatmap{position:relative;height:100%;min-height:250px}.v26-heatmap .v23-heatmap-head{padding-right:110px!important}.v26-heat-summary{position:absolute;right:12px;top:10px;display:flex;flex-direction:column;align-items:flex-end}.v26-heat-summary span{font-size:6px;color:#7087a1;text-transform:uppercase;letter-spacing:.05em}.v26-heat-summary b{font-size:20px;color:#eaf4ff;line-height:1.1;margin-top:3px}.v26-heatmap .v23-heatmap-scroll{max-height:295px!important}.v26-heatmap tbody tr{cursor:pointer}.v26-heatmap tbody tr:hover td{filter:brightness(1.12)}
+@media(max-width:1050px){.v26-heatmap .v23-heatmap-head{padding-right:12px!important}.v26-heat-summary{display:none}}

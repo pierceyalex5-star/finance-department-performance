@@ -1,0 +1,1 @@
+window.FI_IMPORT_ORIGINS={asOf:null,year:null,month:null,hs:'7318',description:'Iron and steel fasteners',basis:'U.S. Census Port HS6 data',totalValue:0,countries:[],regions:[],sourceUrl:'https://www.census.gov/foreign-trade/data/dataproducts.html',fetchedAt:null};

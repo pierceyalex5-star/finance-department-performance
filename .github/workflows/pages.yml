@@ -52,6 +52,7 @@ jobs:
           node --check fastener-intelligence/intelligence-v6.js
           node --check fastener-intelligence/intelligence-v7.js
           node --check fastener-intelligence/intelligence-v8.js
+          node --check fastener-intelligence/intelligence-v9.js
           node --check fastener-intelligence/runtime-fix.js
       - name: Build static site
         run: |
@@ -63,6 +64,7 @@ jobs:
             cp -R fastener-intelligence _site/
             echo 'Refreshing Fastener Trend Lab public data...'
             python3 fastener-intelligence/build_trend_data.py _site/fastener-intelligence/trend-data.js || echo 'Base trend data refresh failed; using committed fallback.'
+            python3 fastener-intelligence/extend_trend_history.py _site/fastener-intelligence/trend-data.js || echo 'History extension failed; retaining base history.'
             python3 fastener-intelligence/augment_energir_data.py _site/fastener-intelligence/trend-data.js || echo 'Energir trend augmentation failed; retaining base trend data.'
             python3 fastener-intelligence/augment_drewry_data.py _site/fastener-intelligence/trend-data.js || echo 'Drewry WCI augmentation failed; using seeded/fallback freight data.'
             echo 'Refreshing and validating official U.S. HS 7318 import origin mix...'

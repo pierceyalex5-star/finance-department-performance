@@ -47,6 +47,9 @@ jobs:
           node --check fastener-intelligence/enhanced.js
           node --check fastener-intelligence/trend-lab-v2.js
           node --check fastener-intelligence/intelligence-v3.js
+          node --check fastener-intelligence/intelligence-v4.js
+          node --check fastener-intelligence/intelligence-v5.js
+          node --check fastener-intelligence/runtime-fix.js
       - name: Build static site
         run: |
           mkdir -p _site
@@ -58,6 +61,10 @@ jobs:
             echo 'Refreshing Fastener Trend Lab public data...'
             python3 fastener-intelligence/build_trend_data.py _site/fastener-intelligence/trend-data.js || echo 'Base trend data refresh failed; using committed fallback.'
             python3 fastener-intelligence/augment_energir_data.py _site/fastener-intelligence/trend-data.js || echo 'Energir trend augmentation failed; retaining base trend data.'
+            python3 fastener-intelligence/augment_drewry_data.py _site/fastener-intelligence/trend-data.js || echo 'Drewry WCI augmentation failed; using seeded/fallback freight data.'
+            echo 'Refreshing geographic SVG basemaps...'
+            curl -fsSL 'https://simplemaps.com/static/demos/resources/svg-library/svgs/north-america.svg' -o _site/fastener-intelligence/north-america.svg || echo 'North America basemap download failed; browser fallback remains enabled.'
+            curl -fsSL 'https://simplemaps.com/static/demos/resources/svg-library/svgs/world.svg' -o _site/fastener-intelligence/world.svg || echo 'World basemap download failed; browser fallback remains enabled.'
           fi
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4

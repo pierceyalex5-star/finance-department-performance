@@ -60,6 +60,7 @@ jobs:
           node --check fastener-intelligence/intelligence-v15.js
           node --check fastener-intelligence/intelligence-v16.js
           node --check fastener-intelligence/intelligence-v17.js
+          node --check fastener-intelligence/intelligence-v18.js
           node --check fastener-intelligence/runtime-fix.js
       - name: Build static site
         run: |
@@ -80,6 +81,9 @@ jobs:
             echo 'Loading Natural Earth country boundaries for self-contained maps...'
             curl -fsSL 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson' -o _site/fastener-intelligence/ne-countries.geojson
             python3 -c "import json; p='_site/fastener-intelligence/ne-countries.geojson'; g=json.load(open(p,encoding='utf-8')); n=len(g.get('features',[])); assert n>=150, f'Natural Earth geometry incomplete: {n} features'; print(f'Natural Earth country geometry validated: {n} features')"
+            python3 fastener-intelligence/build_geo_svgs.py _site/fastener-intelligence/ne-countries.geojson _site/fastener-intelligence/world-map.svg _site/fastener-intelligence/north-america-map.svg
+            test -s _site/fastener-intelligence/world-map.svg
+            test -s _site/fastener-intelligence/north-america-map.svg
           fi
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4

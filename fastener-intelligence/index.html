@@ -5,24 +5,27 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="dark" />
   <title>Fastener Industry Intelligence</title>
-  <link rel="stylesheet" href="styles.css?v=20260815.15" />
-  <link rel="stylesheet" href="enhanced.css?v=20260815.15" />
-  <link rel="stylesheet" href="trend-lab-v2.css?v=20260815.15" />
-  <link rel="stylesheet" href="trend-lab-v3.css?v=20260815.15" />
-  <link rel="stylesheet" href="intelligence-v3.css?v=20260815.15" />
-  <link rel="stylesheet" href="intelligence-v4.css?v=20260815.15" />
-  <link rel="stylesheet" href="intelligence-v5.css?v=20260815.15" />
-  <link rel="stylesheet" href="intelligence-v6.css?v=20260815.15" />
-  <link rel="stylesheet" href="intelligence-v7.css?v=20260815.15" />
-  <link rel="stylesheet" href="intelligence-v8.css?v=20260815.15" />
-  <link rel="stylesheet" href="intelligence-v9.css?v=20260815.15" />
-  <link rel="stylesheet" href="intelligence-v10.css?v=20260815.15" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css?v=20260815.16" />
+  <link rel="stylesheet" href="enhanced.css?v=20260815.16" />
+  <link rel="stylesheet" href="trend-lab-v2.css?v=20260815.16" />
+  <link rel="stylesheet" href="trend-lab-v3.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v3.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v4.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v5.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v6.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v7.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v8.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v9.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v10.css?v=20260815.16" />
+  <link rel="stylesheet" href="intelligence-v12.css?v=20260815.16" />
 </head>
 <body>
   <header class="topbar"><div class="brand-block"><div class="brand-mark">FI</div><div><strong>FASTENER INDUSTRY INTELLIGENCE</strong><span>North America intelligence command center</span></div></div><div class="market-strip" id="marketStrip"></div><div class="header-actions"><button class="btn ghost" id="sourceRegisterBtn">Sources & Data</button><button class="btn ghost" id="exportSourcesBtn">Export Sources</button></div></header>
   <div class="shell"><aside class="sidebar"><nav id="sideNav"></nav><div class="sidebar-foot"><div class="coverage-key"><strong>Evidence</strong><span class="evidence fact">FACT</span><span class="evidence mgmt">MGMT</span><span class="evidence est">EST</span><span class="evidence derived">DERIVED</span><span class="evidence inference">INFERENCE</span></div></div></aside><main class="main"><section class="controlbar"><div class="view-title"><h1 id="viewTitle">Industry Pulse</h1><span id="viewSubtitle">Decision-useful industry conditions and source-backed signals</span></div><div class="filters"><label><input type="checkbox" class="evidenceFilter" value="fact" checked> Facts</label><label><input type="checkbox" class="evidenceFilter" value="mgmt" checked> Management</label><label><input type="checkbox" class="evidenceFilter" value="est" checked> Estimates</label><label><input type="checkbox" class="evidenceFilter" value="derived" checked> Derived</label><label><input type="checkbox" class="evidenceFilter" value="inference" checked> Inferences</label></div></section><div id="app"></div></main></div>
   <div class="drawer" id="drawer" aria-hidden="true"><div class="drawer-head"><div><span class="eyebrow" id="drawerType"></span><h2 id="drawerTitle"></h2><p id="drawerSubtitle"></p></div><button class="icon-btn" id="drawerClose" aria-label="Close">×</button></div><div class="drawer-tabs" id="drawerTabs"></div><div class="drawer-body" id="drawerBody"></div></div><div class="backdrop" id="backdrop"></div>
   <div class="modal" id="sourceModal" aria-hidden="true"><div class="modal-card"><div class="modal-head"><div><span class="eyebrow">Evidence & provenance</span><h2 id="sourceModalTitle">Source register</h2></div><button class="icon-btn" id="sourceModalClose">×</button></div><div class="source-toolbar"><input id="sourceSearch" placeholder="Search sources, entities, periods, IDs..." /><select id="sourceTypeFilter"><option value="all">All evidence classes</option><option value="fact">Fact</option><option value="mgmt">Management commentary</option><option value="est">Estimate</option><option value="derived">Derived</option><option value="inference">Inference</option></select></div><div id="sourceModalBody"></div></div></div>
-  <script src="data.js?v=20260815.15"></script><script src="trend-data.js?v=20260815.15"></script><script src="import-origin-data.js?v=20260815.15"></script><script src="trend-source-register.js?v=20260815.15"></script><script src="app.js?v=20260815.15"></script><script src="enhanced.js?v=20260815.15"></script><script src="runtime-fix.js?v=20260815.15"></script><script src="trend-lab-v2.js?v=20260815.15"></script><script src="trend-lab-v3.js?v=20260815.15"></script><script src="intelligence-v3.js?v=20260815.15"></script><script src="intelligence-v4.js?v=20260815.15"></script><script src="intelligence-v5.js?v=20260815.15"></script><script src="intelligence-v6.js?v=20260815.15"></script><script src="intelligence-v7.js?v=20260815.15"></script><script src="intelligence-v8.js?v=20260815.15"></script><script src="intelligence-v9.js?v=20260815.15"></script><script src="intelligence-v10.js?v=20260815.15"></script><script src="intelligence-v11.js?v=20260815.15"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="data.js?v=20260815.16"></script><script src="trend-data.js?v=20260815.16"></script><script src="import-origin-data.js?v=20260815.16"></script><script src="trend-source-register.js?v=20260815.16"></script><script src="app.js?v=20260815.16"></script><script src="enhanced.js?v=20260815.16"></script><script src="runtime-fix.js?v=20260815.16"></script><script src="trend-lab-v2.js?v=20260815.16"></script><script src="trend-lab-v3.js?v=20260815.16"></script><script src="intelligence-v3.js?v=20260815.16"></script><script src="intelligence-v4.js?v=20260815.16"></script><script src="intelligence-v5.js?v=20260815.16"></script><script src="intelligence-v6.js?v=20260815.16"></script><script src="intelligence-v7.js?v=20260815.16"></script><script src="intelligence-v8.js?v=20260815.16"></script><script src="intelligence-v9.js?v=20260815.16"></script><script src="intelligence-v10.js?v=20260815.16"></script><script src="intelligence-v11.js?v=20260815.16"></script><script src="intelligence-v12.js?v=20260815.16"></script>
 </body>
 </html>

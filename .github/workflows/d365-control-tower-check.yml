@@ -54,7 +54,7 @@ jobs:
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const files=['data/framework.json','data/processes.json','data/registers.json','data/tasks.json','data/milestones.json','data/flows/manifest.json','data/sync.json'];
+          const files=['data/framework.json','data/processes.json','data/registers.json','data/tasks.json','data/milestones.json','data/planning.json','data/flows/manifest.json','data/sync.json'];
           for(const f of files) JSON.parse(fs.readFileSync(f,'utf8'));
           const manifest=JSON.parse(fs.readFileSync('data/flows/manifest.json','utf8'));
           for(const f of [...new Set(Object.values(manifest).flat())]) JSON.parse(fs.readFileSync(f,'utf8'));

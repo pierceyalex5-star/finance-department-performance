@@ -1,0 +1,55 @@
+name: Refresh Fastener Intelligence Data
+
+on:
+  schedule:
+    - cron: '40 10 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fastener-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install data dependencies
+        run: python3 -m pip install --quiet openpyxl
+      - name: Refresh source-backed datasets
+        run: |
+          set -euo pipefail
+          cp fastener-intelligence/trend-data.js /tmp/trend-data.js
+          cp fastener-intelligence/import-origin-data.js /tmp/import-origin-data.js
+
+          python3 fastener-intelligence/build_trend_data.py /tmp/trend-data.js
+          python3 fastener-intelligence/extend_trend_history.py /tmp/trend-data.js
+          python3 fastener-intelligence/augment_energir_data.py /tmp/trend-data.js
+          python3 fastener-intelligence/augment_drewry_data.py /tmp/trend-data.js
+          python3 fastener-intelligence/augment_us_import_origins.py /tmp/import-origin-data.js
+
+          mv /tmp/trend-data.js fastener-intelligence/trend-data.js
+          mv /tmp/import-origin-data.js fastener-intelligence/import-origin-data.js
+      - name: Validate refreshed data files
+        run: |
+          node --check fastener-intelligence/trend-data.js
+          node --check fastener-intelligence/import-origin-data.js
+          grep -q 'DREWRY_WCI' fastener-intelligence/trend-data.js
+          grep -q 'FI_IMPORT_ORIGINS' fastener-intelligence/import-origin-data.js
+      - name: Commit refreshed datasets
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add fastener-intelligence/trend-data.js fastener-intelligence/import-origin-data.js
+          if git diff --cached --quiet; then
+            echo 'No source-data changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Refresh Fastener Intelligence source data'
+          git push

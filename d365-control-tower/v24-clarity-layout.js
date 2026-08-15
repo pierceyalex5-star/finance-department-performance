@@ -50,7 +50,7 @@
     return ms.find(x=>(x.end||x.due)>=todayIso())||ms.at(-1)||null;
   }
   function gate(){
-    try{if(typeof currentMilestone==='function'){const m=currentMilestone();if(m)return {m,score:typeof gateReadiness==='function'?Math.round(Number(gateReadiness(m))||0):null,status:typeof gateStatus==='function'?gateStatus(m):m.status}}catch(_){ }
+    try{if(typeof currentMilestone==='function'){const m=currentMilestone();if(m)return {m,score:typeof gateReadiness==='function'?Math.round(Number(gateReadiness(m))||0):null,status:typeof gateStatus==='function'?gateStatus(m):m.status}}}catch(_){ }
     const m=milestone();return {m,score:null,status:m?.status||'—'};
   }
   function programHealth(){

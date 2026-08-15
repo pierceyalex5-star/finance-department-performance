@@ -40,6 +40,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Install Fastener data dependencies
+        run: python3 -m pip install --quiet openpyxl
+      - name: Validate Fastener JavaScript
+        run: |
+          node --check fastener-intelligence/enhanced.js
+          node --check fastener-intelligence/trend-lab-v2.js
+          node --check fastener-intelligence/intelligence-v3.js
       - name: Build static site
         run: |
           mkdir -p _site
@@ -49,7 +56,8 @@ jobs:
           if [ -d fastener-intelligence ]; then
             cp -R fastener-intelligence _site/
             echo 'Refreshing Fastener Trend Lab public data...'
-            python3 fastener-intelligence/build_trend_data.py _site/fastener-intelligence/trend-data.js || echo 'Trend data refresh failed; using committed fallback.'
+            python3 fastener-intelligence/build_trend_data.py _site/fastener-intelligence/trend-data.js || echo 'Base trend data refresh failed; using committed fallback.'
+            python3 fastener-intelligence/augment_energir_data.py _site/fastener-intelligence/trend-data.js || echo 'Energir trend augmentation failed; retaining base trend data.'
           fi
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4

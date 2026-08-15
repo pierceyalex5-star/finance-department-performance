@@ -18,6 +18,9 @@ on:
       - 'fastener-intelligence/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
+  schedule:
+    # Refresh source-backed Fastener Trend Lab data every morning (10:40 UTC = 06:40 EDT).
+    - cron: '40 10 * * *'
 
 permissions:
   contents: read
@@ -43,7 +46,11 @@ jobs:
           cp index.html manifest.json sw.js config.js auto-sync.js sop-upload.js state.json journal-analytics-seed.json _site/
           if [ -d sops ]; then cp -R sops _site/; fi
           if [ -d d365-control-tower ]; then cp -R d365-control-tower _site/; fi
-          if [ -d fastener-intelligence ]; then cp -R fastener-intelligence _site/; fi
+          if [ -d fastener-intelligence ]; then
+            cp -R fastener-intelligence _site/
+            echo 'Refreshing Fastener Trend Lab public data...'
+            python3 fastener-intelligence/build_trend_data.py _site/fastener-intelligence/trend-data.js || echo 'Trend data refresh failed; using committed fallback.'
+          fi
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4
         with:

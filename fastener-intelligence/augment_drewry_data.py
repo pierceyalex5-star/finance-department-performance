@@ -8,10 +8,8 @@ MTS_EVENT='https://www.mtsinsights.com/events/3967/'
 DREWRY_URL='https://www.drewry.co.uk/maritime-research-opinion-browser/world-container-index-assessed-by-drewry'
 CUTOFF='2024-01-01'
 MAX_PAGES=180
-HEADERS={'User-Agent':'fastener-intelligence-github-pages/12.0','Accept':'text/html,*/*'}
+HEADERS={'User-Agent':'fastener-intelligence-github-pages/12.1','Accept':'text/html,*/*'}
 
-# Exact reported Drewry WCI composite observations selected near each 2024 month-end.
-# These are public industry publications quoting Drewry's detailed weekly assessment.
 ARCHIVE_2024={
  '2024-01-25':(3964.0,'https://cyprusshippingnews.com/2024/01/30/world-container-index-up-5-last-week-according-to-drewry/'),
  '2024-02-29':(3493.0,'https://cyprusshippingnews.com/2024/03/05/world-container-index-down-5-last-week-according-to-drewry/'),
@@ -107,7 +105,9 @@ def latest_drewry():
     return None
 
 obj=load(PATH)
-data={d:v for d,(v,_) in ARCHIVE_2024};obs_urls={d:u for d,(_,u) in ARCHIVE_2024.items()};method='2024 monthly public Drewry reports + seed fallback';pages=0
+data={d:v for d,(v,_) in ARCHIVE_2024.items()}
+obs_urls={d:u for d,(_,u) in ARCHIVE_2024.items()}
+method='2024 monthly public Drewry reports + seed fallback';pages=0
 try:
     crawled,crawl_urls,pages=crawl()
     if len(crawled)>=50:
@@ -123,7 +123,8 @@ except Exception as e:
 latest=latest_drewry()
 if latest:data[latest[0]]=latest[1]
 rows=[[d,data[d]] for d in sorted(data)]
-obj.setdefault('series',{})['DREWRY_WCI']={'id':'DREWRY_WCI','name':'Drewry World Container Index','group':'Freight & logistics','units':'USD per 40ft container','frequency':'Weekly from 2025; monthly month-end anchors in 2024','source':'Drewry WCI — 2024 public Drewry assessments quoted by industry publications; 2025+ MTS Insights weekly dispatches','relevance':'Ocean freight benchmark for imported finished goods','url':MTS_EVENT,'data':rows,'observationUrls':obs_urls,'error':None,'coverageNote':f'Historical method: {method}. 2024 contains exact reported month-end/near-month-end Drewry composite observations, not interpolated weekly values. Exact MTS weekly dispatch history is loaded from 2025 onward. Earliest loaded observation: {rows[0][0] if rows else "unavailable"}. Each loaded observation retains a source URL where available. Pages crawled: {pages}.'}
+if rows[0][0]>'2024-01-31':raise RuntimeError('Drewry 2024 anchors were not loaded')
+obj.setdefault('series',{})['DREWRY_WCI']={'id':'DREWRY_WCI','name':'Drewry World Container Index','group':'Freight & logistics','units':'USD per 40ft container','frequency':'Weekly from 2025; monthly month-end anchors in 2024','source':'Drewry WCI — 2024 public Drewry assessments quoted by industry publications; 2025+ MTS Insights weekly dispatches','relevance':'Ocean freight benchmark for imported finished goods','url':MTS_EVENT,'data':rows,'observationUrls':obs_urls,'error':None,'coverageNote':f'Historical method: {method}. 2024 contains exact reported month-end/near-month-end Drewry composite observations, not interpolated weekly values. Exact MTS weekly dispatch history is loaded from 2025 onward. Earliest loaded observation: {rows[0][0]}. Each loaded observation retains a source URL where available. Pages crawled: {pages}.'}
 obj['provider']=str(obj.get('provider',''))+' + Drewry WCI 2024 public assessments + MTS Insights dispatches'
 with open(PATH,'w',encoding='utf-8') as f:f.write('window.FI_TREND_DATA=');json.dump(obj,f,separators=(',',':'));f.write(';\n')
-print(f'Drewry WCI observations: {len(rows)}; earliest={rows[0] if rows else None}; latest={rows[-1] if rows else None}; method={method}; 2024_anchors={len(ARCHIVE_2024)}; pages={pages}')
+print(f'Drewry WCI observations: {len(rows)}; earliest={rows[0]}; latest={rows[-1]}; method={method}; 2024_anchors={len(ARCHIVE_2024)}; pages={pages}')

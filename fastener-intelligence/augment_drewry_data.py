@@ -8,7 +8,7 @@ MTS_EVENT='https://www.mtsinsights.com/events/3967/'
 DREWRY_URL='https://www.drewry.co.uk/maritime-research-opinion-browser/world-container-index-assessed-by-drewry'
 CUTOFF='2024-01-01'
 MAX_PAGES=180
-HEADERS={'User-Agent':'fastener-intelligence-github-pages/11.0','Accept':'text/html,*/*'}
+HEADERS={'User-Agent':'fastener-intelligence-github-pages/11.1','Accept':'text/html,*/*'}
 SEED=[['2026-05-28',2800.0],['2026-06-04',3433.0],['2026-06-11',3549.0],['2026-06-18',3969.0],['2026-06-25',4166.0],['2026-07-02',4530.0],['2026-07-09',4639.0],['2026-07-16',4547.0],['2026-07-23',4374.0],['2026-07-30',4255.0],['2026-08-06',4297.0],['2026-08-13',4339.0]]
 
 def load(path):
@@ -34,14 +34,24 @@ def parse_date(t):
     except ValueError:return None
 
 def parse_wci(t):
+    # Dispatch wording changes over time. Use the first monetary value after the WCI heading,
+    # which is the composite WCI before route-level values are discussed.
+    anchors=[]
+    for pat in (r'Drewry World Container Index',r'World Container Index',r'\bWCI\b'):
+        m=re.search(pat,t,re.I)
+        if m:anchors.append(m.end())
+    start=min(anchors) if anchors else 0
+    segment=t[start:start+1600]
     patterns=[
-      r'(?:Drewry World Container Index|World Container Index|\bWCI\b).*?(?:increased|decreased|rose|fell|surged|jumped|rebounded|edged|climbed|dropped|declined|was|is).*?\$([0-9,]+(?:\.\d+)?)\s*per\s*40ft\s*container',
-      r'(?:Drewry World Container Index|World Container Index|\bWCI\b).*?\$([0-9,]+(?:\.\d+)?)\s*per\s*40ft\s*container'
+      r'(?:US\s*)?\$\s*([0-9,]+(?:\.\d+)?)\s*(?:per|/)\s*(?:40ft|40-ft|40-foot|forty-foot)\s*(?:container)?',
+      r'(?:US\s*)?\$\s*([0-9,]+(?:\.\d+)?)'
     ]
     for p in patterns:
-        m=re.search(p,t,re.I)
+        m=re.search(p,segment,re.I)
         if m:
-            try:return float(m.group(1).replace(',',''))
+            try:
+                v=float(m.group(1).replace(',',''))
+                if 500<=v<=20000:return v
             except ValueError:pass
     return None
 
@@ -53,8 +63,7 @@ def anchors(h):
     return out
 
 def latest_summary():
-    _,h=get(MTS_EVENT); aa=anchors(h)
-    # Event page lists newest dispatch first. Prefer a permalink/summary anchor.
+    _,h=get(MTS_EVENT);aa=anchors(h)
     for u,txt in aa:
         if '/summaries/' in u and ('permalink' in txt.lower() or 'week of' in txt.lower()):return u
     for u,txt in aa:
@@ -68,10 +77,11 @@ def crawl():
     while url and url not in seen and pages<MAX_PAGES:
         seen.add(url);pages+=1
         final,h=get(url);t=textify(h);d=parse_date(t);v=parse_wci(t)
+        if pages<=5:print(f'MTS parse check page {pages}: date={d} value={v} url={final}')
         if d and v:
             data[d]=v;urls[d]=final
-            if pages==1 or pages%20==0:print(f'MTS Drewry crawl page {pages}: {d} = {v:.0f}')
-            if d<CUTOFF:break
+            if pages%20==0:print(f'MTS Drewry crawl page {pages}: {d} = {v:.0f}')
+        if d and d<CUTOFF:break
         prev=None
         for u,txt in anchors(h):
             if '/summaries/' in u and 'previous' in txt.lower():prev=u;break
@@ -94,19 +104,13 @@ def latest_drewry():
 obj=load(PATH);data={d:v for d,v in SEED};obs_urls={};method='seed fallback';pages=0
 try:
     rows,obs_urls,pages=crawl()
-    if len(rows)>=50 and rows[0][0]<'2025-01-01':
-        data={d:v for d,v in rows};method='MTS weekly dispatches (Source: Drewry)'
+    if len(rows)>=50 and rows[0][0]<'2025-01-01':data={d:v for d,v in rows};method='MTS weekly dispatches (Source: Drewry)'
     else:print(f'WARN MTS Drewry crawl insufficient: rows={len(rows)}, earliest={rows[0][0] if rows else None}',file=sys.stderr)
 except Exception as e:print(f'WARN MTS Drewry crawl: {e}',file=sys.stderr)
 latest=latest_drewry()
 if latest:data[latest[0]]=latest[1]
 rows=[[d,data[d]] for d in sorted(data)]
-series={
- 'id':'DREWRY_WCI','name':'Drewry World Container Index','group':'Freight & logistics','units':'USD per 40ft container','frequency':'Weekly',
- 'source':'MTS Insights weekly dispatches; underlying source Drewry','relevance':'Ocean freight benchmark for imported finished goods','url':MTS_EVENT,'data':rows,
- 'observationUrls':obs_urls,'error':None,
- 'coverageNote':f'Historical method: {method}. Earliest loaded observation: {rows[0][0] if rows else "unavailable"}. Each crawled observation retains its dated MTS dispatch URL. Pages crawled: {pages}.'
-}
-obj.setdefault('series',{})['DREWRY_WCI']=series;obj['provider']=str(obj.get('provider',''))+' + Drewry WCI via MTS Insights dispatches'
+obj.setdefault('series',{})['DREWRY_WCI']={'id':'DREWRY_WCI','name':'Drewry World Container Index','group':'Freight & logistics','units':'USD per 40ft container','frequency':'Weekly','source':'MTS Insights weekly dispatches; underlying source Drewry','relevance':'Ocean freight benchmark for imported finished goods','url':MTS_EVENT,'data':rows,'observationUrls':obs_urls,'error':None,'coverageNote':f'Historical method: {method}. Earliest loaded observation: {rows[0][0] if rows else "unavailable"}. Each crawled observation retains its dated MTS dispatch URL. Pages crawled: {pages}.'}
+obj['provider']=str(obj.get('provider',''))+' + Drewry WCI via MTS Insights dispatches'
 with open(PATH,'w',encoding='utf-8') as f:f.write('window.FI_TREND_DATA=');json.dump(obj,f,separators=(',',':'));f.write(';\n')
 print(f'Drewry WCI observations: {len(rows)}; earliest={rows[0] if rows else None}; latest={rows[-1] if rows else None}; method={method}; pages={pages}')

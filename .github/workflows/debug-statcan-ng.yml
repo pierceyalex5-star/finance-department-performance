@@ -1,0 +1,34 @@
+name: Debug StatCan Natural Gas Schema
+on:
+  push:
+    paths:
+      - '.github/workflows/debug-statcan-ng.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect table 25-10-0033-01
+        run: |
+          python3 - <<'PY'
+          import csv, io, urllib.request, zipfile
+          u='https://www150.statcan.gc.ca/n1/en/tbl/csv/25100033-eng.zip'
+          b=urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'schema-debug/1.0'}),timeout=45).read()
+          z=zipfile.ZipFile(io.BytesIO(b)); n=next(x for x in z.namelist() if x.lower().endswith('.csv') and 'metadata' not in x.lower())
+          r=csv.DictReader(io.StringIO(z.read(n).decode('utf-8-sig',errors='replace')))
+          print('FIELDS=',r.fieldnames)
+          seen=set(); count=0
+          for row in r:
+            vals=[str(v or '').strip().lower() for v in row.values()]
+            geo=any(v=='quebec' or v=='québec' or v.startswith('quebec') or v.startswith('québec') for v in vals)
+            ind=any('industrial' in v for v in vals)
+            if not (geo and ind): continue
+            key=tuple((k,row.get(k)) for k in r.fieldnames if k not in ('VALUE','STATUS','SYMBOL','DECIMALS','TERMINATED','DGUID','UOM_ID','SCALAR_ID','COORDINATE','VECTOR'))
+            if key not in seen:
+              seen.add(key); print('CANDIDATE',key)
+              count+=1
+              if count>=20: break
+          PY

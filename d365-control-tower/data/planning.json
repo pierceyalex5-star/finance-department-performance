@@ -859,5 +859,15 @@
       "createdAt": "2026-08-15T12:51:00.177Z",
       "updatedAt": "2026-08-15T12:51:00.177Z"
     }
-  ]
+  ],
+  "financialVault": {
+    "version": 1,
+    "alg": "AES-GCM",
+    "kdf": "PBKDF2-SHA256",
+    "iterations": 250000,
+    "salt": "bpIhNWwzNEY18BO5RGLFbA==",
+    "iv": "C0EGhicdWWrVvQV6",
+    "ciphertext": "woxvO/4058xwEysIJgP9HBC00Hvd0p09YTDNWbELmeGnCMgvLkKLprFNZOGuDx/ucEH8M93VPDxPFd6S6OqBLueN35BzS4U2IZ2gWxucS/X3e4vBizIPmA==",
+    "updatedAt": "2026-08-15T12:59:37.885Z"
+  }
 }

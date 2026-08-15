@@ -76,14 +76,7 @@ jobs:
             python3 fastener-intelligence/augment_us_import_origins.py _site/fastener-intelligence/import-origin-data.js
             echo 'Loading Natural Earth country boundaries for self-contained maps...'
             curl -fsSL 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson' -o _site/fastener-intelligence/ne-countries.geojson
-            python3 - <<'PY'
-import json
-p='_site/fastener-intelligence/ne-countries.geojson'
-with open(p,encoding='utf-8') as f: g=json.load(f)
-features=g.get('features',[])
-assert len(features) >= 150, f'Natural Earth geometry incomplete: {len(features)} features'
-print(f'Natural Earth country geometry validated: {len(features)} features')
-PY
+            python3 -c "import json; p='_site/fastener-intelligence/ne-countries.geojson'; g=json.load(open(p,encoding='utf-8')); n=len(g.get('features',[])); assert n>=150, f'Natural Earth geometry incomplete: {n} features'; print(f'Natural Earth country geometry validated: {n} features')"
           fi
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4

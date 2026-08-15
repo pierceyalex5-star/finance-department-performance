@@ -10,7 +10,7 @@ BASE = 'https://www.census.gov/trade/downloads/{year}/Port/im_hs6_m/PORTHS6MM{yy
 
 
 def fetch(url, timeout=75):
-    req = urllib.request.Request(url, headers={'User-Agent':'fastener-intelligence-github-pages/4.0'})
+    req = urllib.request.Request(url, headers={'User-Agent':'fastener-intelligence-github-pages/4.1'})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
 
@@ -93,8 +93,15 @@ agg,target=parse(year,month,blob)
 total=sum(agg.values())
 rows=[]
 for code,value in sorted(agg.items(),key=lambda kv:kv[1],reverse=True):
+    if value <= 0:
+        continue
     meta=ctys.get(code,{'name':f'Country {code}','iso':''})
     rows.append({'code':code,'name':meta['name'],'iso':meta['iso'],'region':region_for(code),'value':value,'share':(value/total*100 if total else 0)})
+if total <= 0 or not rows:
+    raise RuntimeError(f'Census HS {PRODUCT} parser produced no positive country import values for {year}-{month:02d}; refusing to publish empty origin mix.')
+share_check=sum(r['share'] for r in rows)
+if abs(share_check-100.0) > 0.2:
+    raise RuntimeError(f'Country shares do not reconcile to 100%: {share_check:.3f}%')
 regions=defaultdict(int)
 for r in rows: regions[r['region']] += r['value']
 region_rows=[{'name':k,'value':v,'share':v/total*100 if total else 0} for k,v in sorted(regions.items(),key=lambda kv:kv[1],reverse=True)]
@@ -116,5 +123,5 @@ with open(OUT,'w',encoding='utf-8') as f:
     f.write('window.FI_IMPORT_ORIGINS=')
     json.dump(obj,f,separators=(',',':'))
     f.write(';\n')
-print(f"US HS7318 import origins: {year}-{month:02d}; countries={len(rows)}; total=${total:,}")
+print(f"US HS7318 import origins: {year}-{month:02d}; countries={len(rows)}; total=${total:,}; shares={share_check:.2f}%")
 print('Top origins: '+', '.join(f"{r['name']} {r['share']:.1f}%" for r in rows[:8]))

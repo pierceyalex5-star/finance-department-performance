@@ -50,7 +50,7 @@
       "stream": "Program",
       "start": "2026-10-01",
       "end": "2027-01-14",
-      "status": "Proposed",
+      "status": "In Progress",
       "exitCriteria": "Prioritized business requirements and enterprise design principles are approved; major entity design differences are either resolved or formally accepted; milestone tasks are fully represented and approved.",
       "exitCriteriaFr": "Les exigences d’affaires priorisées et les principes de conception d’entreprise sont approuvés; les principaux écarts de conception entre entités sont résolus ou formellement acceptés; les tâches du jalon sont entièrement représentées et approuvées.",
       "gateCriteria": [
@@ -78,7 +78,9 @@
           "fr": "Tâches du jalon approuvées / fermées",
           "rule": "tasksApproved"
         }
-      ]
+      ],
+      "owner": "Business Owner",
+      "description": ""
     },
     {
       "id": "M-03",

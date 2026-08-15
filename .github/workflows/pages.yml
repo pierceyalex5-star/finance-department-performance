@@ -19,7 +19,6 @@ on:
       - '.github/workflows/pages.yml'
   workflow_dispatch:
   schedule:
-    # Refresh source-backed Fastener Trend Lab and trade data every morning (10:40 UTC = 06:40 EDT).
     - cron: '40 10 * * *'
 
 permissions:
@@ -55,6 +54,7 @@ jobs:
           node --check fastener-intelligence/intelligence-v8.js
           node --check fastener-intelligence/intelligence-v9.js
           node --check fastener-intelligence/intelligence-v10.js
+          node --check fastener-intelligence/intelligence-v11.js
           node --check fastener-intelligence/runtime-fix.js
       - name: Build static site
         run: |

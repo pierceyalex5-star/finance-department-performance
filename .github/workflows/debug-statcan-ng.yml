@@ -1,4 +1,4 @@
-name: Debug StatCan Natural Gas Schema
+name: Debug Energir Natural Gas Price History
 on:
   push:
     paths:
@@ -11,24 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect table 25-10-0033-01
+      - name: Install workbook reader
+        run: python3 -m pip install --quiet openpyxl
+      - name: Inspect Energir 5-year price workbook
         run: |
           python3 - <<'PY'
-          import csv, io, urllib.request, zipfile
-          u='https://www150.statcan.gc.ca/n1/en/tbl/csv/25100033-eng.zip'
-          b=urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'schema-debug/1.0'}),timeout=45).read()
-          z=zipfile.ZipFile(io.BytesIO(b)); n=next(x for x in z.namelist() if x.lower().endswith('.csv') and 'metadata' not in x.lower())
-          r=csv.DictReader(io.StringIO(z.read(n).decode('utf-8-sig',errors='replace')))
-          print('FIELDS=',r.fieldnames)
-          seen=set(); count=0
-          for row in r:
-            vals=[str(v or '').strip().lower() for v in row.values()]
-            geo=any(v=='quebec' or v=='québec' or v.startswith('quebec') or v.startswith('québec') for v in vals)
-            ind=any('industrial' in v for v in vals)
-            if not (geo and ind): continue
-            key=tuple((k,row.get(k)) for k in r.fieldnames if k not in ('VALUE','STATUS','SYMBOL','DECIMALS','TERMINATED','DGUID','UOM_ID','SCALAR_ID','COORDINATE','VECTOR'))
-            if key not in seen:
-              seen.add(key); print('CANDIDATE',key)
-              count+=1
-              if count>=20: break
+          import io, urllib.request
+          from openpyxl import load_workbook
+          u='https://energir.com/files/energir_common/Evolution_prix_en.xlsx'
+          b=urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':'fastener-intelligence/1.0'}),timeout=45).read()
+          wb=load_workbook(io.BytesIO(b),data_only=True,read_only=True)
+          print('SHEETS',wb.sheetnames)
+          for ws in wb.worksheets:
+            print('SHEET',ws.title,ws.max_row,ws.max_column)
+            for row in ws.iter_rows(min_row=1,max_row=min(ws.max_row,35),values_only=True):
+              print('ROW',repr(row[:10]))
           PY

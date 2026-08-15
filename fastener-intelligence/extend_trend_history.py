@@ -4,6 +4,7 @@ import csv, io, json, sys, urllib.request
 PATH=sys.argv[1] if len(sys.argv)>1 else 'trend-data.js'
 START='2019-01-01'
 PREFIX='window.FI_TREND_DATA='
+CORE={'WPU101','WPU10','PZINCUSDM','PNICKUSDM','WPU3012','PCU4831114831115','DEXCAUS','DEXTAUS','DHHNGSP'}
 
 def load():
     t=open(PATH,encoding='utf-8').read().strip()
@@ -14,8 +15,8 @@ def load():
 
 def fetch_fred(sid):
     url=f'https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}&cosd={START}'
-    req=urllib.request.Request(url,headers={'User-Agent':'fastener-intelligence-github-pages/9.0'})
-    with urllib.request.urlopen(req,timeout=35) as r:
+    req=urllib.request.Request(url,headers={'User-Agent':'fastener-intelligence-github-pages/9.1'})
+    with urllib.request.urlopen(req,timeout=25) as r:
         text=r.read().decode('utf-8-sig')
     reader=csv.DictReader(io.StringIO(text)); fields=reader.fieldnames or []
     if not fields: return []
@@ -31,9 +32,9 @@ def fetch_fred(sid):
     return rows
 
 obj=load(); changed=0
-for sid,s in obj.get('series',{}).items():
-    url=str(s.get('url') or '')
-    if 'fred.stlouisfed.org/series/' not in url: continue
+for sid in CORE:
+    s=obj.get('series',{}).get(sid)
+    if not s: continue
     try:
         rows=fetch_fred(sid)
         if rows:
@@ -44,4 +45,4 @@ for sid,s in obj.get('series',{}).items():
 obj['start']=START
 with open(PATH,'w',encoding='utf-8') as f:
     f.write(PREFIX); json.dump(obj,f,separators=(',',':')); f.write(';\n')
-print(f'Extended {changed} FRED-backed series to {START}')
+print(f'Extended {changed} landed-cost source series to {START}')

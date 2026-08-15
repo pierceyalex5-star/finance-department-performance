@@ -55,7 +55,7 @@ jobs:
           node --check fastener-intelligence/intelligence-v9.js
           node --check fastener-intelligence/intelligence-v10.js
           node --check fastener-intelligence/intelligence-v11.js
-          node --check fastener-intelligence/intelligence-v12.js
+          node --check fastener-intelligence/intelligence-v13.js
           node --check fastener-intelligence/runtime-fix.js
       - name: Build static site
         run: |
@@ -73,9 +73,6 @@ jobs:
             python3 fastener-intelligence/augment_drewry_data.py _site/fastener-intelligence/trend-data.js
             echo 'Refreshing and validating official U.S. HS 7318 import origin mix...'
             python3 fastener-intelligence/augment_us_import_origins.py _site/fastener-intelligence/import-origin-data.js
-            echo 'Refreshing geographic SVG basemaps...'
-            curl -fsSL 'https://simplemaps.com/static/demos/resources/svg-library/svgs/north-america.svg' -o _site/fastener-intelligence/north-america.svg || echo 'North America basemap download failed; browser fallback remains enabled.'
-            curl -fsSL 'https://simplemaps.com/static/demos/resources/svg-library/svgs/world.svg' -o _site/fastener-intelligence/world.svg || echo 'World basemap download failed; browser fallback remains enabled.'
           fi
           touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v4

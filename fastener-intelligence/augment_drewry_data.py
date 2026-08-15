@@ -5,10 +5,8 @@ from datetime import datetime
 PATH = sys.argv[1] if len(sys.argv) > 1 else 'trend-data.js'
 DREWRY_URL = 'https://www.drewry.co.uk/maritime-research-opinion-browser/world-container-index-assessed-by-drewry'
 MTS_URL = 'https://www.mtsinsights.com/events/3967/'
-DW_DATA_URL = 'https://static.dwcdn.net/data/8j9Yk.csv'
+DW_DATA_URL = 'https://datawrapper.dwcdn.net/8j9Yk/data'
 
-# Recent observations retained as a resilience fallback only. The primary build now
-# pulls the full MTS Insights Datawrapper history, which is sourced to Drewry.
 SEED = [
     ['2026-06-11', 3549.0], ['2026-06-18', 3969.0], ['2026-06-25', 4166.0],
     ['2026-07-02', 4530.0], ['2026-07-09', 4639.0], ['2026-07-16', 4547.0],
@@ -24,16 +22,15 @@ def load_existing(path):
     return json.loads(body)
 
 def get(url):
-    req=urllib.request.Request(url,headers={'User-Agent':'fastener-intelligence-github-pages/10.0','Accept':'text/csv,text/plain,text/html,*/*'})
+    req=urllib.request.Request(url,headers={'User-Agent':'fastener-intelligence-github-pages/10.1','Accept':'text/csv,text/tab-separated-values,text/plain,application/octet-stream,*/*'})
     with urllib.request.urlopen(req,timeout=40) as r: return r.read().decode('utf-8-sig',errors='replace')
 
 def parse_date(raw):
     s=str(raw or '').strip()
     if not s: return None
-    for f in ('%Y-%m-%d','%m/%d/%Y','%d/%m/%Y','%b %d, %Y','%B %d, %Y','%d %b %Y','%d %B %Y'):
+    for f in ('%Y-%m-%d','%m/%d/%Y','%d/%m/%Y','%b %d, %Y','%B %d, %Y','%d %b %Y','%d %B %Y','%m/%d/%y','%d.%m.%Y'):
         try: return datetime.strptime(s,f).strftime('%Y-%m-%d')
         except ValueError: pass
-    # Datawrapper sometimes emits ISO timestamps.
     m=re.match(r'(20\d{2}-\d{2}-\d{2})',s)
     return m.group(1) if m else None
 
@@ -46,10 +43,12 @@ def parse_num(raw):
 
 def fetch_datawrapper():
     text=get(DW_DATA_URL)
-    reader=csv.DictReader(io.StringIO(text)); fields=reader.fieldnames or []
+    # Datawrapper /data may be comma-, tab-, or semicolon-delimited depending on the chart upload.
+    try: dialect=csv.Sniffer().sniff(text[:4096],delimiters=',\t;')
+    except Exception: dialect=csv.excel
+    reader=csv.DictReader(io.StringIO(text),dialect=dialect); fields=reader.fieldnames or []
     if not fields: return []
     rows=[]
-    # Prefer columns whose names identify date and WCI/value, but remain tolerant of chart schema changes.
     date_fields=[f for f in fields if any(k in f.lower() for k in ('date','week','time'))] or fields[:1]
     value_fields=[f for f in fields if any(k in f.lower() for k in ('drewry','wci','index','value','price','rate')) and f not in date_fields]
     if not value_fields: value_fields=[f for f in fields if f not in date_fields]
@@ -58,18 +57,29 @@ def fetch_datawrapper():
         for f in date_fields:
             d=parse_date(r.get(f))
             if d: break
+        if not d:
+            # Last-resort: scan the row for a parseable date.
+            for v0 in r.values():
+                d=parse_date(v0)
+                if d: break
         if not d: continue
         v=None
         for f in value_fields:
-            v=parse_num(r.get(f))
-            if v is not None and v>500: break
-        if v is not None and v>500: rows.append([d,v])
-    # Deduplicate and sort.
+            n=parse_num(r.get(f))
+            if n is not None and n>500: v=n; break
+        if v is None:
+            for f,v0 in r.items():
+                if f in date_fields: continue
+                n=parse_num(v0)
+                if n is not None and n>500: v=n; break
+        if v is not None: rows.append([d,v])
     out={d:v for d,v in rows}
     return [[d,out[d]] for d in sorted(out)]
 
 def fetch_latest_drewry():
-    html=get(DREWRY_URL); text=re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',html))
+    req=urllib.request.Request(DREWRY_URL,headers={'User-Agent':'fastener-intelligence-github-pages/10.1'})
+    with urllib.request.urlopen(req,timeout=35) as r: html=r.read().decode('utf-8',errors='replace')
+    text=re.sub(r'\s+',' ',re.sub(r'<[^>]+>',' ',html))
     dm=re.search(r'(?:Thursday,\s*)?(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+20\d{2})',text,re.I)
     vm=re.search(r'World Container Index.*?(?:increased|decreased|rose|fell).*?to\s*\$([0-9,]+)\s*per\s*40ft',text,re.I)
     if not(dm and vm): return None
@@ -82,10 +92,10 @@ def fetch_latest_drewry():
 obj=load_existing(PATH); data={d:v for d,v in SEED}; method='seed fallback'
 try:
     full=fetch_datawrapper()
-    if len(full)>=50:
+    if len(full)>=50 and full[0][0]<'2025-01-01':
         data={d:v for d,v in full}; method='MTS Insights Datawrapper / Drewry'
     else:
-        print(f'WARN Drewry Datawrapper returned only {len(full)} usable rows',file=sys.stderr)
+        print(f'WARN Drewry Datawrapper returned {len(full)} usable rows; earliest={full[0][0] if full else None}',file=sys.stderr)
 except Exception as e:
     print(f'WARN Drewry Datawrapper history: {e}',file=sys.stderr)
 try:

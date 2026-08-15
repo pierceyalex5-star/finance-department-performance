@@ -733,7 +733,16 @@
     "approvedBudget": "",
     "budgetNotes": "Enter approved project budget and loaded hourly rates when available. Until rates are entered, effort is tracked in hours and cost calculations are flagged as incomplete.",
     "personRates": {
-      "Alex": 80
+      "Alex": 80,
+      "Danielle Jacques": 75,
+      "Danielle-Dominique Prevost": 35,
+      "Diane Madeiros": 75,
+      "Dimitru Raileanu": 60,
+      "Jacynthe Dupont": 50,
+      "Louis-Philippe Corriveau": 60,
+      "Louis-Philippe Deragon": 50,
+      "Martin Despres": 40,
+      "TBD - External Recruit": 50
     },
     "lines": [
       {

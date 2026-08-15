@@ -821,6 +821,19 @@
       "notes": "",
       "createdAt": "2026-08-15T12:46:55.142Z",
       "updatedAt": "2026-08-15T12:46:55.142Z"
+    },
+    {
+      "id": "TIME-1786798140195-nsza",
+      "weekStart": "2026-08-10",
+      "person": "Alex",
+      "role": "Business Owner",
+      "taskId": "",
+      "stream": "Program",
+      "hours": 10,
+      "output": "Create the dashboard, create the team charter and pledge",
+      "notes": "",
+      "createdAt": "2026-08-15T12:49:54.175Z",
+      "updatedAt": "2026-08-15T12:49:54.175Z"
     }
   ]
 }

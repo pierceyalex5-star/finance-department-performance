@@ -732,7 +732,9 @@
     "currency": "CAD",
     "approvedBudget": "",
     "budgetNotes": "Enter approved project budget and loaded hourly rates when available. Until rates are entered, effort is tracked in hours and cost calculations are flagged as incomplete.",
-    "personRates": {},
+    "personRates": {
+      "Alex": 80
+    },
     "lines": [
       {
         "id": "BUD-01",

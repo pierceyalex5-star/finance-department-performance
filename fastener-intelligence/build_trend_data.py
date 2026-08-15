@@ -74,9 +74,9 @@ def fetch_series(sid, meta):
     return {**meta, "id":sid, "url":f"https://fred.stlouisfed.org/series/{sid}", "data":rows, "error":None}
 
 def fetch_quebec_natural_gas():
-    """Statistics Canada table 25-10-0033-01: Quebec industrial sales unit price."""
+    """Statistics Canada table 25-10-0033-01: Québec industrial sales unit price."""
     url = "https://www150.statcan.gc.ca/n1/en/tbl/csv/25100033-eng.zip"
-    req = urllib.request.Request(url, headers={"User-Agent":"fastener-intelligence-github-pages/2.0"})
+    req = urllib.request.Request(url, headers={"User-Agent":"fastener-intelligence-github-pages/2.1"})
     with urllib.request.urlopen(req, timeout=45) as r:
         blob = r.read()
     z = zipfile.ZipFile(io.BytesIO(blob))
@@ -84,14 +84,25 @@ def fetch_quebec_natural_gas():
     text = z.read(csv_name).decode('utf-8-sig', errors='replace')
     reader = csv.DictReader(io.StringIO(text))
     rows=[]
+    candidate_count=0
     for row in reader:
         vals=[str(v or '').strip().lower() for v in row.values()]
-        joined=' | '.join(vals)
-        if 'quebec' not in vals and 'québec' not in vals:
+        geo_match=any(v == 'quebec' or v == 'québec' or v.startswith('quebec') or v.startswith('québec') for v in vals)
+        industrial_match=any('industrial' in v for v in vals)
+        uom=str(row.get('UOM') or '').strip().lower()
+        scalar=str(row.get('SCALAR_FACTOR') or '').strip().lower()
+        price_unit_match=('cent' in uom and 'cubic' in uom) or any('cents per cubic metre' in v for v in vals)
+        estimate_match=any('sales unit price' in v or v == 'unit price' for v in vals)
+        if not (geo_match and industrial_match):
             continue
-        if not any('industrial' == v or v.startswith('industrial') for v in vals):
+        candidate_count += 1
+        # The published price rows are uniquely identified by cents-per-cubic-metre UOM.
+        # Some bulk CSV versions do not repeat the display heading "Sales unit price" in every row,
+        # so UOM is the authoritative filter and estimate_match is only a fallback.
+        if not (price_unit_match or estimate_match):
             continue
-        if 'sales unit price' not in joined and 'unit price' not in joined:
+        # Reject scaled volume/revenue rows even if another dimension happens to contain "unit price".
+        if scalar not in ('', 'units') and not price_unit_match:
             continue
         raw=(row.get('VALUE') or '').strip()
         date=(row.get('REF_DATE') or '').strip()
@@ -99,20 +110,20 @@ def fetch_quebec_natural_gas():
             continue
         try: value=float(raw)
         except ValueError: continue
-        # Monthly REF_DATE commonly arrives as YYYY-MM. Normalize to chart date.
         if len(date)==7: date += '-01'
         elif len(date)==4: date += '-01-01'
         rows.append([date,value])
-    # de-duplicate by date, retaining the last matching observation
     dedup={d:v for d,v in rows if d >= START}
     rows=sorted(dedup.items())
+    if not rows:
+        print(f"WARN QC_NATGAS: {candidate_count} Québec industrial candidate rows found but no unit-price observations matched", file=sys.stderr)
     return {
       "name":"Québec Industrial Natural Gas Unit Price",
       "group":"Energy","units":"cents per cubic metre","frequency":"Monthly",
       "source":"Statistics Canada table 25-10-0033-01",
       "relevance":"Plant energy cost in Québec / heat-treatment economics",
       "id":"QC_NATGAS","url":"https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=2510003301",
-      "data":[[d,v] for d,v in rows],"error":None
+      "data":[[d,v] for d,v in rows],"error":None if rows else "Statistics Canada source available; unit-price row parser returned no numeric observations."
     }
 
 result = {"fetchedAt":datetime.now(timezone.utc).isoformat(), "start":START, "provider":"FRED / underlying public agencies + Statistics Canada", "series":{}}

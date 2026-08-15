@@ -8,7 +8,24 @@ MTS_EVENT='https://www.mtsinsights.com/events/3967/'
 DREWRY_URL='https://www.drewry.co.uk/maritime-research-opinion-browser/world-container-index-assessed-by-drewry'
 CUTOFF='2024-01-01'
 MAX_PAGES=180
-HEADERS={'User-Agent':'fastener-intelligence-github-pages/11.2','Accept':'text/html,*/*'}
+HEADERS={'User-Agent':'fastener-intelligence-github-pages/12.0','Accept':'text/html,*/*'}
+
+# Exact reported Drewry WCI composite observations selected near each 2024 month-end.
+# These are public industry publications quoting Drewry's detailed weekly assessment.
+ARCHIVE_2024={
+ '2024-01-25':(3964.0,'https://cyprusshippingnews.com/2024/01/30/world-container-index-up-5-last-week-according-to-drewry/'),
+ '2024-02-29':(3493.0,'https://cyprusshippingnews.com/2024/03/05/world-container-index-down-5-last-week-according-to-drewry/'),
+ '2024-03-28':(2929.0,'https://www.ajot.com/news/drewrys-world-container-index-28-mar'),
+ '2024-04-25':(2706.0,'https://www.freshplaza.com/north-america/article/9621208/drewry-s-world-container-index-remains-stable-this-week/'),
+ '2024-05-30':(4226.0,'https://www.fibre2fashion.com/news/textile-news/drewry-wci-increase-continues-container-freight-rises-4-this-week-295713-newsdetails.htm'),
+ '2024-06-27':(5318.0,'https://cyprusshippingnews.com/2024/07/01/world-container-index-up-4-last-week-according-to-drewry/'),
+ '2024-07-25':(5806.0,'https://www.fibre2fashion.com/news/textiles-logistics-news/drewry-world-container-index-eases-2-after-continuous-18-week-rise-296962-newsdetails.htm'),
+ '2024-08-29':(5181.0,'https://airfreight.news/articles/full/drewry-world-container-index-29-august'),
+ '2024-09-26':(3691.0,'https://www.ajot.com/news/drewry-world-container-index-26-sep'),
+ '2024-10-31':(3213.0,'https://www.freshplaza.com/north-america/article/9674406/drewry-s-world-container-index-increased-4-to-3-213-per-40ft-container-this-week/'),
+ '2024-11-28':(3331.0,'https://www.freshplaza.com/north-america/article/9683345/drewry-s-world-container-index-decreased-2-to-3-331-per-40ft-container-this-week/'),
+ '2024-12-19':(3803.0,'https://www.fibre2fashion.com/news/textiles-logistics-news/drewry-wci-up-8-amid-strike-fears-trump-policy-expectations-299777-newsdetails.htm?amp=true')
+}
 SEED=[['2026-05-28',2800.0],['2026-06-04',3433.0],['2026-06-11',3549.0],['2026-06-18',3969.0],['2026-06-25',4166.0],['2026-07-02',4530.0],['2026-07-09',4639.0],['2026-07-16',4547.0],['2026-07-23',4374.0],['2026-07-30',4255.0],['2026-08-06',4297.0],['2026-08-13',4339.0]]
 
 def load(path):
@@ -70,7 +87,6 @@ def crawl():
     data={};urls={};seen=set();pages=0
     while url and url not in seen and pages<MAX_PAGES:
         seen.add(url);pages+=1;final,h=get(url);t=textify(h);d=parse_date(t);v=parse_wci(t)
-        if pages<=5:print(f'MTS parse check page {pages}: date={d} value={v} url={final}')
         if d and v:data[d]=v;urls[d]=final
         if d and d<CUTOFF:break
         prev=None
@@ -90,17 +106,24 @@ def latest_drewry():
     except Exception as e:print(f'WARN Drewry direct latest: {e}',file=sys.stderr)
     return None
 
-obj=load(PATH);data={d:v for d,v in SEED};obs_urls={};method='seed fallback';pages=0
+obj=load(PATH)
+data={d:v for d,(v,_) in ARCHIVE_2024};obs_urls={d:u for d,(_,u) in ARCHIVE_2024.items()};method='2024 monthly public Drewry reports + seed fallback';pages=0
 try:
-    rows,obs_urls,pages=crawl()
-    if len(rows)>=50:
-        data={d:v for d,v in rows};method='MTS weekly dispatches (Source: Drewry)'
-    else:print(f'WARN MTS Drewry crawl insufficient: rows={len(rows)}, earliest={rows[0][0] if rows else None}',file=sys.stderr)
-except Exception as e:print(f'WARN MTS Drewry crawl: {e}',file=sys.stderr)
+    crawled,crawl_urls,pages=crawl()
+    if len(crawled)>=50:
+        for d,v in crawled:data[d]=v
+        obs_urls.update(crawl_urls)
+        method='2024 monthly source-backed anchors + MTS weekly dispatches (Source: Drewry)'
+    else:
+        for d,v in SEED:data[d]=v
+        print(f'WARN MTS Drewry crawl insufficient: rows={len(crawled)}, earliest={crawled[0][0] if crawled else None}',file=sys.stderr)
+except Exception as e:
+    for d,v in SEED:data[d]=v
+    print(f'WARN MTS Drewry crawl: {e}',file=sys.stderr)
 latest=latest_drewry()
 if latest:data[latest[0]]=latest[1]
 rows=[[d,data[d]] for d in sorted(data)]
-obj.setdefault('series',{})['DREWRY_WCI']={'id':'DREWRY_WCI','name':'Drewry World Container Index','group':'Freight & logistics','units':'USD per 40ft container','frequency':'Weekly','source':'MTS Insights weekly dispatches; underlying source Drewry','relevance':'Ocean freight benchmark for imported finished goods','url':MTS_EVENT,'data':rows,'observationUrls':obs_urls,'error':None,'coverageNote':f'Historical method: {method}. Earliest exact dispatch observation: {rows[0][0] if rows else "unavailable"}. Each crawled observation retains its dated MTS dispatch URL. The MTS chart itself visually extends further into 2024 where exact dispatch pages may not be available. Pages crawled: {pages}.'}
-obj['provider']=str(obj.get('provider',''))+' + Drewry WCI via MTS Insights dispatches'
+obj.setdefault('series',{})['DREWRY_WCI']={'id':'DREWRY_WCI','name':'Drewry World Container Index','group':'Freight & logistics','units':'USD per 40ft container','frequency':'Weekly from 2025; monthly month-end anchors in 2024','source':'Drewry WCI — 2024 public Drewry assessments quoted by industry publications; 2025+ MTS Insights weekly dispatches','relevance':'Ocean freight benchmark for imported finished goods','url':MTS_EVENT,'data':rows,'observationUrls':obs_urls,'error':None,'coverageNote':f'Historical method: {method}. 2024 contains exact reported month-end/near-month-end Drewry composite observations, not interpolated weekly values. Exact MTS weekly dispatch history is loaded from 2025 onward. Earliest loaded observation: {rows[0][0] if rows else "unavailable"}. Each loaded observation retains a source URL where available. Pages crawled: {pages}.'}
+obj['provider']=str(obj.get('provider',''))+' + Drewry WCI 2024 public assessments + MTS Insights dispatches'
 with open(PATH,'w',encoding='utf-8') as f:f.write('window.FI_TREND_DATA=');json.dump(obj,f,separators=(',',':'));f.write(';\n')
-print(f'Drewry WCI observations: {len(rows)}; earliest={rows[0] if rows else None}; latest={rows[-1] if rows else None}; method={method}; pages={pages}')
+print(f'Drewry WCI observations: {len(rows)}; earliest={rows[0] if rows else None}; latest={rows[-1] if rows else None}; method={method}; 2024_anchors={len(ARCHIVE_2024)}; pages={pages}')

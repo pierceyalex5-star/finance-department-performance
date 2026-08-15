@@ -1,1 +1,282 @@
-{"milestones":[{"id":"M-01","name":"Mobilization & current-state validation","stream":"Program","start":"2026-08-17","end":"2026-10-16","status":"Proposed","exitCriteria":"All in-scope current-state processes are accounted for and validated; accountable BPO/process ownership is confirmed; material findings are reviewed and classified; milestone work is fully decomposed, completed and approved.","exitCriteriaFr":"Tous les processus actuels dans la portée sont recensés et validés; les responsabilités BPO/processus sont confirmées; les constats significatifs sont révisés et classifiés; le travail du jalon est entièrement décomposé, complété et approuvé.","gateCriteria":[{"id":"M01-C1","text":"L3 current-state process validation","fr":"Validation des processus actuels L3","rule":"processValidation"},{"id":"M01-C2","text":"BPO / process ownership confirmed","fr":"Responsabilité BPO / processus confirmée","rule":"ownership"},{"id":"M01-C3","text":"Findings reviewed and progressed","fr":"Constats révisés et avancés","rule":"findingsReviewed"},{"id":"M01-C4","text":"Milestone task contribution coverage","fr":"Couverture des contributions des tâches","rule":"taskCoverage"},{"id":"M01-C5","text":"Linked milestone tasks approved / closed","fr":"Tâches du jalon approuvées / fermées","rule":"tasksApproved"}]},{"id":"M-02","name":"Requirements & design principles","stream":"Program","start":"2026-10-01","end":"2027-01-14","status":"Proposed","exitCriteria":"Prioritized business requirements and enterprise design principles are approved; major entity design differences are either resolved or formally accepted; milestone tasks are fully represented and approved.","exitCriteriaFr":"Les exigences d’affaires priorisées et les principes de conception d’entreprise sont approuvés; les principaux écarts de conception entre entités sont résolus ou formellement acceptés; les tâches du jalon sont entièrement représentées et approuvées.","gateCriteria":[{"id":"M02-C1","text":"Requirements approved / ready for design","fr":"Exigences approuvées / prêtes pour conception","rule":"requirementsApproved"},{"id":"M02-C2","text":"Entity design differences resolved","fr":"Écarts de conception entre entités résolus","rule":"entityDesignResolved"},{"id":"M02-C3","text":"Milestone task contribution coverage","fr":"Couverture des contributions des tâches","rule":"taskCoverage"},{"id":"M02-C4","text":"Linked milestone tasks approved / closed","fr":"Tâches du jalon approuvées / fermées","rule":"tasksApproved"}]},{"id":"M-03","name":"To-Be solution design / fit-gap","stream":"Program","start":"2026-12-15","end":"2027-05-14","status":"Proposed","exitCriteria":"Approved requirements have a documented To-Be design and fit/gap disposition; material entity variants and solution exceptions are resolved; linked milestone work is approved.","exitCriteriaFr":"Les exigences approuvées ont une conception cible et une disposition fit/gap documentées; les variantes d’entités et exceptions de solution significatives sont résolues; le travail lié au jalon est approuvé.","gateCriteria":[{"id":"M03-C1","text":"To-Be and fit/gap completed for requirements","fr":"Cible et fit/gap complétés pour les exigences","rule":"fitGapComplete"},{"id":"M03-C2","text":"Entity design differences resolved","fr":"Écarts de conception entre entités résolus","rule":"entityDesignResolved"},{"id":"M03-C3","text":"Milestone task contribution coverage","fr":"Couverture des contributions des tâches","rule":"taskCoverage"},{"id":"M03-C4","text":"Linked milestone tasks approved / closed","fr":"Tâches du jalon approuvées / fermées","rule":"tasksApproved"}]},{"id":"M-04","name":"Configuration, data & integrations","stream":"Program","start":"2027-04-14","end":"2027-09-11","status":"Proposed","exitCriteria":"Configuration/build scope is delivered to the agreed design; required data objects are mapped and cleansed; required integrations are build-ready; linked milestone work is approved.","exitCriteriaFr":"La configuration et la construction sont livrées selon la conception approuvée; les objets de données requis sont mappés et nettoyés; les intégrations requises sont prêtes; le travail lié au jalon est approuvé.","gateCriteria":[{"id":"M04-C1","text":"Data mapping and cleansing ready","fr":"Mappage et nettoyage des données prêts","rule":"dataReady"},{"id":"M04-C2","text":"Integrations build-ready","fr":"Intégrations prêtes","rule":"integrationsReady"},{"id":"M04-C3","text":"Milestone task contribution coverage","fr":"Couverture des contributions des tâches","rule":"taskCoverage"},{"id":"M04-C4","text":"Linked milestone tasks approved / closed","fr":"Tâches du jalon approuvées / fermées","rule":"tasksApproved"}]},{"id":"M-05","name":"SIT & remediation","stream":"Program","start":"2027-08-12","end":"2027-11-15","status":"Proposed","exitCriteria":"All critical end-to-end SIT scenarios have passed or have an approved exception; critical defects are remediated or formally accepted; milestone work is approved.","exitCriteriaFr":"Tous les scénarios SIT critiques de bout en bout sont réussis ou font l’objet d’une exception approuvée; les anomalies critiques sont corrigées ou formellement acceptées; le travail du jalon est approuvé.","gateCriteria":[{"id":"M05-C1","text":"SIT scenarios passed","fr":"Scénarios SIT réussis","rule":"sitPassed"},{"id":"M05-C2","text":"Milestone task contribution coverage","fr":"Couverture des contributions des tâches","rule":"taskCoverage"},{"id":"M05-C3","text":"Linked milestone tasks approved / closed","fr":"Tâches du jalon approuvées / fermées","rule":"tasksApproved"}]},{"id":"M-06","name":"UAT & training","stream":"Program","start":"2027-10-26","end":"2028-01-04","status":"Proposed","exitCriteria":"Critical UAT scenarios are passed; business sign-off is obtained; people and training readiness items are complete or have approved exceptions; milestone work is approved.","exitCriteriaFr":"Les scénarios UAT critiques sont réussis; l’approbation d’affaires est obtenue; les éléments de préparation des personnes et de formation sont complétés ou ont des exceptions approuvées; le travail du jalon est approuvé.","gateCriteria":[{"id":"M06-C1","text":"UAT scenarios passed","fr":"Scénarios UAT réussis","rule":"uatPassed"},{"id":"M06-C2","text":"People and training readiness","fr":"Préparation des personnes et de la formation","rule":"trainingReady"},{"id":"M06-C3","text":"Milestone task contribution coverage","fr":"Couverture des contributions des tâches","rule":"taskCoverage"},{"id":"M06-C4","text":"Linked milestone tasks approved / closed","fr":"Tâches du jalon approuvées / fermées","rule":"tasksApproved"}]},{"id":"M-07","name":"Cutover readiness","stream":"Program","start":"2027-12-25","end":"2028-02-03","status":"Proposed","exitCriteria":"Cutover activities, data, controls, reporting, integrations, support ownership and business readiness conditions are complete or have explicit approved exceptions; go/no-go evidence is available.","exitCriteriaFr":"Les activités de bascule, données, contrôles, rapports, intégrations, responsabilités de soutien et conditions de préparation opérationnelle sont complétés ou ont des exceptions explicitement approuvées; les preuves pour la décision go/no-go sont disponibles.","gateCriteria":[{"id":"M07-C1","text":"Cutover and readiness items complete","fr":"Éléments de bascule et de préparation complétés","rule":"cutoverReady"},{"id":"M07-C2","text":"Milestone task contribution coverage","fr":"Couverture des contributions des tâches","rule":"taskCoverage"},{"id":"M07-C3","text":"Linked milestone tasks approved / closed","fr":"Tâches du jalon approuvées / fermées","rule":"tasksApproved"}]},{"id":"M-08","name":"Go-live & hypercare","stream":"Program","start":"2028-02-03","end":"2028-02-18","status":"Proposed","exitCriteria":"Go-live is completed; critical business operations are stable; hypercare ownership and exit items are completed; unresolved items are transferred to accountable business or support owners.","exitCriteriaFr":"La mise en production est complétée; les opérations d’affaires critiques sont stables; les responsabilités et éléments de sortie d’hypercare sont complétés; les éléments non résolus sont transférés aux responsables d’affaires ou de soutien.","gateCriteria":[{"id":"M08-C1","text":"Hypercare exit items complete","fr":"Éléments de sortie d’hypercare complétés","rule":"hypercareReady"},{"id":"M08-C2","text":"Milestone task contribution coverage","fr":"Couverture des contributions des tâches","rule":"taskCoverage"},{"id":"M08-C3","text":"Linked milestone tasks approved / closed","fr":"Tâches du jalon approuvées / fermées","rule":"tasksApproved"}]}]}
+{
+  "milestones": [
+    {
+      "id": "M-01",
+      "name": "Mobilization & current-state validation",
+      "stream": "Program",
+      "start": "2026-08-17",
+      "end": "2026-10-16",
+      "status": "Proposed",
+      "exitCriteria": "All in-scope current-state processes are accounted for and validated; accountable BPO/process ownership is confirmed; material findings are reviewed and classified; milestone work is fully decomposed, completed and approved.",
+      "exitCriteriaFr": "Tous les processus actuels dans la portée sont recensés et validés; les responsabilités BPO/processus sont confirmées; les constats significatifs sont révisés et classifiés; le travail du jalon est entièrement décomposé, complété et approuvé.",
+      "gateCriteria": [
+        {
+          "id": "M01-C1",
+          "text": "L3 current-state process validation",
+          "fr": "Validation des processus actuels L3",
+          "rule": "processValidation"
+        },
+        {
+          "id": "M01-C2",
+          "text": "BPO / process ownership confirmed",
+          "fr": "Responsabilité BPO / processus confirmée",
+          "rule": "ownership"
+        },
+        {
+          "id": "M01-C3",
+          "text": "Findings reviewed and progressed",
+          "fr": "Constats révisés et avancés",
+          "rule": "findingsReviewed"
+        },
+        {
+          "id": "M01-C4",
+          "text": "Milestone task contribution coverage",
+          "fr": "Couverture des contributions des tâches",
+          "rule": "taskCoverage"
+        },
+        {
+          "id": "M01-C5",
+          "text": "Linked milestone tasks approved / closed",
+          "fr": "Tâches du jalon approuvées / fermées",
+          "rule": "tasksApproved"
+        }
+      ],
+      "owner": "Business Owner",
+      "description": ""
+    },
+    {
+      "id": "M-02",
+      "name": "Requirements & design principles",
+      "stream": "Program",
+      "start": "2026-10-01",
+      "end": "2027-01-14",
+      "status": "Proposed",
+      "exitCriteria": "Prioritized business requirements and enterprise design principles are approved; major entity design differences are either resolved or formally accepted; milestone tasks are fully represented and approved.",
+      "exitCriteriaFr": "Les exigences d’affaires priorisées et les principes de conception d’entreprise sont approuvés; les principaux écarts de conception entre entités sont résolus ou formellement acceptés; les tâches du jalon sont entièrement représentées et approuvées.",
+      "gateCriteria": [
+        {
+          "id": "M02-C1",
+          "text": "Requirements approved / ready for design",
+          "fr": "Exigences approuvées / prêtes pour conception",
+          "rule": "requirementsApproved"
+        },
+        {
+          "id": "M02-C2",
+          "text": "Entity design differences resolved",
+          "fr": "Écarts de conception entre entités résolus",
+          "rule": "entityDesignResolved"
+        },
+        {
+          "id": "M02-C3",
+          "text": "Milestone task contribution coverage",
+          "fr": "Couverture des contributions des tâches",
+          "rule": "taskCoverage"
+        },
+        {
+          "id": "M02-C4",
+          "text": "Linked milestone tasks approved / closed",
+          "fr": "Tâches du jalon approuvées / fermées",
+          "rule": "tasksApproved"
+        }
+      ]
+    },
+    {
+      "id": "M-03",
+      "name": "To-Be solution design / fit-gap",
+      "stream": "Program",
+      "start": "2026-12-15",
+      "end": "2027-05-14",
+      "status": "Proposed",
+      "exitCriteria": "Approved requirements have a documented To-Be design and fit/gap disposition; material entity variants and solution exceptions are resolved; linked milestone work is approved.",
+      "exitCriteriaFr": "Les exigences approuvées ont une conception cible et une disposition fit/gap documentées; les variantes d’entités et exceptions de solution significatives sont résolues; le travail lié au jalon est approuvé.",
+      "gateCriteria": [
+        {
+          "id": "M03-C1",
+          "text": "To-Be and fit/gap completed for requirements",
+          "fr": "Cible et fit/gap complétés pour les exigences",
+          "rule": "fitGapComplete"
+        },
+        {
+          "id": "M03-C2",
+          "text": "Entity design differences resolved",
+          "fr": "Écarts de conception entre entités résolus",
+          "rule": "entityDesignResolved"
+        },
+        {
+          "id": "M03-C3",
+          "text": "Milestone task contribution coverage",
+          "fr": "Couverture des contributions des tâches",
+          "rule": "taskCoverage"
+        },
+        {
+          "id": "M03-C4",
+          "text": "Linked milestone tasks approved / closed",
+          "fr": "Tâches du jalon approuvées / fermées",
+          "rule": "tasksApproved"
+        }
+      ]
+    },
+    {
+      "id": "M-04",
+      "name": "Configuration, data & integrations",
+      "stream": "Program",
+      "start": "2027-04-14",
+      "end": "2027-09-11",
+      "status": "Proposed",
+      "exitCriteria": "Configuration/build scope is delivered to the agreed design; required data objects are mapped and cleansed; required integrations are build-ready; linked milestone work is approved.",
+      "exitCriteriaFr": "La configuration et la construction sont livrées selon la conception approuvée; les objets de données requis sont mappés et nettoyés; les intégrations requises sont prêtes; le travail lié au jalon est approuvé.",
+      "gateCriteria": [
+        {
+          "id": "M04-C1",
+          "text": "Data mapping and cleansing ready",
+          "fr": "Mappage et nettoyage des données prêts",
+          "rule": "dataReady"
+        },
+        {
+          "id": "M04-C2",
+          "text": "Integrations build-ready",
+          "fr": "Intégrations prêtes",
+          "rule": "integrationsReady"
+        },
+        {
+          "id": "M04-C3",
+          "text": "Milestone task contribution coverage",
+          "fr": "Couverture des contributions des tâches",
+          "rule": "taskCoverage"
+        },
+        {
+          "id": "M04-C4",
+          "text": "Linked milestone tasks approved / closed",
+          "fr": "Tâches du jalon approuvées / fermées",
+          "rule": "tasksApproved"
+        }
+      ]
+    },
+    {
+      "id": "M-05",
+      "name": "SIT & remediation",
+      "stream": "Program",
+      "start": "2027-08-12",
+      "end": "2027-11-15",
+      "status": "Proposed",
+      "exitCriteria": "All critical end-to-end SIT scenarios have passed or have an approved exception; critical defects are remediated or formally accepted; milestone work is approved.",
+      "exitCriteriaFr": "Tous les scénarios SIT critiques de bout en bout sont réussis ou font l’objet d’une exception approuvée; les anomalies critiques sont corrigées ou formellement acceptées; le travail du jalon est approuvé.",
+      "gateCriteria": [
+        {
+          "id": "M05-C1",
+          "text": "SIT scenarios passed",
+          "fr": "Scénarios SIT réussis",
+          "rule": "sitPassed"
+        },
+        {
+          "id": "M05-C2",
+          "text": "Milestone task contribution coverage",
+          "fr": "Couverture des contributions des tâches",
+          "rule": "taskCoverage"
+        },
+        {
+          "id": "M05-C3",
+          "text": "Linked milestone tasks approved / closed",
+          "fr": "Tâches du jalon approuvées / fermées",
+          "rule": "tasksApproved"
+        }
+      ]
+    },
+    {
+      "id": "M-06",
+      "name": "UAT & training",
+      "stream": "Program",
+      "start": "2027-10-26",
+      "end": "2028-01-04",
+      "status": "Proposed",
+      "exitCriteria": "Critical UAT scenarios are passed; business sign-off is obtained; people and training readiness items are complete or have approved exceptions; milestone work is approved.",
+      "exitCriteriaFr": "Les scénarios UAT critiques sont réussis; l’approbation d’affaires est obtenue; les éléments de préparation des personnes et de formation sont complétés ou ont des exceptions approuvées; le travail du jalon est approuvé.",
+      "gateCriteria": [
+        {
+          "id": "M06-C1",
+          "text": "UAT scenarios passed",
+          "fr": "Scénarios UAT réussis",
+          "rule": "uatPassed"
+        },
+        {
+          "id": "M06-C2",
+          "text": "People and training readiness",
+          "fr": "Préparation des personnes et de la formation",
+          "rule": "trainingReady"
+        },
+        {
+          "id": "M06-C3",
+          "text": "Milestone task contribution coverage",
+          "fr": "Couverture des contributions des tâches",
+          "rule": "taskCoverage"
+        },
+        {
+          "id": "M06-C4",
+          "text": "Linked milestone tasks approved / closed",
+          "fr": "Tâches du jalon approuvées / fermées",
+          "rule": "tasksApproved"
+        }
+      ]
+    },
+    {
+      "id": "M-07",
+      "name": "Cutover readiness",
+      "stream": "Program",
+      "start": "2027-12-25",
+      "end": "2028-02-03",
+      "status": "Proposed",
+      "exitCriteria": "Cutover activities, data, controls, reporting, integrations, support ownership and business readiness conditions are complete or have explicit approved exceptions; go/no-go evidence is available.",
+      "exitCriteriaFr": "Les activités de bascule, données, contrôles, rapports, intégrations, responsabilités de soutien et conditions de préparation opérationnelle sont complétés ou ont des exceptions explicitement approuvées; les preuves pour la décision go/no-go sont disponibles.",
+      "gateCriteria": [
+        {
+          "id": "M07-C1",
+          "text": "Cutover and readiness items complete",
+          "fr": "Éléments de bascule et de préparation complétés",
+          "rule": "cutoverReady"
+        },
+        {
+          "id": "M07-C2",
+          "text": "Milestone task contribution coverage",
+          "fr": "Couverture des contributions des tâches",
+          "rule": "taskCoverage"
+        },
+        {
+          "id": "M07-C3",
+          "text": "Linked milestone tasks approved / closed",
+          "fr": "Tâches du jalon approuvées / fermées",
+          "rule": "tasksApproved"
+        }
+      ]
+    },
+    {
+      "id": "M-08",
+      "name": "Go-live & hypercare",
+      "stream": "Program",
+      "start": "2028-02-03",
+      "end": "2028-02-18",
+      "status": "Proposed",
+      "exitCriteria": "Go-live is completed; critical business operations are stable; hypercare ownership and exit items are completed; unresolved items are transferred to accountable business or support owners.",
+      "exitCriteriaFr": "La mise en production est complétée; les opérations d’affaires critiques sont stables; les responsabilités et éléments de sortie d’hypercare sont complétés; les éléments non résolus sont transférés aux responsables d’affaires ou de soutien.",
+      "gateCriteria": [
+        {
+          "id": "M08-C1",
+          "text": "Hypercare exit items complete",
+          "fr": "Éléments de sortie d’hypercare complétés",
+          "rule": "hypercareReady"
+        },
+        {
+          "id": "M08-C2",
+          "text": "Milestone task contribution coverage",
+          "fr": "Couverture des contributions des tâches",
+          "rule": "taskCoverage"
+        },
+        {
+          "id": "M08-C3",
+          "text": "Linked milestone tasks approved / closed",
+          "fr": "Tâches du jalon approuvées / fermées",
+          "rule": "tasksApproved"
+        }
+      ]
+    }
+  ]
+}

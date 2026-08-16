@@ -1,6 +1,10 @@
 name: Refresh Fastener Intelligence Data
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fastener-data-refresh.yml'
   schedule:
     - cron: '40 10 * * *'
   workflow_dispatch:
@@ -26,13 +30,11 @@ jobs:
           set -euo pipefail
           cp fastener-intelligence/trend-data.js /tmp/trend-data.js
           cp fastener-intelligence/import-origin-data.js /tmp/import-origin-data.js
-
           python3 fastener-intelligence/build_trend_data.py /tmp/trend-data.js
           python3 fastener-intelligence/extend_trend_history.py /tmp/trend-data.js
           python3 fastener-intelligence/augment_energir_data.py /tmp/trend-data.js
           python3 fastener-intelligence/augment_drewry_data.py /tmp/trend-data.js
           python3 fastener-intelligence/augment_us_import_origins.py /tmp/import-origin-data.js
-
           mv /tmp/trend-data.js fastener-intelligence/trend-data.js
           mv /tmp/import-origin-data.js fastener-intelligence/import-origin-data.js
       - name: Validate refreshed data files
@@ -41,6 +43,14 @@ jobs:
           node --check fastener-intelligence/import-origin-data.js
           grep -q 'DREWRY_WCI' fastener-intelligence/trend-data.js
           grep -q 'FI_IMPORT_ORIGINS' fastener-intelligence/import-origin-data.js
+          python3 - <<'PY'
+          import re
+          p='fastener-intelligence/trend-data.js'
+          s=open(p,encoding='utf-8').read()
+          assert 'series:{}' not in s, 'Trend data is still empty'
+          assert len(s)>10000, f'Trend data unexpectedly small: {len(s)} bytes'
+          print('Trend data populated:',len(s),'bytes')
+          PY
       - name: Commit refreshed datasets
         run: |
           set -euo pipefail

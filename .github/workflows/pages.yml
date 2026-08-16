@@ -54,6 +54,7 @@ jobs:
           node --check fastener-intelligence/intelligence-v18.js
           node --check fastener-intelligence/intelligence-v19.js
           node --check fastener-intelligence/intelligence-v23.js
+          node --check fastener-intelligence/intelligence-v24.js
           node --check fastener-intelligence/runtime-fix.js
           node --check fastener-intelligence/trend-data.js
           node --check fastener-intelligence/import-origin-data.js

@@ -42,6 +42,7 @@ jobs:
           node --check fastener-intelligence/enhanced.js
           node --check fastener-intelligence/trend-lab-v2.js
           node --check fastener-intelligence/trend-lab-v3.js
+          node --check fastener-intelligence/trend-lag-v4.js
           node --check fastener-intelligence/intelligence-v3.js
           node --check fastener-intelligence/intelligence-v4.js
           node --check fastener-intelligence/intelligence-v5.js

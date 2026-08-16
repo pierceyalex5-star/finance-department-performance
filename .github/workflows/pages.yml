@@ -46,11 +46,6 @@ jobs:
           node --check fastener-intelligence/intelligence-v4.js
           node --check fastener-intelligence/intelligence-v5.js
           node --check fastener-intelligence/intelligence-v6.js
-          node --check fastener-intelligence/intelligence-v7.js
-          node --check fastener-intelligence/intelligence-v8.js
-          node --check fastener-intelligence/intelligence-v9.js
-          node --check fastener-intelligence/intelligence-v10.js
-          node --check fastener-intelligence/intelligence-v11.js
           node --check fastener-intelligence/intelligence-v13.js
           node --check fastener-intelligence/intelligence-v14.js
           node --check fastener-intelligence/intelligence-v15.js
@@ -58,8 +53,10 @@ jobs:
           node --check fastener-intelligence/intelligence-v17.js
           node --check fastener-intelligence/intelligence-v18.js
           node --check fastener-intelligence/intelligence-v19.js
-          node --check fastener-intelligence/intelligence-v22.js
+          node --check fastener-intelligence/intelligence-v23.js
           node --check fastener-intelligence/runtime-fix.js
+          node --check fastener-intelligence/trend-data.js
+          node --check fastener-intelligence/import-origin-data.js
       - name: Build static site
         run: |
           set -euo pipefail

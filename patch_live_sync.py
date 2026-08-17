@@ -19,3 +19,5 @@ p.write_text(s,encoding='utf-8')
 # Reconnect live state API.
 p=Path('config.js')
 p.write_text('// Finance Control Tower - live shared-state mode; notifications disabled\nwindow.FINANCE_API_BASE = "https://finance-performance-api.pierceyalex5.workers.dev";\n',encoding='utf-8')
+
+# restoration trigger v2

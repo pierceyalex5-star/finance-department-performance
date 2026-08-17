@@ -1,3 +1,2 @@
-// Finance Control Tower - GitHub shared-state mode
-// Pages refresh: Dumitru reconciled tasks + journal KPI analytics v3 + Finance SOP workflow
-window.FINANCE_API_BASE = "";
+// Finance Control Tower - live shared-state mode; notifications disabled
+window.FINANCE_API_BASE = "https://finance-performance-api.pierceyalex5.workers.dev";

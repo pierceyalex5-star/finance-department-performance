@@ -280,6 +280,8 @@ function applyAction(input, a) {
     else delete state.settings.teamsEmails[a.name];
   } else if (a.type === 'user_delete') {
     state.users = (state.users || []).filter(u => u !== a.name);
+  } else if (a.type === 'journal_import') {
+    state.journalAnalytics = a.analytics;
   } else if (a.type === 'replace_state') {
     state = a.state;
   } else {
@@ -324,21 +326,12 @@ export default {
         return json(await getState(env));
       }
       if (url.pathname === '/api/integrations' && request.method === 'GET') {
-        return json({ teamsPushConfigured: Boolean(env.TEAMS_WORKFLOW_URL) });
+        return json({ teamsPushConfigured: false });
       }
       if (url.pathname === '/api/action' && request.method === 'POST') {
         const action = await request.json();
         const next = await mutateState(env, action);
-        let teamsResult = null;
-        if (action.type === 'stage_complete' || action.type === 'ho_stage_complete') teamsResult = await sendTeamsHandoff(env, next, action);
-        const response = json(next);
-        if (teamsResult?.attempted) {
-          const headers = new Headers(response.headers);
-          headers.set('X-Teams-Push', teamsResult.ok ? 'accepted' : 'failed');
-          headers.set('X-Teams-Status', String(teamsResult.status || 0));
-          return new Response(response.body, { status: response.status, headers });
-        }
-        return response;
+        return json(next);
       }
       if (url.pathname === '/api/events' && request.method === 'GET') {
         const state = await getState(env);

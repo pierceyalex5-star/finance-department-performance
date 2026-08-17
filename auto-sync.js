@@ -19,6 +19,7 @@
    ============================================================================ */
 (function () {
   "use strict";
+  if (window.FINANCE_API_BASE) { console.log("[auto-sync] disabled: live API active"); return; }
 
   // ---- CONFIG — change these if your repo/branch differ ----
   var GH_REPO   = "pierceyalex5-star/finance-department-performance";

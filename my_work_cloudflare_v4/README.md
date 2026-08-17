@@ -58,6 +58,8 @@ npx wrangler secret put SESSION_SECRET
 npm run deploy
 ```
 
+Cloudflare Worker name: `mpv`.
+
 The deployed app uses `gpt-5.6` by default; change `OPENAI_MODEL` in `wrangler.jsonc` if desired.
 
 ## Historical memory

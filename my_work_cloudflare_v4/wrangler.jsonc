@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-work-ai",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-17",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "WORKSPACE_ID": "alex",
+    "OPENAI_MODEL": "gpt-5.6"
+  }
+}

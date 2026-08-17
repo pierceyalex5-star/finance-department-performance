@@ -11,5 +11,13 @@
   "vars": {
     "WORKSPACE_ID": "alex",
     "OPENAI_MODEL": "gpt-5.6"
+  },
+  "secrets": {
+    "required": [
+      "DATABASE_URL",
+      "OPENAI_API_KEY",
+      "APP_PASSWORD",
+      "SESSION_SECRET"
+    ]
   }
 }

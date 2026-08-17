@@ -1,5 +1,5 @@
 {
-  // refresh: reliable Teams webhook acceptance
+  // refresh: shared-state only; Teams notifications disabled
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "finance-performance-api",
   "main": "src/index.js",

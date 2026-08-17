@@ -40,6 +40,12 @@ async function uploadFile(env,request,url){const period=url.searchParams.get('pe
 async function downloadFile(env,id){await ensureFilesTable(env);const sql=sqlFor(env);const rows=await sql`SELECT file_name,content_type,encode(data,'base64') AS data_base64 FROM dashboard_files WHERE id=${id}`;if(!rows.length)return json({error:'File not found'},404);const row=rows[0],bytes=base64ToBytes(row.data_base64);return new Response(bytes,{status:200,headers:{...CORS,'Content-Type':row.content_type||'application/octet-stream','Content-Disposition':`attachment; filename*=UTF-8''${encodeURIComponent(row.file_name||'backup-file')}`}})}
 async function deleteFile(env,id){await ensureFilesTable(env);const sql=sqlFor(env);const rows=await sql`DELETE FROM dashboard_files WHERE id=${id} RETURNING id`;return rows.length?json({ok:true}):json({error:'File not found'},404)}
 
+
+function itemActiveForPeriod(x,period){return x && x.active!==false && (!x.effectiveStartPeriod || x.effectiveStartPeriod<=period)}
+function dependencyItem(state,id){return (state.taskTemplates||[]).find(x=>x.id===id)||(state.headOfficeTemplate||[]).find(x=>x.id===id)||null}
+function dependencyComplete(state,item,period){if(!item?.dependencyId)return true;const d=dependencyItem(state,item.dependencyId);if(!itemActiveForPeriod(d,period))return false;if((state.taskTemplates||[]).some(x=>x.id===d.id)){const stages=enabledStages(d),ps=state.periodStates?.[period]?.[d.id]?.stages||{};return stages.every(st=>!!ps[st]?.doneAt)}const ds=state.deliverableStates?.[period]?.[d.id]||{};return !!ds.reviewedAt}
+function assertDependency(state,action){let item=null;if(action.type==='stage_complete')item=(state.taskTemplates||[]).find(x=>x.id===action.taskId);else if(action.type==='ho_stage_complete')item=(state.headOfficeTemplate||[]).find(x=>x.id===action.id);if(item&&!dependencyComplete(state,item,action.period)){const d=dependencyItem(state,item.dependencyId);throw new Error(`Blocked by dependency ${d?.displayId||item.dependencyId}`)}}
+
 function enabledStages(t) {
   return ['Preparation','Approval','Entry','Review'].filter(s => t.stageEnabled?.[s] !== false);
 }
@@ -296,6 +302,7 @@ async function mutateState(env, action) {
     const rows = await sql`SELECT state FROM dashboard_state WHERE id = 1`;
     if (!rows.length) throw new Error('Dashboard state has not been initialized');
     const current = rows[0].state;
+    assertDependency(current, action);
     const currentVersion = Number(current?.version || 0);
     const next = applyAction(current, action);
     const updated = await sql`UPDATE dashboard_state

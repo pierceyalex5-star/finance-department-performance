@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'apply_governance_v2.py'
+      - '.github/workflows/apply-governance-v2.yml'
   workflow_dispatch:
 
 permissions:
@@ -22,8 +23,7 @@ jobs:
       - name: Apply dashboard and Worker patch
         run: python apply_governance_v2.py
       - name: Validate JavaScript
-        run: |
-          node --check cloudflare-worker/src/index.js
+        run: node --check cloudflare-worker/src/index.js
       - name: Install Neon dependency
         run: npm install @neondatabase/serverless
       - name: Seed migrated state into Neon

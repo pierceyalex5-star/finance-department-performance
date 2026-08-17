@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS projects (
   name text NOT NULL,
   description text,
   status text NOT NULL DEFAULT 'active' CHECK (status IN ('active','on_hold','done','archived')),
+  with_people text[] DEFAULT ARRAY[]::text[],
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE(workspace_id,name)
@@ -21,6 +22,8 @@ CREATE TABLE IF NOT EXISTS tasks (
   priority text NOT NULL DEFAULT 'normal' CHECK (priority IN ('low','normal','high')),
   due_at timestamptz,
   waiting_on text,
+  eisenhower_quadrant text,
+  with_people text[] DEFAULT ARRAY[]::text[],
   source text NOT NULL DEFAULT 'chat',
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
@@ -28,6 +31,11 @@ CREATE TABLE IF NOT EXISTS tasks (
 );
 CREATE INDEX IF NOT EXISTS idx_tasks_workspace_status_due ON tasks(workspace_id,status,due_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id);
+
+-- Idempotent upgrade path for databases created before the Eisenhower/With features.
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS eisenhower_quadrant text;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS with_people text[] DEFAULT ARRAY[]::text[];
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS with_people text[] DEFAULT ARRAY[]::text[];
 
 CREATE TABLE IF NOT EXISTS notes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

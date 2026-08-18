@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS tasks (
   priority text NOT NULL DEFAULT 'normal' CHECK (priority IN ('low','normal','high')),
   due_at timestamptz,
   waiting_on text,
+  owner_name text,
+  follow_up_at timestamptz,
   eisenhower_quadrant text,
   with_people text[] DEFAULT ARRAY[]::text[],
   source text NOT NULL DEFAULT 'chat',
@@ -32,10 +34,12 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE INDEX IF NOT EXISTS idx_tasks_workspace_status_due ON tasks(workspace_id,status,due_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id);
 
--- Idempotent upgrade path for databases created before the Eisenhower/With features.
+-- Idempotent upgrade path for existing My Work databases.
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS eisenhower_quadrant text;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS with_people text[] DEFAULT ARRAY[]::text[];
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS with_people text[] DEFAULT ARRAY[]::text[];
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS owner_name text;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS follow_up_at timestamptz;
 
 CREATE TABLE IF NOT EXISTS notes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -869,5 +869,12 @@
     "iv": "dG5cLuYf4Z/ByY9O",
     "ciphertext": "Ggg9D8ei55IoL52Nng8FclZcIjzE2pyOPtiOO+wSUkzjxVhjoxihDDwRznBNnsxDxjpTme1rs6RooP4ow4D1Lq43vuYtjGdN7RrLE7kU7qsQBL/JLSgSev8ZKNOFnucA5pd4YWt96UzTo6YqY7isLHx2Rf2oHFQkcBnLEggOscnb0IqD8+N3zZ1b0gOwc1XLZIIDwi+36lwBLtAPXYgHEH0AR8tdh/Pudq05Tc6/iwQn/VDtos0QoI/zpSVa/wNv6K5E6Urj8wis/QcsPe43flW/gY5aaj8gMG9LnQJjanc8UGQG5QI7D3De1dq/0PLxEFf3yckMtVPwGZk0g0VxPveT2VMc/0YEXeDT52sClqTnb79NYu7Tn9cPvPMYIDMV8Y4SNjfN3zfDRfRMowURnn/Pve9C2YbWK4x3ypQ4mog=",
     "updatedAt": "2026-08-15T13:00:28.270Z"
+  },
+  "programAdministration": {
+    "version": "2026-08-15-program-admin-v1",
+    "standardWorkweekHours": 35,
+    "steeringParticipantCountExcludingBusinessOwner": 4,
+    "steeringPooledResourceName": "Steering Committee (pooled)",
+    "planningBasis": "Business Owner program-administration capacity baseline. Budgeted hours are planning assumptions and should be reforecast as cadence and implementation-partner responsibilities become clearer."
   }
 }

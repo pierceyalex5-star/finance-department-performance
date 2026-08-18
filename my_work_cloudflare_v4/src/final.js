@@ -15,6 +15,9 @@ export default {
     if (!html.includes('/daily-control.js')) {
       html = html.replace('</body>', '<script src="/daily-control.js?v=20260818-1"></script></body>');
     }
+    if (!html.includes('/autosync.js')) {
+      html = html.replace('</body>', '<script src="/autosync.js?v=20260818-1"></script></body>');
+    }
     const headers = new Headers(response.headers);
     headers.delete('content-length');
     headers.set('cache-control', 'no-store, max-age=0');

@@ -1,0 +1,48 @@
+name: Deploy My Work Worker
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - pierceyalex5-star-MVP
+    paths:
+      - 'my_work_cloudflare_v4/**'
+      - '.github/workflows/deploy-my-work.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: my_work_cloudflare_v4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve Cloudflare credentials
+        shell: bash
+        working-directory: .
+        env:
+          TOKEN_1: ${{ secrets.CLOUDFLARE_API_TOKEN || vars.CLOUDFLARE_API_TOKEN }}
+          TOKEN_2: ${{ secrets.CLOUDFARE_API_TOKEN || vars.CLOUDFARE_API_TOKEN }}
+          TOKEN_3: ${{ secrets.CF_API_TOKEN || vars.CF_API_TOKEN }}
+          TOKEN_4: ${{ secrets.CLOUDFLARE_TOKEN || vars.CLOUDFLARE_TOKEN }}
+          ACCOUNT_1: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
+          ACCOUNT_2: ${{ secrets.CLOUDFARE_ACCOUNT_ID || vars.CLOUDFARE_ACCOUNT_ID }}
+          ACCOUNT_3: ${{ secrets.CF_ACCOUNT_ID || vars.CF_ACCOUNT_ID }}
+          ACCOUNT_4: ${{ secrets.CLOUDFLARE_ACCOUNTID || vars.CLOUDFLARE_ACCOUNTID }}
+        run: |
+          token="$TOKEN_1"; [ -n "$token" ] || token="$TOKEN_2"; [ -n "$token" ] || token="$TOKEN_3"; [ -n "$token" ] || token="$TOKEN_4"
+          account="$ACCOUNT_1"; [ -n "$account" ] || account="$ACCOUNT_2"; [ -n "$account" ] || account="$ACCOUNT_3"; [ -n "$account" ] || account="$ACCOUNT_4"
+          test -n "$token" || { echo 'Missing Cloudflare API token.'; exit 1; }
+          test -n "$account" || { echo 'Missing Cloudflare account ID.'; exit 1; }
+          echo "::add-mask::$token"
+          echo "::add-mask::$account"
+          echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
+          echo "CLOUDFLARE_ACCOUNT_ID=$account" >> "$GITHUB_ENV"
+      - name: Install dependencies
+        run: npm install
+      - name: Deploy My Work
+        run: npx wrangler deploy

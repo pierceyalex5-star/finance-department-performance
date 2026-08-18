@@ -75,10 +75,14 @@
     const layout=document.createElement('div');layout.className='v30-academy-layout';const aside=document.createElement('aside');aside.className='v30-academy-aside';const main=document.createElement('div');main.className='v30-academy-main';
     const title=document.createElement('div');title.className='v30-academy-aside-title';title.innerHTML='<span>OFFSITE PLAYBOOK</span><b>Jump to module</b>';aside.appendChild(title);aside.appendChild(nav);
     const move=[...academy.children].filter(x=>x!==hero&&x!==summary&&x!==nav&&x!==layout);move.forEach(x=>main.appendChild(x));layout.appendChild(aside);layout.appendChild(main);summary.after(layout);
-    main.querySelectorAll('.v21-block').forEach((block,i)=>{block.dataset.module=String(i+1).padStart(2,'0')});
+    main.querySelectorAll('.v21-block').forEach(block=>{const eyebrow=block.querySelector('.v21-eyebrow')?.textContent||'',m=eyebrow.match(/MODULE\s+(\d+)/i);block.dataset.module=m?String(m[1]).padStart(2,'0'):/END-OF-DAY|FIN DE JOURNÉE/i.test(eyebrow)?'✓':/OFFSITE|HORS SITE/i.test(eyebrow)?'DAY':/INTRO/i.test(eyebrow)?'→':''});
   }
 
   if(typeof renderGovernance==='function'){const prevGov=renderGovernance;renderGovernance=function(){return prevGov()+raciSection()}}
+  if(typeof renderRoadmap==='function'){
+    const prevRoadmap=renderRoadmap;
+    renderRoadmap=function(){const original=state.tasks?.tasks||[];if(!state.tasks)return prevRoadmap();state.tasks.tasks=original.filter(t=>!t.excludeFromRoadmap);try{return prevRoadmap()}finally{state.tasks.tasks=original}}
+  }
 
   document.addEventListener('click',ev=>{
     const cell=ev.target.closest('[data-raci-row][data-raci-role]');if(cell){ev.preventDefault();setRaci(cell.dataset.raciRow,cell.dataset.raciRole);return}

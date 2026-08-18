@@ -12,6 +12,9 @@ export default {
     if (!html.includes('/executive-ui.js')) {
       html = html.replace('</body>', '<script src="/executive-ui.js?v=20260818-1"></script></body>');
     }
+    if (!html.includes('/daily-control.js')) {
+      html = html.replace('</body>', '<script src="/daily-control.js?v=20260818-1"></script></body>');
+    }
     const headers = new Headers(response.headers);
     headers.delete('content-length');
     headers.set('cache-control', 'no-store, max-age=0');

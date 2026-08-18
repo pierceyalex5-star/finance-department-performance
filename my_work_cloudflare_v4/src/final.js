@@ -9,22 +9,13 @@ export default {
     if (!response.ok || !type.includes('text/html')) return response;
 
     let html = await response.text();
-    if (!html.includes('/executive-ui.js')) {
-      html = html.replace('</body>', '<script src="/executive-ui.js?v=20260818-1"></script></body>');
-    }
-    if (!html.includes('/daily-control.js')) {
-      html = html.replace('</body>', '<script src="/daily-control.js?v=20260818-1"></script></body>');
-    }
-    if (!html.includes('/autosync.js')) {
-      html = html.replace('</body>', '<script src="/autosync.js?v=20260818-1"></script></body>');
-    }
+    if (!html.includes('/executive-ui.js')) html = html.replace('</body>', '<script src="/executive-ui.js?v=20260818-1"></script></body>');
+    if (!html.includes('/daily-control.js')) html = html.replace('</body>', '<script src="/daily-control.js?v=20260818-1"></script></body>');
+    if (!html.includes('/autosync.js')) html = html.replace('</body>', '<script src="/autosync.js?v=20260818-1"></script></body>');
+    if (!html.includes('/calendar-planner-v2.js')) html = html.replace('</body>', '<script src="/calendar-planner-v2.js?v=20260818-1"></script></body>');
     const headers = new Headers(response.headers);
     headers.delete('content-length');
     headers.set('cache-control', 'no-store, max-age=0');
-    return new Response(html, {
-      status: response.status,
-      statusText: response.statusText,
-      headers
-    });
+    return new Response(html, {status:response.status,statusText:response.statusText,headers});
   }
 };

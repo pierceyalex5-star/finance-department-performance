@@ -37,7 +37,6 @@ CREATE INDEX IF NOT EXISTS idx_tasks_workspace_status_due ON tasks(workspace_id,
 CREATE INDEX IF NOT EXISTS idx_tasks_workspace_context_status_due ON tasks(workspace_id,context,status,due_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id);
 
--- Idempotent upgrade path for existing My Work databases.
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS context text NOT NULL DEFAULT 'work';
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS context text NOT NULL DEFAULT 'work';
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS eisenhower_quadrant text;
@@ -105,7 +104,46 @@ ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS context text NOT NULL DEFAULT 
 CREATE INDEX IF NOT EXISTS idx_activity_workspace_created ON activity_log(workspace_id,created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activity_workspace_context_created ON activity_log(workspace_id,context,created_at DESC);
 
--- Ensure project names are unique only within a context.
+CREATE TABLE IF NOT EXISTS commitments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  workspace_id text NOT NULL,
+  context text NOT NULL DEFAULT 'work',
+  project_id uuid REFERENCES projects(id) ON DELETE SET NULL,
+  person_name text,
+  direction text NOT NULL DEFAULT 'mine',
+  title text NOT NULL,
+  details text,
+  due_at timestamptz,
+  status text NOT NULL DEFAULT 'open',
+  source_type text,
+  source_ref text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  completed_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS idx_commitments_workspace_context_status_due ON commitments(workspace_id,context,status,due_at);
+CREATE INDEX IF NOT EXISTS idx_commitments_project ON commitments(project_id);
+CREATE INDEX IF NOT EXISTS idx_commitments_person ON commitments(workspace_id,context,person_name);
+
+CREATE TABLE IF NOT EXISTS assistant_inbox (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  workspace_id text NOT NULL,
+  context text NOT NULL DEFAULT 'work',
+  source_type text NOT NULL,
+  source_ref text,
+  title text NOT NULL,
+  summary text,
+  suggested_action text,
+  suggested_project_id uuid REFERENCES projects(id) ON DELETE SET NULL,
+  suggested_person text,
+  suggested_due_at timestamptz,
+  status text NOT NULL DEFAULT 'new',
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_assistant_inbox_workspace_context_status_created ON assistant_inbox(workspace_id,context,status,created_at DESC);
+
 ALTER TABLE projects DROP CONSTRAINT IF EXISTS projects_workspace_id_name_key;
 ALTER TABLE projects DROP CONSTRAINT IF EXISTS projects_workspace_id_context_name_key;
 ALTER TABLE projects ADD CONSTRAINT projects_workspace_id_context_name_key UNIQUE (workspace_id,context,name);

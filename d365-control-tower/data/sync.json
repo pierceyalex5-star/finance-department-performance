@@ -1,7 +1,8 @@
 {
-  "updatedAt": "2026-08-15T16:54:42.790Z",
+  "updatedAt": "2026-08-18T21:36:18.706Z",
   "changedFiles": [
-    "data/flows/O2C.json"
+    "planning",
+    "tasks"
   ],
   "lastEditor": "Browser editor"
 }

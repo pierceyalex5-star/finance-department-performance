@@ -1,345 +1,163 @@
 import { neon } from '@neondatabase/serverless';
 
 const enc = new TextEncoder();
-const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
-  status,
-  headers: { 'content-type': 'application/json; charset=utf-8', ...headers }
-});
+const json = (data, status=200, headers={}) => new Response(JSON.stringify(data), {status, headers:{'content-type':'application/json; charset=utf-8',...headers}});
 const workspace = env => env.WORKSPACE_ID || 'alex';
 const db = env => neon(env.DATABASE_URL);
-const QUADRANTS = new Set(['do', 'schedule', 'delegate', 'later']);
+const QUADS = ['do','schedule','delegate','later'];
+const TASK_STATUSES = ['open','waiting','done','cancelled'];
+const PRIORITIES = ['low','normal','high'];
 
-function cookieValue(request, name) {
-  const raw = request.headers.get('cookie') || '';
-  for (const part of raw.split(';')) {
-    const [k, ...v] = part.trim().split('=');
-    if (k === name) return decodeURIComponent(v.join('='));
-  }
-  return '';
-}
-function b64url(bytes) {
-  return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-async function sign(secret, value) {
-  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  return b64url(await crypto.subtle.sign('HMAC', key, enc.encode(value)));
-}
-async function isAuthed(request, env) {
-  if (!env.SESSION_SECRET) return false;
-  const got = cookieValue(request, 'mywork_session');
-  if (!got) return false;
-  const expected = await sign(env.SESSION_SECRET, `my-work:${workspace(env)}`);
-  return got === expected;
-}
-function sessionCookie(value) {
-  return `mywork_session=${encodeURIComponent(value)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`;
-}
-function clearCookie() {
-  return 'mywork_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0';
-}
-function arrayLiteral(values) {
-  const vals = Array.isArray(values) ? values.filter(Boolean).map(v => String(v).trim()).filter(Boolean) : [];
-  return `{${vals.map(v => `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
-}
-function normalizePeople(values) {
-  if (!Array.isArray(values)) return [];
-  return [...new Set(values.map(v => String(v || '').trim()).filter(Boolean))];
-}
-function normalizeQuadrant(value) {
-  return QUADRANTS.has(value) ? value : null;
-}
-function localDateKey(date = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Montreal', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
-  const get = type => parts.find(x => x.type === type)?.value;
-  return `${get('year')}-${get('month')}-${get('day')}`;
-}
-async function activity(sql, env, entityType, entityId, action, summary, metadata = {}) {
-  await sql`INSERT INTO activity_log (workspace_id,entity_type,entity_id,action,summary,metadata)
-            VALUES (${workspace(env)},${entityType},${String(entityId || '')},${action},${summary},${JSON.stringify(metadata)}::jsonb)`;
-}
-async function findProject(sql, env, name) {
-  if (!name) return null;
-  const rows = await sql`SELECT * FROM projects WHERE workspace_id=${workspace(env)} AND lower(name)=lower(${name.trim()}) LIMIT 1`;
-  return rows[0] || null;
-}
-async function getOrCreateProject(sql, env, name, description = null, withPeople = null) {
-  if (!name) return null;
-  const people = withPeople === null ? [] : normalizePeople(withPeople);
-  const preservePeople = withPeople === null;
-  const rows = await sql`INSERT INTO projects (workspace_id,name,description,with_people)
-                         VALUES (${workspace(env)},${name.trim()},${description},${arrayLiteral(people)}::text[])
-                         ON CONFLICT (workspace_id,name) DO UPDATE SET
-                           description=COALESCE(EXCLUDED.description,projects.description),
-                           with_people=CASE WHEN ${preservePeople} THEN projects.with_people ELSE EXCLUDED.with_people END,
-                           updated_at=now()
-                         RETURNING *`;
-  return rows[0];
-}
-async function taskById(sql, env, id) {
-  const rows = await sql`SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id
-                         WHERE t.workspace_id=${workspace(env)} AND t.id=${id}::uuid LIMIT 1`;
-  return rows[0] || null;
+function cookieValue(request,name){const raw=request.headers.get('cookie')||'';for(const part of raw.split(';')){const [k,...v]=part.trim().split('=');if(k===name)return decodeURIComponent(v.join('='));}return '';}
+function b64url(bytes){return btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+async function sign(secret,value){const key=await crypto.subtle.importKey('raw',enc.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);return b64url(await crypto.subtle.sign('HMAC',key,enc.encode(value)));}
+async function isAuthed(request,env){if(!env.SESSION_SECRET)return false;const got=cookieValue(request,'mywork_session');if(!got)return false;const expected=await sign(env.SESSION_SECRET,`my-work:${workspace(env)}`);return got===expected;}
+function sessionCookie(value){return `mywork_session=${encodeURIComponent(value)}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`;}
+function clearCookie(){return 'mywork_session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0';}
+function normalizePeople(value){if(!value)return [];const arr=Array.isArray(value)?value:String(value).split(',');return [...new Set(arr.map(x=>String(x).trim()).filter(Boolean))].slice(0,20);}
+function localDateKey(value=new Date()){return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Montreal',year:'numeric',month:'2-digit',day:'2-digit'}).format(value);}
+function snapshotTask(t){if(!t)return null;return {id:t.id,project_id:t.project_id??null,title:t.title,details:t.details??null,status:t.status,priority:t.priority,due_at:t.due_at??null,waiting_on:t.waiting_on??null,eisenhower_quadrant:t.eisenhower_quadrant??null,with_people:normalizePeople(t.with_people),completed_at:t.completed_at??null};}
+function snapshotProject(p){if(!p)return null;return {id:p.id,name:p.name,description:p.description??null,status:p.status,with_people:normalizePeople(p.with_people)};}
+
+async function activity(sql,env,entityType,entityId,action,summary,metadata={}){const rows=await sql`INSERT INTO activity_log (workspace_id,entity_type,entity_id,action,summary,metadata) VALUES (${workspace(env)},${entityType},${String(entityId||'')},${action},${summary},${JSON.stringify(metadata)}::jsonb) RETURNING id`;return rows[0]?.id;}
+async function findProject(sql,env,name){if(!name)return null;const rows=await sql`SELECT * FROM projects WHERE workspace_id=${workspace(env)} AND lower(name)=lower(${name.trim()}) LIMIT 1`;return rows[0]||null;}
+async function projectById(sql,env,id){const rows=await sql`SELECT * FROM projects WHERE workspace_id=${workspace(env)} AND id=${id}::uuid LIMIT 1`;return rows[0]||null;}
+async function getOrCreateProject(sql,env,name,description=null,withPeople=[]){if(!name)return null;const people=normalizePeople(withPeople);const rows=await sql`INSERT INTO projects (workspace_id,name,description,with_people) VALUES (${workspace(env)},${name.trim()},${description},${people}) ON CONFLICT (workspace_id,name) DO UPDATE SET description=COALESCE(EXCLUDED.description,projects.description),with_people=CASE WHEN cardinality(EXCLUDED.with_people)>0 THEN EXCLUDED.with_people ELSE projects.with_people END,updated_at=now() RETURNING *`;return rows[0];}
+async function taskById(sql,env,id){const rows=await sql`SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id WHERE t.workspace_id=${workspace(env)} AND t.id=${id}::uuid LIMIT 1`;return rows[0]||null;}
+async function restoreTask(sql,env,before){await sql`UPDATE tasks SET project_id=${before.project_id},title=${before.title},details=${before.details},status=${before.status},priority=${before.priority},due_at=${before.due_at},waiting_on=${before.waiting_on},eisenhower_quadrant=${before.eisenhower_quadrant},with_people=${normalizePeople(before.with_people)},completed_at=${before.completed_at},updated_at=now() WHERE workspace_id=${workspace(env)} AND id=${before.id}::uuid`;}
+async function undoLast(sql,env){
+  const rows=await sql`SELECT a.* FROM activity_log a WHERE a.workspace_id=${workspace(env)} AND COALESCE((a.metadata->>'reversible')::boolean,false)=true AND NOT EXISTS (SELECT 1 FROM activity_log u WHERE u.workspace_id=a.workspace_id AND u.action='undo' AND u.metadata->>'undo_of'=a.id::text) ORDER BY a.id DESC LIMIT 1`;
+  const a=rows[0];if(!a)return {ok:false,message:'Nothing recent to undo.'};const m=a.metadata||{};
+  if(m.operation==='task_create')await sql`DELETE FROM tasks WHERE workspace_id=${workspace(env)} AND id=${m.entity_id}::uuid`;
+  else if(['task_update','task_complete','task_move'].includes(m.operation)&&m.before)await restoreTask(sql,env,m.before);
+  else if(m.operation==='note_create')await sql`DELETE FROM notes WHERE workspace_id=${workspace(env)} AND id=${m.entity_id}::uuid`;
+  else if(m.operation==='memory_create')await sql`DELETE FROM memory_entries WHERE workspace_id=${workspace(env)} AND id=${m.entity_id}::uuid`;
+  else if(m.operation==='project_create')await sql`DELETE FROM projects WHERE workspace_id=${workspace(env)} AND id=${m.entity_id}::uuid AND NOT EXISTS (SELECT 1 FROM tasks WHERE project_id=${m.entity_id}::uuid)`;
+  else if(m.operation==='project_update'&&m.before){const b=m.before;await sql`UPDATE projects SET name=${b.name},description=${b.description},status=${b.status},with_people=${normalizePeople(b.with_people)},updated_at=now() WHERE workspace_id=${workspace(env)} AND id=${b.id}::uuid`;}
+  else return {ok:false,message:'That change cannot be undone automatically.'};
+  await activity(sql,env,a.entity_type,a.entity_id,'undo',`Undid: ${a.summary}`,{undo_of:String(a.id)});return {ok:true,message:`Undid: ${a.summary}`};
 }
 
-const tools = [
-  { type: 'function', name: 'list_projects', description: 'List tracked projects. Use this to resolve a project name before writing when needed.', strict: true, parameters: { type: 'object', properties: { search: { type: ['string', 'null'] }, with_person: { type: ['string', 'null'] } }, required: ['search', 'with_person'], additionalProperties: false } },
-  { type: 'function', name: 'create_project', description: 'Create or update a project when the user clearly wants that work tracked as a project. with_people are employees, bosses or other stakeholders the user works with on the project.', strict: true, parameters: { type: 'object', properties: { name: { type: 'string' }, description: { type: ['string', 'null'] }, with_people: { type: ['array', 'null'], items: { type: 'string' } } }, required: ['name', 'description', 'with_people'], additionalProperties: false } },
-  { type: 'function', name: 'list_tasks', description: 'Find tasks, including by words, project, status or person. Use before changing or completing a task when a conversational reference could match more than one item.', strict: true, parameters: { type: 'object', properties: { search: { type: ['string', 'null'] }, project_name: { type: ['string', 'null'] }, status: { type: 'string', enum: ['open', 'waiting', 'done', 'cancelled', 'all'] }, with_person: { type: ['string', 'null'] } }, required: ['search', 'project_name', 'status', 'with_person'], additionalProperties: false } },
-  { type: 'function', name: 'create_task', description: 'Create a concrete action the user intends to do, delegate, send, review, prepare, remember or follow up on. Do not create tasks from mere brainstorming. Capture with_people when the task is with, for, to discuss with, or dependent on named people. If waiting on someone, include that person in with_people too.', strict: true, parameters: { type: 'object', properties: { title: { type: 'string' }, details: { type: ['string', 'null'] }, project_name: { type: ['string', 'null'] }, due_at: { type: ['string', 'null'], description: 'ISO 8601 datetime with America/Montreal offset when a due date/time is known.' }, priority: { type: 'string', enum: ['low', 'normal', 'high'] }, status: { type: 'string', enum: ['open', 'waiting'] }, waiting_on: { type: ['string', 'null'] }, eisenhower_quadrant: { type: ['string', 'null'], enum: ['do', 'schedule', 'delegate', 'later', null] }, with_people: { type: 'array', items: { type: 'string' } } }, required: ['title', 'details', 'project_name', 'due_at', 'priority', 'status', 'waiting_on', 'eisenhower_quadrant', 'with_people'], additionalProperties: false } },
-  { type: 'function', name: 'update_task', description: 'Update one exact existing task after its ID has been resolved. Use with_people for employees, bosses or stakeholders connected to the task. Eisenhower: do=urgent+important, schedule=important not urgent, delegate=urgent less important, later=neither.', strict: true, parameters: { type: 'object', properties: { id: { type: 'string' }, title: { type: ['string', 'null'] }, details: { type: ['string', 'null'] }, project_name: { type: ['string', 'null'] }, due_at: { type: ['string', 'null'] }, priority: { type: ['string', 'null'], enum: ['low', 'normal', 'high', null] }, status: { type: ['string', 'null'], enum: ['open', 'waiting', 'done', 'cancelled', null] }, waiting_on: { type: ['string', 'null'] }, eisenhower_quadrant: { type: ['string', 'null'], enum: ['do', 'schedule', 'delegate', 'later', null] }, with_people: { type: ['array', 'null'], items: { type: 'string' } } }, required: ['id', 'title', 'details', 'project_name', 'due_at', 'priority', 'status', 'waiting_on', 'eisenhower_quadrant', 'with_people'], additionalProperties: false } },
-  { type: 'function', name: 'complete_task', description: 'Mark one exact task complete after resolving its ID.', strict: true, parameters: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'], additionalProperties: false } },
-  { type: 'function', name: 'add_note', description: 'Save a durable note, decision, meeting note or assumption that is useful context but is not itself a to-do.', strict: true, parameters: { type: 'object', properties: { body: { type: 'string' }, kind: { type: 'string', enum: ['note', 'decision', 'meeting_note', 'assumption'] }, title: { type: ['string', 'null'] }, project_name: { type: ['string', 'null'] } }, required: ['body', 'kind', 'title', 'project_name'], additionalProperties: false } },
-  { type: 'function', name: 'remember_context', description: 'Save stable work context from the discussion for future retrieval. Use selectively for important background, conclusions or history, not every message.', strict: true, parameters: { type: 'object', properties: { body: { type: 'string' }, memory_type: { type: 'string', enum: ['context', 'decision', 'history', 'reference'] }, title: { type: ['string', 'null'] }, project_name: { type: ['string', 'null'] }, tags: { type: 'array', items: { type: 'string' } } }, required: ['body', 'memory_type', 'title', 'project_name', 'tags'], additionalProperties: false } },
-  { type: 'function', name: 'search_memory', description: 'Search prior work memory, notes, decisions and chat history when the user refers to earlier discussions, prior decisions, rationale or historical context.', strict: true, parameters: { type: 'object', properties: { query: { type: 'string' }, project_name: { type: ['string', 'null'] } }, required: ['query', 'project_name'], additionalProperties: false } },
-  { type: 'function', name: 'get_workspace_summary', description: 'Get current counts and the most important open work for questions about what is due, overdue, waiting or what to focus on.', strict: true, parameters: { type: 'object', properties: { scope: { type: 'string', enum: ['all', 'today', 'upcoming', 'overdue', 'waiting'] } }, required: ['scope'], additionalProperties: false } }
+const tools=[
+  {type:'function',name:'list_projects',description:'List tracked projects. Use this to resolve a project name before writing when needed.',strict:true,parameters:{type:'object',properties:{search:{type:['string','null']},person:{type:['string','null']}},required:['search','person'],additionalProperties:false}},
+  {type:'function',name:'create_project',description:'Create or update a project when the user clearly wants that work tracked as a project.',strict:true,parameters:{type:'object',properties:{name:{type:'string'},description:{type:['string','null']},with_people:{type:'array',items:{type:'string'}}},required:['name','description','with_people'],additionalProperties:false}},
+  {type:'function',name:'list_tasks',description:'Find tasks, including by words, project, person, status or Eisenhower quadrant. Use before changing or completing a task when a conversational reference could match more than one item.',strict:true,parameters:{type:'object',properties:{search:{type:['string','null']},project_name:{type:['string','null']},person:{type:['string','null']},status:{type:'string',enum:['open','waiting','done','cancelled','all']},eisenhower_quadrant:{type:['string','null'],enum:['do','schedule','delegate','later',null]}},required:['search','project_name','person','status','eisenhower_quadrant'],additionalProperties:false}},
+  {type:'function',name:'create_task',description:'Create a concrete action the user intends to do, delegate, send, review, prepare, remember or follow up on. Do not create tasks from mere brainstorming.',strict:true,parameters:{type:'object',properties:{title:{type:'string'},details:{type:['string','null']},project_name:{type:['string','null']},due_at:{type:['string','null'],description:'ISO 8601 datetime with America/Montreal offset when a due date/time is known.'},priority:{type:'string',enum:['low','normal','high']},status:{type:'string',enum:['open','waiting']},waiting_on:{type:['string','null']},eisenhower_quadrant:{type:['string','null'],enum:['do','schedule','delegate','later',null]},with_people:{type:'array',items:{type:'string'}}},required:['title','details','project_name','due_at','priority','status','waiting_on','eisenhower_quadrant','with_people'],additionalProperties:false}},
+  {type:'function',name:'update_task',description:'Update one exact existing task after its ID has been resolved.',strict:true,parameters:{type:'object',properties:{id:{type:'string'},title:{type:['string','null']},details:{type:['string','null']},project_name:{type:['string','null']},due_at:{type:['string','null']},priority:{type:['string','null'],enum:['low','normal','high',null]},status:{type:['string','null'],enum:['open','waiting','done','cancelled',null]},waiting_on:{type:['string','null']},eisenhower_quadrant:{type:['string','null'],enum:['do','schedule','delegate','later',null]},with_people:{type:['array','null'],items:{type:'string'}}},required:['id','title','details','project_name','due_at','priority','status','waiting_on','eisenhower_quadrant','with_people'],additionalProperties:false}},
+  {type:'function',name:'complete_task',description:'Mark one exact task complete after resolving its ID.',strict:true,parameters:{type:'object',properties:{id:{type:'string'}},required:['id'],additionalProperties:false}},
+  {type:'function',name:'add_note',description:'Save a durable note, decision, meeting note or assumption that is useful context but is not itself a to-do.',strict:true,parameters:{type:'object',properties:{body:{type:'string'},kind:{type:'string',enum:['note','decision','meeting_note','assumption']},title:{type:['string','null']},project_name:{type:['string','null']}},required:['body','kind','title','project_name'],additionalProperties:false}},
+  {type:'function',name:'remember_context',description:'Save stable work context from the discussion for future retrieval. Use selectively for important background, conclusions or history, not every message.',strict:true,parameters:{type:'object',properties:{body:{type:'string'},memory_type:{type:'string',enum:['context','decision','history','reference']},title:{type:['string','null']},project_name:{type:['string','null']},tags:{type:'array',items:{type:'string'}}},required:['body','memory_type','title','project_name','tags'],additionalProperties:false}},
+  {type:'function',name:'search_memory',description:'Search prior work memory, notes, decisions and chat history when the user refers to earlier discussions, prior decisions, rationale or historical context.',strict:true,parameters:{type:'object',properties:{query:{type:'string'},project_name:{type:['string','null']}},required:['query','project_name'],additionalProperties:false}},
+  {type:'function',name:'get_workspace_summary',description:'Get current counts and the most important open work for questions about what is due, overdue, waiting or what to focus on.',strict:true,parameters:{type:'object',properties:{scope:{type:'string',enum:['all','today','upcoming','overdue','waiting','inbox']},person:{type:['string','null']}},required:['scope','person'],additionalProperties:false}},
+  {type:'function',name:'list_people',description:'List people connected to tasks and projects, including counts of open and waiting work.',strict:true,parameters:{type:'object',properties:{search:{type:['string','null']}},required:['search'],additionalProperties:false}},
+  {type:'function',name:'undo_last_change',description:'Undo the most recent reversible workspace change when the user explicitly asks to undo it.',strict:true,parameters:{type:'object',properties:{},required:[],additionalProperties:false}}
 ];
 
-async function runTool(name, args, sql, env) {
-  const ws = workspace(env);
-  if (name === 'list_projects') {
-    let rows = await sql`SELECT id,name,description,status,with_people,updated_at FROM projects WHERE workspace_id=${ws} ORDER BY updated_at DESC`;
-    if (args.search) {
-      const q = args.search.toLowerCase();
-      rows = rows.filter(x => x.name.toLowerCase().includes(q) || (x.description || '').toLowerCase().includes(q));
-    }
-    if (args.with_person) {
-      const q = args.with_person.toLowerCase();
-      rows = rows.filter(x => (x.with_people || []).some(p => String(p).toLowerCase().includes(q)));
-    }
-    return { projects: rows };
+async function runTool(name,args,sql,env){
+  const ws=workspace(env);
+  if(name==='list_projects'){
+    let rows=await sql`SELECT id,name,description,status,with_people,updated_at FROM projects WHERE workspace_id=${ws} ORDER BY updated_at DESC`;
+    if(args.search){const q=args.search.toLowerCase();rows=rows.filter(x=>x.name.toLowerCase().includes(q)||(x.description||'').toLowerCase().includes(q));}
+    if(args.person){const p=args.person.toLowerCase();rows=rows.filter(x=>normalizePeople(x.with_people).some(n=>n.toLowerCase().includes(p)));}
+    return {projects:rows.slice(0,50)};
   }
-  if (name === 'create_project') {
-    const p = await getOrCreateProject(sql, env, args.name, args.description, args.with_people);
-    await activity(sql, env, 'project', p.id, 'create_or_update', `Project: ${p.name}`, { with_people: p.with_people || [] });
-    return { project: p };
+  if(name==='create_project'){
+    const existed=await findProject(sql,env,args.name);const before=snapshotProject(existed);const p=await getOrCreateProject(sql,env,args.name,args.description,args.with_people);
+    await activity(sql,env,'project',p.id,existed?'update':'create',`${existed?'Updated':'Created'} project: ${p.name}`,{reversible:true,operation:existed?'project_update':'project_create',entity_id:p.id,before});return {project:p};
   }
-  if (name === 'list_tasks') {
-    let rows = await sql`SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id WHERE t.workspace_id=${ws} ORDER BY t.due_at NULLS LAST,t.updated_at DESC LIMIT 150`;
-    if (args.status !== 'all') rows = rows.filter(x => x.status === args.status);
-    if (args.project_name) rows = rows.filter(x => (x.project_name || '').toLowerCase().includes(args.project_name.toLowerCase()));
-    if (args.with_person) {
-      const q = args.with_person.toLowerCase();
-      rows = rows.filter(x => (x.with_people || []).some(p => String(p).toLowerCase().includes(q)) || (x.waiting_on || '').toLowerCase().includes(q));
-    }
-    if (args.search) {
-      const q = args.search.toLowerCase();
-      rows = rows.filter(x => x.title.toLowerCase().includes(q) || (x.details || '').toLowerCase().includes(q) || (x.waiting_on || '').toLowerCase().includes(q) || (x.project_name || '').toLowerCase().includes(q) || (x.with_people || []).some(p => String(p).toLowerCase().includes(q)));
-    }
-    return { tasks: rows.slice(0, 60) };
+  if(name==='list_tasks'){
+    let rows=await sql`SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id WHERE t.workspace_id=${ws} ORDER BY t.due_at NULLS LAST,t.updated_at DESC LIMIT 150`;
+    if(args.status!=='all')rows=rows.filter(x=>x.status===args.status);
+    if(args.project_name)rows=rows.filter(x=>(x.project_name||'').toLowerCase().includes(args.project_name.toLowerCase()));
+    if(args.person){const p=args.person.toLowerCase();rows=rows.filter(x=>normalizePeople(x.with_people).some(n=>n.toLowerCase().includes(p))||(x.waiting_on||'').toLowerCase().includes(p));}
+    if(args.eisenhower_quadrant)rows=rows.filter(x=>x.eisenhower_quadrant===args.eisenhower_quadrant);
+    if(args.search){const q=args.search.toLowerCase();rows=rows.filter(x=>x.title.toLowerCase().includes(q)||(x.details||'').toLowerCase().includes(q)||(x.waiting_on||'').toLowerCase().includes(q)||(x.project_name||'').toLowerCase().includes(q)||normalizePeople(x.with_people).join(' ').toLowerCase().includes(q));}
+    return {tasks:rows.slice(0,60)};
   }
-  if (name === 'create_task') {
-    const people = normalizePeople([...(args.with_people || []), ...(args.waiting_on ? [args.waiting_on] : [])]);
-    const p = args.project_name ? await getOrCreateProject(sql, env, args.project_name) : null;
-    const quadrant = normalizeQuadrant(args.eisenhower_quadrant);
-    const rows = await sql`INSERT INTO tasks (workspace_id,project_id,title,details,status,priority,due_at,waiting_on,eisenhower_quadrant,with_people,source)
-                           VALUES (${ws},${p?.id || null},${args.title.trim()},${args.details},${args.status},${args.priority},${args.due_at},${args.waiting_on},${quadrant},${arrayLiteral(people)}::text[],'ai_chat') RETURNING *`;
-    const t = rows[0];
-    await activity(sql, env, 'task', t.id, 'create', `Created task: ${t.title}`, { quadrant, with_people: people });
-    return { task: await taskById(sql, env, t.id) };
+  if(name==='create_task'){
+    const p=args.project_name?await getOrCreateProject(sql,env,args.project_name):null;const people=normalizePeople([...(args.with_people||[]),...(args.waiting_on?[args.waiting_on]:[])]);const q=QUADS.includes(args.eisenhower_quadrant)?args.eisenhower_quadrant:null;
+    const rows=await sql`INSERT INTO tasks (workspace_id,project_id,title,details,status,priority,due_at,waiting_on,eisenhower_quadrant,with_people,source) VALUES (${ws},${p?.id||null},${args.title.trim()},${args.details},${args.status},${args.priority},${args.due_at},${args.waiting_on},${q},${people},'ai_chat') RETURNING *`;
+    const t=rows[0];await activity(sql,env,'task',t.id,'create',`Created task: ${t.title}`,{reversible:true,operation:'task_create',entity_id:t.id});return {task:await taskById(sql,env,t.id)};
   }
-  if (name === 'update_task') {
-    const old = await taskById(sql, env, args.id);
-    if (!old) return { error: 'Task not found' };
-    let projectId = old.project_id;
-    if (args.project_name !== null) projectId = args.project_name ? (await getOrCreateProject(sql, env, args.project_name)).id : null;
-    const title = args.title ?? old.title;
-    const details = args.details ?? old.details;
-    const due = args.due_at ?? old.due_at;
-    const priority = args.priority ?? old.priority;
-    const status = args.status ?? old.status;
-    const waiting = args.waiting_on ?? old.waiting_on;
-    const quadrant = args.eisenhower_quadrant === null ? old.eisenhower_quadrant : normalizeQuadrant(args.eisenhower_quadrant);
-    const people = args.with_people === null ? (old.with_people || []) : normalizePeople([...(args.with_people || []), ...(waiting ? [waiting] : [])]);
-    await sql`UPDATE tasks SET project_id=${projectId},title=${title},details=${details},due_at=${due},priority=${priority},status=${status},waiting_on=${waiting},eisenhower_quadrant=${quadrant},with_people=${arrayLiteral(people)}::text[],updated_at=now(),completed_at=CASE WHEN ${status}='done' THEN COALESCE(completed_at,now()) ELSE NULL END WHERE workspace_id=${ws} AND id=${args.id}::uuid`;
-    await activity(sql, env, 'task', args.id, 'update', `Updated task: ${title}`, { quadrant, with_people: people });
-    return { task: await taskById(sql, env, args.id) };
+  if(name==='update_task'){
+    const old=await taskById(sql,env,args.id);if(!old)return {error:'Task not found'};const before=snapshotTask(old);let projectId=old.project_id;
+    if(args.project_name!==null){projectId=args.project_name?(await getOrCreateProject(sql,env,args.project_name)).id:null;}
+    const title=args.title??old.title,details=args.details??old.details,due=args.due_at??old.due_at,priority=args.priority??old.priority,status=args.status??old.status,waiting=args.waiting_on??old.waiting_on,q=args.eisenhower_quadrant===null?old.eisenhower_quadrant:(QUADS.includes(args.eisenhower_quadrant)?args.eisenhower_quadrant:null),people=args.with_people===null?normalizePeople(old.with_people):normalizePeople(args.with_people);
+    await sql`UPDATE tasks SET project_id=${projectId},title=${title},details=${details},due_at=${due},priority=${priority},status=${status},waiting_on=${waiting},eisenhower_quadrant=${q},with_people=${people},updated_at=now(),completed_at=CASE WHEN ${status}='done' THEN COALESCE(completed_at,now()) ELSE CASE WHEN ${status}<>'done' THEN NULL ELSE completed_at END END WHERE workspace_id=${ws} AND id=${args.id}::uuid`;
+    await activity(sql,env,'task',args.id,'update',`Updated task: ${title}`,{reversible:true,operation:'task_update',entity_id:args.id,before});return {task:await taskById(sql,env,args.id)};
   }
-  if (name === 'complete_task') {
-    const old = await taskById(sql, env, args.id);
-    if (!old) return { error: 'Task not found' };
-    await sql`UPDATE tasks SET status='done',completed_at=COALESCE(completed_at,now()),waiting_on=NULL,updated_at=now() WHERE workspace_id=${ws} AND id=${args.id}::uuid`;
-    await activity(sql, env, 'task', args.id, 'complete', `Completed task: ${old.title}`);
-    return { task: await taskById(sql, env, args.id) };
+  if(name==='complete_task'){
+    const old=await taskById(sql,env,args.id);if(!old)return {error:'Task not found'};const before=snapshotTask(old);await sql`UPDATE tasks SET status='done',completed_at=COALESCE(completed_at,now()),waiting_on=NULL,updated_at=now() WHERE workspace_id=${ws} AND id=${args.id}::uuid`;
+    await activity(sql,env,'task',args.id,'complete',`Completed task: ${old.title}`,{reversible:true,operation:'task_complete',entity_id:args.id,before});return {task:await taskById(sql,env,args.id)};
   }
-  if (name === 'add_note') {
-    const p = args.project_name ? await getOrCreateProject(sql, env, args.project_name) : null;
-    const rows = await sql`INSERT INTO notes (workspace_id,project_id,kind,title,body,source) VALUES (${ws},${p?.id || null},${args.kind},${args.title},${args.body},'ai_chat') RETURNING *`;
-    await activity(sql, env, 'note', rows[0].id, 'create', `${args.kind}: ${args.title || args.body.slice(0, 80)}`);
-    return { note: rows[0] };
+  if(name==='add_note'){
+    const p=args.project_name?await getOrCreateProject(sql,env,args.project_name):null;const rows=await sql`INSERT INTO notes (workspace_id,project_id,kind,title,body,source) VALUES (${ws},${p?.id||null},${args.kind},${args.title},${args.body},'ai_chat') RETURNING *`;
+    await activity(sql,env,'note',rows[0].id,'create',`${args.kind}: ${args.title||args.body.slice(0,80)}`,{reversible:true,operation:'note_create',entity_id:rows[0].id});return {note:rows[0]};
   }
-  if (name === 'remember_context') {
-    const p = args.project_name ? await getOrCreateProject(sql, env, args.project_name) : null;
-    const rows = await sql`INSERT INTO memory_entries (workspace_id,project_id,memory_type,title,body,tags,source_type,source_ref,occurred_at) VALUES (${ws},${p?.id || null},${args.memory_type},${args.title},${args.body},${JSON.stringify(args.tags)}::jsonb,'ai_chat','my-work',now()) RETURNING *`;
-    await activity(sql, env, 'memory', rows[0].id, 'remember', `Remembered: ${args.title || args.body.slice(0, 80)}`);
-    return { memory: rows[0] };
+  if(name==='remember_context'){
+    const p=args.project_name?await getOrCreateProject(sql,env,args.project_name):null;const rows=await sql`INSERT INTO memory_entries (workspace_id,project_id,memory_type,title,body,tags,source_type,source_ref,occurred_at) VALUES (${ws},${p?.id||null},${args.memory_type},${args.title},${args.body},${JSON.stringify(args.tags)}::jsonb,'ai_chat','my-work',now()) RETURNING *`;
+    await activity(sql,env,'memory',rows[0].id,'remember',`Remembered: ${args.title||args.body.slice(0,80)}`,{reversible:true,operation:'memory_create',entity_id:rows[0].id});return {memory:rows[0]};
   }
-  if (name === 'search_memory') {
-    const project = args.project_name ? await findProject(sql, env, args.project_name) : null;
-    let mem = [];
-    try {
-      mem = await sql`SELECT m.*,p.name AS project_name FROM memory_entries m LEFT JOIN projects p ON p.id=m.project_id WHERE m.workspace_id=${ws} AND (${project?.id || null}::uuid IS NULL OR m.project_id=${project?.id || null}::uuid) AND to_tsvector('simple',coalesce(m.title,'')||' '||m.body) @@ plainto_tsquery('simple',${args.query}) ORDER BY COALESCE(m.occurred_at,m.created_at) DESC LIMIT 12`;
-    } catch {
-      mem = await sql`SELECT m.*,p.name AS project_name FROM memory_entries m LEFT JOIN projects p ON p.id=m.project_id WHERE m.workspace_id=${ws} ORDER BY COALESCE(m.occurred_at,m.created_at) DESC LIMIT 12`;
-    }
-    const notes = await sql`SELECT n.*,p.name AS project_name FROM notes n LEFT JOIN projects p ON p.id=n.project_id WHERE n.workspace_id=${ws} ORDER BY n.created_at DESC LIMIT 12`;
-    const chats = await sql`SELECT role,content,created_at FROM chat_messages WHERE workspace_id=${ws} AND content ILIKE ${'%' + args.query.slice(0, 120) + '%'} ORDER BY created_at DESC LIMIT 8`;
-    return { memory: mem, notes, chats };
+  if(name==='search_memory'){
+    const project=args.project_name?await findProject(sql,env,args.project_name):null;let mem=[];
+    try{mem=await sql`SELECT m.*,p.name AS project_name FROM memory_entries m LEFT JOIN projects p ON p.id=m.project_id WHERE m.workspace_id=${ws} AND (${project?.id||null}::uuid IS NULL OR m.project_id=${project?.id||null}::uuid) AND to_tsvector('simple',coalesce(m.title,'')||' '||m.body) @@ plainto_tsquery('simple',${args.query}) ORDER BY COALESCE(m.occurred_at,m.created_at) DESC LIMIT 12`;}
+    catch{mem=await sql`SELECT m.*,p.name AS project_name FROM memory_entries m LEFT JOIN projects p ON p.id=m.project_id WHERE m.workspace_id=${ws} ORDER BY COALESCE(m.occurred_at,m.created_at) DESC LIMIT 12`;}
+    const notes=await sql`SELECT n.*,p.name AS project_name FROM notes n LEFT JOIN projects p ON p.id=n.project_id WHERE n.workspace_id=${ws} AND (n.body ILIKE ${'%'+args.query+'%'} OR COALESCE(n.title,'') ILIKE ${'%'+args.query+'%'}) ORDER BY n.created_at DESC LIMIT 12`;
+    const chats=await sql`SELECT role,content,created_at FROM chat_messages WHERE workspace_id=${ws} AND content ILIKE ${'%'+args.query.slice(0,120)+'%'} ORDER BY created_at DESC LIMIT 8`;return {memory:mem,notes,chats};
   }
-  if (name === 'get_workspace_summary') {
-    const rows = await sql`SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id WHERE t.workspace_id=${ws} AND t.status NOT IN ('done','cancelled') ORDER BY t.due_at NULLS LAST,t.updated_at DESC LIMIT 120`;
-    const today = localDateKey();
-    const isToday = x => x.due_at && localDateKey(new Date(x.due_at)) === today;
-    const overdue = x => x.due_at && localDateKey(new Date(x.due_at)) < today;
-    let selected = rows;
-    if (args.scope === 'today') selected = rows.filter(isToday);
-    if (args.scope === 'overdue') selected = rows.filter(overdue);
-    if (args.scope === 'waiting') selected = rows.filter(x => x.status === 'waiting');
-    if (args.scope === 'upcoming') selected = rows.filter(x => x.due_at && localDateKey(new Date(x.due_at)) > today);
-    const projectCount = (await sql`SELECT count(*)::int AS n FROM projects WHERE workspace_id=${ws} AND status='active'`)[0].n;
-    return { open: rows.length, today: rows.filter(isToday).length, overdue: rows.filter(overdue).length, waiting: rows.filter(x => x.status === 'waiting').length, projects: projectCount, tasks: selected.slice(0, 30) };
+  if(name==='get_workspace_summary'){
+    let rows=await sql`SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id WHERE t.workspace_id=${ws} AND t.status NOT IN ('done','cancelled') ORDER BY t.due_at NULLS LAST,t.updated_at DESC LIMIT 150`;const today=localDateKey();
+    if(args.person){const p=args.person.toLowerCase();rows=rows.filter(x=>normalizePeople(x.with_people).some(n=>n.toLowerCase().includes(p))||(x.waiting_on||'').toLowerCase().includes(p));}
+    const isToday=x=>x.due_at&&localDateKey(new Date(x.due_at))===today,overdue=x=>x.due_at&&localDateKey(new Date(x.due_at))<today;let selected=rows;
+    if(args.scope==='today')selected=rows.filter(isToday);if(args.scope==='overdue')selected=rows.filter(overdue);if(args.scope==='waiting')selected=rows.filter(x=>x.status==='waiting');if(args.scope==='upcoming')selected=rows.filter(x=>x.due_at&&localDateKey(new Date(x.due_at))>today);if(args.scope==='inbox')selected=rows.filter(x=>!x.eisenhower_quadrant);
+    const projectCount=(await sql`SELECT count(*)::int AS n FROM projects WHERE workspace_id=${ws} AND status='active'`)[0].n;return {today:rows.filter(isToday).length,overdue:rows.filter(overdue).length,waiting:rows.filter(x=>x.status==='waiting').length,projects:projectCount,inbox:rows.filter(x=>!x.eisenhower_quadrant).length,tasks:selected.slice(0,40)};
   }
-  return { error: `Unknown tool ${name}` };
+  if(name==='list_people'){
+    const tasks=await sql`SELECT with_people,waiting_on,status FROM tasks WHERE workspace_id=${ws} AND status NOT IN ('done','cancelled')`;const projects=await sql`SELECT with_people FROM projects WHERE workspace_id=${ws} AND status='active'`;const map=new Map();const add=(name,type)=>{if(!name)return;const k=name.trim();if(!k)return;const o=map.get(k)||{name:k,open_tasks:0,waiting:0,projects:0};o[type]++;map.set(k,o);};for(const t of tasks){for(const p of normalizePeople(t.with_people))add(p,'open_tasks');if(t.waiting_on)add(t.waiting_on,'waiting');}for(const p of projects)for(const n of normalizePeople(p.with_people))add(n,'projects');let out=[...map.values()].sort((a,b)=>(b.open_tasks+b.waiting+b.projects)-(a.open_tasks+a.waiting+a.projects));if(args.search)out=out.filter(x=>x.name.toLowerCase().includes(args.search.toLowerCase()));return {people:out.slice(0,50)};
+  }
+  if(name==='undo_last_change')return undoLast(sql,env);
+  return {error:`Unknown tool ${name}`};
 }
 
-function extractText(response) {
-  const parts = [];
-  for (const item of response.output || []) {
-    if (item.type === 'message') for (const c of item.content || []) if (c.type === 'output_text' && c.text) parts.push(c.text);
-  }
-  return parts.join('\n').trim();
-}
-function systemInstructions() {
-  const now = new Date();
-  return `You are My Work, a conversational task and project assistant for Alex. The user should be able to speak naturally and never organize information manually.
-Today is ${now.toISOString()} and Alex's working timezone is America/Montreal.
+function extractText(response){const parts=[];for(const item of response.output||[]){if(item.type==='message')for(const c of item.content||[])if(c.type==='output_text'&&c.text)parts.push(c.text);}return parts.join('\n').trim();}
+function systemInstructions(env){const now=new Date();return `You are My Work, a conversational task and project chief-of-staff for Alex. The user speaks naturally; you organize the work with minimal administration.
+Today is ${now.toISOString()} and the working timezone is America/Montreal.
 
 Operating rules:
-- Treat database tools as the source of truth. Never claim a task/project/note was saved or changed unless the tool succeeded.
-- When the user clearly states a concrete action (I need to, send, review, follow up, prepare, remember to, call, finish), create a task unless it is clearly hypothetical.
-- Brainstorming, possibilities and unresolved ideas are not tasks. Save them as a note only if clearly worth retaining.
-- Record explicit agreements/conclusions as decisions. Save stable project background selectively with remember_context.
-- Resolve pronouns and references from recent conversation. If a mutation might target the wrong existing task, call list_tasks first. Ask one concise clarification only when multiple plausible matches remain.
-- If a project is obvious, link the task automatically. If the user names a genuinely new project, create it.
-- Interpret relative dates using America/Montreal. Do not invent dates when none are implied.
-- Multiple actions in one message should result in multiple tool calls.
-- Track people in with_people whenever a task/project is with an employee, boss, customer or other stakeholder. Examples: "prepare the BI session with Josiane" => with_people ["Josiane"]; "ask Jason" => ["Jason"]. Waiting-on people should also be included.
-- Eisenhower classification: do = urgent and important; schedule = important but not urgent; delegate = urgent but less important / best handled by someone else; later = neither urgent nor important. Only classify when the user indicates it or the classification is strongly implied; otherwise leave it unsorted.
-- For focus/prioritization questions, use workspace data and prioritize overdue items, today's blockers, high priority, dependencies and Eisenhower do items.
-- When the user asks about an earlier discussion, rationale or decision, search work memory before answering.
-- When asked to show tasks/projects, summarize the most relevant subset in chat; the dashboard is the detailed source of truth. Do not dump the entire inventory unless explicitly requested.
-- Keep replies concise and operational. Manual dashboard controls are secondary; conversation is the primary interface.`;
-}
-async function callOpenAI(env, input) {
-  const res = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: { authorization: `Bearer ${env.OPENAI_API_KEY}`, 'content-type': 'application/json' },
-    body: JSON.stringify({ model: env.OPENAI_MODEL || 'gpt-5.6', instructions: systemInstructions(), input, tools, tool_choice: 'auto', store: false, safety_identifier: `my-work-${workspace(env)}` })
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error?.message || `OpenAI request failed (${res.status})`);
-  return data;
-}
-async function chat(request, env) {
-  if (!env.OPENAI_API_KEY || !env.DATABASE_URL) return json({ error: 'Server is missing OPENAI_API_KEY or DATABASE_URL.' }, 500);
-  const body = await request.json();
-  const message = String(body.message || '').trim();
-  if (!message) return json({ error: 'Message is required.' }, 400);
-  const sql = db(env), ws = workspace(env);
-  const recent = await sql`SELECT role,content FROM chat_messages WHERE workspace_id=${ws} ORDER BY created_at DESC LIMIT 18`;
-  await sql`INSERT INTO chat_messages (workspace_id,role,content) VALUES (${ws},'user',${message})`;
-  let input = [...recent.reverse().map(m => ({ role: m.role, content: m.content })), { role: 'user', content: message }];
-  let response, toolEvents = [];
-  for (let round = 0; round < 8; round++) {
-    response = await callOpenAI(env, input);
-    const calls = (response.output || []).filter(x => x.type === 'function_call');
-    if (!calls.length) break;
-    input.push(...response.output);
-    for (const call of calls) {
-      let args = {};
-      try { args = JSON.parse(call.arguments || '{}'); } catch {}
-      let result;
-      try { result = await runTool(call.name, args, sql, env); } catch (e) { result = { error: e.message || String(e) }; }
-      toolEvents.push({ name: call.name, args, result });
-      input.push({ type: 'function_call_output', call_id: call.call_id, output: JSON.stringify(result) });
-    }
-  }
-  const reply = extractText(response) || 'Done.';
-  await sql`INSERT INTO chat_messages (workspace_id,role,content) VALUES (${ws},'assistant',${reply})`;
-  return json({ reply, tool_events: toolEvents });
-}
-async function state(env) {
-  const sql = db(env), ws = workspace(env);
-  const tasks = await sql`SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id WHERE t.workspace_id=${ws} ORDER BY CASE WHEN t.status IN ('open','waiting') THEN 0 ELSE 1 END,t.due_at NULLS LAST,t.updated_at DESC LIMIT 200`;
-  const projects = await sql`SELECT p.*,count(t.id) FILTER (WHERE t.status IN ('open','waiting'))::int AS open_tasks FROM projects p LEFT JOIN tasks t ON t.project_id=p.id WHERE p.workspace_id=${ws} GROUP BY p.id ORDER BY p.updated_at DESC`;
-  const notes = await sql`SELECT n.*,p.name AS project_name FROM notes n LEFT JOIN projects p ON p.id=n.project_id WHERE n.workspace_id=${ws} ORDER BY n.created_at DESC LIMIT 30`;
-  const messages = await sql`SELECT role,content,created_at FROM chat_messages WHERE workspace_id=${ws} ORDER BY created_at DESC LIMIT 40`;
-  const today = localDateKey(), open = tasks.filter(x => !['done', 'cancelled'].includes(x.status));
-  const peopleSet = new Set();
-  for (const t of tasks) {
-    for (const p of (t.with_people || [])) if (p) peopleSet.add(String(p));
-    if (t.waiting_on) peopleSet.add(String(t.waiting_on));
-  }
-  for (const p of projects) for (const person of (p.with_people || [])) if (person) peopleSet.add(String(person));
-  return {
-    tasks,
-    projects,
-    notes,
-    messages: messages.reverse(),
-    people: [...peopleSet].sort((a, b) => a.localeCompare(b)),
-    metrics: {
-      open: open.length,
-      today: open.filter(x => x.due_at && localDateKey(new Date(x.due_at)) === today).length,
-      overdue: open.filter(x => x.due_at && localDateKey(new Date(x.due_at)) < today).length,
-      waiting: open.filter(x => x.status === 'waiting').length,
-      projects: projects.filter(x => x.status === 'active').length
-    }
-  };
-}
+- Database tools are the source of truth. Never claim a task/project/note was saved or changed unless the tool succeeded.
+- Concrete actions become tasks. Brainstorming and possibilities are not tasks unless the user commits to them.
+- Record explicit agreements/conclusions as decisions. Save stable background selectively with remember_context.
+- Resolve references like “that task”, “move it”, “the one with Josiane” from recent conversation and workspace data. Use list_tasks when ambiguity remains.
+- When the user says a task/project is “with” someone, put that person in with_people. When waiting on someone, use status=waiting, waiting_on=that person and include them in with_people.
+- Eisenhower mapping: urgent+important=do; important+not urgent=schedule; urgent+less important/delegated=delegate; neither/later/eliminate=later. Do not invent a quadrant unless the user asks for prioritization or the intent is obvious.
+- Multiple actions in one message should produce multiple tool calls.
+- For prioritization, use overdue, due today, high priority, blockers, dependencies and Eisenhower quadrant. Waiting items should surface as follow-ups rather than active execution work.
+- When the user asks about earlier rationale/decisions, search memory before answering.
+- If the user asks to undo the last change, use undo_last_change.
+- Keep replies concise and operational. Do not dump the whole task/project inventory unless explicitly requested. Summarize changes made and the next useful action.
+- Manual dashboard controls are secondary; conversation is the primary interface.`;}
+async function callOpenAI(env,input){const res=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{authorization:`Bearer ${env.OPENAI_API_KEY}`,'content-type':'application/json'},body:JSON.stringify({model:env.OPENAI_MODEL||'gpt-5.6',instructions:systemInstructions(env),input,tools,tool_choice:'auto',store:false,safety_identifier:`my-work-${workspace(env)}`})});const data=await res.json();if(!res.ok)throw new Error(data?.error?.message||`OpenAI request failed (${res.status})`);return data;}
+async function chat(request,env){if(!env.OPENAI_API_KEY||!env.DATABASE_URL)return json({error:'Server is missing OPENAI_API_KEY or DATABASE_URL.'},500);const body=await request.json();const message=String(body.message||'').trim();if(!message)return json({error:'Message is required.'},400);const sql=db(env),ws=workspace(env);const recent=await sql`SELECT role,content FROM chat_messages WHERE workspace_id=${ws} ORDER BY created_at DESC LIMIT 20`;await sql`INSERT INTO chat_messages (workspace_id,role,content) VALUES (${ws},'user',${message})`;let input=[...recent.reverse().map(m=>({role:m.role,content:m.content})),{role:'user',content:message}],response,toolEvents=[];for(let round=0;round<8;round++){response=await callOpenAI(env,input);const calls=(response.output||[]).filter(x=>x.type==='function_call');if(!calls.length)break;input.push(...response.output);for(const call of calls){let args={};try{args=JSON.parse(call.arguments||'{}')}catch{}let result;try{result=await runTool(call.name,args,sql,env)}catch(e){result={error:e.message||String(e)}}toolEvents.push({name:call.name,args,result});input.push({type:'function_call_output',call_id:call.call_id,output:JSON.stringify(result)});}}const reply=extractText(response)||'Done.';await sql`INSERT INTO chat_messages (workspace_id,role,content) VALUES (${ws},'assistant',${reply})`;return json({reply,tool_events:toolEvents});}
 
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-    try {
-      if (url.pathname === '/api/login' && request.method === 'POST') {
-        const { password } = await request.json();
-        if (!env.APP_PASSWORD || !env.SESSION_SECRET) return json({ error: 'Login is not configured.' }, 500);
-        if (String(password) !== String(env.APP_PASSWORD)) return json({ error: 'Incorrect password.' }, 401);
-        const sig = await sign(env.SESSION_SECRET, `my-work:${workspace(env)}`);
-        return json({ ok: true }, 200, { 'set-cookie': sessionCookie(sig) });
-      }
-      if (url.pathname === '/api/logout' && request.method === 'POST') return json({ ok: true }, 200, { 'set-cookie': clearCookie() });
-      if (url.pathname === '/login.html') return env.ASSETS.fetch(request);
-      const authed = await isAuthed(request, env);
-      if (url.pathname.startsWith('/api/') && !authed) return json({ error: 'Unauthorized' }, 401);
-      if (url.pathname === '/api/chat' && request.method === 'POST') return chat(request, env);
-      if (url.pathname === '/api/state' && request.method === 'GET') return json(await state(env));
-      if (url.pathname.startsWith('/api/tasks/') && url.pathname.endsWith('/complete') && request.method === 'POST') {
-        const id = url.pathname.split('/')[3], sql = db(env);
-        const old = await taskById(sql, env, id);
-        if (!old) return json({ error: 'Task not found' }, 404);
-        await sql`UPDATE tasks SET status='done',completed_at=COALESCE(completed_at,now()),waiting_on=NULL,updated_at=now() WHERE workspace_id=${workspace(env)} AND id=${id}::uuid`;
-        await activity(sql, env, 'task', id, 'complete_manual', `Completed task: ${old.title}`);
-        return json({ ok: true, task: await taskById(sql, env, id) });
-      }
-      if (url.pathname.startsWith('/api/tasks/') && url.pathname.endsWith('/matrix') && request.method === 'POST') {
-        const id = url.pathname.split('/')[3], sql = db(env);
-        const old = await taskById(sql, env, id);
-        if (!old) return json({ error: 'Task not found' }, 404);
-        const body = await request.json();
-        const quadrant = body.quadrant === null || body.quadrant === '' ? null : normalizeQuadrant(body.quadrant);
-        if (body.quadrant && !quadrant) return json({ error: 'Invalid Eisenhower quadrant.' }, 400);
-        await sql`UPDATE tasks SET eisenhower_quadrant=${quadrant},updated_at=now() WHERE workspace_id=${workspace(env)} AND id=${id}::uuid`;
-        await activity(sql, env, 'task', id, 'matrix_move', `Moved task: ${old.title}`, { quadrant });
-        return json({ ok: true, task: await taskById(sql, env, id) });
-      }
-      if (!authed) {
-        const loginUrl = new URL('/login.html', url);
-        return env.ASSETS.fetch(new Request(loginUrl, request));
-      }
-      return env.ASSETS.fetch(request);
-    } catch (e) {
-      console.error(e);
-      return json({ error: e?.message || String(e) }, 500);
-    }
-  }
-};
+function buildPeople(tasks,projects){const map=new Map();const add=(name,key)=>{if(!name)return;const n=String(name).trim();if(!n)return;const x=map.get(n)||{name:n,open_tasks:0,waiting:0,projects:0};x[key]++;map.set(n,x);};for(const t of tasks.filter(x=>!['done','cancelled'].includes(x.status))){for(const n of normalizePeople(t.with_people))add(n,'open_tasks');if(t.waiting_on)add(t.waiting_on,'waiting');}for(const p of projects.filter(x=>x.status==='active'))for(const n of normalizePeople(p.with_people))add(n,'projects');return [...map.values()].sort((a,b)=>(b.open_tasks+b.waiting+b.projects)-(a.open_tasks+a.waiting+a.projects));}
+async function state(env){const sql=db(env),ws=workspace(env);const tasks=await sql`SELECT t.*,p.name AS project_name FROM tasks t LEFT JOIN projects p ON p.id=t.project_id WHERE t.workspace_id=${ws} ORDER BY CASE WHEN t.status IN ('open','waiting') THEN 0 ELSE 1 END,t.due_at NULLS LAST,t.updated_at DESC LIMIT 250`;const projects=await sql`SELECT p.*,count(t.id) FILTER (WHERE t.status IN ('open','waiting'))::int AS open_tasks FROM projects p LEFT JOIN tasks t ON t.project_id=p.id WHERE p.workspace_id=${ws} GROUP BY p.id ORDER BY p.updated_at DESC`;const notes=await sql`SELECT n.*,p.name AS project_name FROM notes n LEFT JOIN projects p ON p.id=n.project_id WHERE n.workspace_id=${ws} ORDER BY n.created_at DESC LIMIT 50`;const messages=await sql`SELECT role,content,created_at FROM chat_messages WHERE workspace_id=${ws} ORDER BY created_at DESC LIMIT 50`;const activityRows=await sql`SELECT id,entity_type,entity_id,action,summary,metadata,created_at FROM activity_log WHERE workspace_id=${ws} ORDER BY id DESC LIMIT 80`;const today=localDateKey(),open=tasks.filter(x=>!['done','cancelled'].includes(x.status));const isToday=x=>x.due_at&&localDateKey(new Date(x.due_at))===today,overdue=x=>x.due_at&&localDateKey(new Date(x.due_at))<today;const lastUndoable=activityRows.find(a=>a.metadata?.reversible&&!activityRows.some(u=>u.action==='undo'&&String(u.metadata?.undo_of)===String(a.id)));return {tasks,projects,notes,messages:messages.reverse(),activity:activityRows,people:buildPeople(tasks,projects),last_undoable:lastUndoable||null,metrics:{today:open.filter(isToday).length,overdue:open.filter(overdue).length,waiting:open.filter(x=>x.status==='waiting').length,projects:projects.filter(x=>x.status==='active').length,open:open.length,inbox:open.filter(x=>!x.eisenhower_quadrant).length}};}
+
+async function patchTask(request,env,id){const sql=db(env),old=await taskById(sql,env,id);if(!old)return json({error:'Task not found'},404);const b=await request.json();const before=snapshotTask(old);let projectId=old.project_id;if(Object.prototype.hasOwnProperty.call(b,'project_name'))projectId=b.project_name?(await getOrCreateProject(sql,env,String(b.project_name))).id:null;const title=Object.prototype.hasOwnProperty.call(b,'title')?String(b.title||'').trim():old.title;if(!title)return json({error:'Title is required.'},400);const details=Object.prototype.hasOwnProperty.call(b,'details')?(b.details||null):old.details;const status=Object.prototype.hasOwnProperty.call(b,'status')&&TASK_STATUSES.includes(b.status)?b.status:old.status;const priority=Object.prototype.hasOwnProperty.call(b,'priority')&&PRIORITIES.includes(b.priority)?b.priority:old.priority;const due=Object.prototype.hasOwnProperty.call(b,'due_at')?(b.due_at||null):old.due_at;const waiting=Object.prototype.hasOwnProperty.call(b,'waiting_on')?(b.waiting_on||null):old.waiting_on;const q=Object.prototype.hasOwnProperty.call(b,'eisenhower_quadrant')?(QUADS.includes(b.eisenhower_quadrant)?b.eisenhower_quadrant:null):old.eisenhower_quadrant;const people=Object.prototype.hasOwnProperty.call(b,'with_people')?normalizePeople(b.with_people):normalizePeople(old.with_people);await sql`UPDATE tasks SET project_id=${projectId},title=${title},details=${details},status=${status},priority=${priority},due_at=${due},waiting_on=${waiting},eisenhower_quadrant=${q},with_people=${people},completed_at=CASE WHEN ${status}='done' THEN COALESCE(completed_at,now()) ELSE NULL END,updated_at=now() WHERE workspace_id=${workspace(env)} AND id=${id}::uuid`;await activity(sql,env,'task',id,'update_manual',`Updated task: ${title}`,{reversible:true,operation:'task_update',entity_id:id,before});return json({ok:true,task:await taskById(sql,env,id)});}
+async function patchProject(request,env,id){const sql=db(env),old=await projectById(sql,env,id);if(!old)return json({error:'Project not found'},404);const b=await request.json(),before=snapshotProject(old);const name=Object.prototype.hasOwnProperty.call(b,'name')?String(b.name||'').trim():old.name;if(!name)return json({error:'Project name is required.'},400);const description=Object.prototype.hasOwnProperty.call(b,'description')?(b.description||null):old.description;const status=Object.prototype.hasOwnProperty.call(b,'status')&&['active','on_hold','done','archived'].includes(b.status)?b.status:old.status;const people=Object.prototype.hasOwnProperty.call(b,'with_people')?normalizePeople(b.with_people):normalizePeople(old.with_people);await sql`UPDATE projects SET name=${name},description=${description},status=${status},with_people=${people},updated_at=now() WHERE workspace_id=${workspace(env)} AND id=${id}::uuid`;await activity(sql,env,'project',id,'update_manual',`Updated project: ${name}`,{reversible:true,operation:'project_update',entity_id:id,before});return json({ok:true,project:await projectById(sql,env,id)});}
+async function searchWorkspace(env,q){const sql=db(env),ws=workspace(env),needle=`%${q}%`;const [tasks,projects,notes,memory,chats]=await Promise.all([sql`SELECT id,title,details,status,priority,due_at,with_people,eisenhower_quadrant FROM tasks WHERE workspace_id=${ws} AND (title ILIKE ${needle} OR COALESCE(details,'') ILIKE ${needle} OR COALESCE(waiting_on,'') ILIKE ${needle} OR array_to_string(with_people,' ') ILIKE ${needle}) ORDER BY updated_at DESC LIMIT 20`,sql`SELECT id,name,description,status,with_people FROM projects WHERE workspace_id=${ws} AND (name ILIKE ${needle} OR COALESCE(description,'') ILIKE ${needle} OR array_to_string(with_people,' ') ILIKE ${needle}) ORDER BY updated_at DESC LIMIT 12`,sql`SELECT id,title,body,kind,created_at FROM notes WHERE workspace_id=${ws} AND (COALESCE(title,'') ILIKE ${needle} OR body ILIKE ${needle}) ORDER BY created_at DESC LIMIT 12`,sql`SELECT id,title,body,memory_type,created_at FROM memory_entries WHERE workspace_id=${ws} AND (COALESCE(title,'') ILIKE ${needle} OR body ILIKE ${needle}) ORDER BY created_at DESC LIMIT 12`,sql`SELECT role,content,created_at FROM chat_messages WHERE workspace_id=${ws} AND content ILIKE ${needle} ORDER BY created_at DESC LIMIT 10`]);return {tasks,projects,notes,memory,chats};}
+
+export default {async fetch(request,env){const url=new URL(request.url);try{
+  if(url.pathname==='/api/login'&&request.method==='POST'){const {password}=await request.json();if(!env.APP_PASSWORD||!env.SESSION_SECRET)return json({error:'Login is not configured.'},500);if(String(password)!==String(env.APP_PASSWORD))return json({error:'Incorrect password.'},401);const sig=await sign(env.SESSION_SECRET,`my-work:${workspace(env)}`);return json({ok:true},200,{'set-cookie':sessionCookie(sig)});}
+  if(url.pathname==='/api/logout'&&request.method==='POST')return json({ok:true},200,{'set-cookie':clearCookie()});
+  if(url.pathname==='/login.html')return env.ASSETS.fetch(request);
+  const authed=await isAuthed(request,env);if(url.pathname.startsWith('/api/')&&!authed)return json({error:'Unauthorized'},401);
+  if(url.pathname==='/api/chat'&&request.method==='POST')return chat(request,env);
+  if(url.pathname==='/api/state'&&request.method==='GET')return json(await state(env));
+  if(url.pathname==='/api/undo'&&request.method==='POST')return json(await undoLast(db(env),env));
+  if(url.pathname==='/api/search'&&request.method==='GET'){const q=String(url.searchParams.get('q')||'').trim();return json(q?await searchWorkspace(env,q):{tasks:[],projects:[],notes:[],memory:[],chats:[]});}
+  const taskMatch=url.pathname.match(/^\/api\/tasks\/([0-9a-f-]+)$/i);if(taskMatch&&request.method==='PATCH')return patchTask(request,env,taskMatch[1]);
+  const completeMatch=url.pathname.match(/^\/api\/tasks\/([0-9a-f-]+)\/complete$/i);if(completeMatch&&request.method==='POST'){const sql=db(env),old=await taskById(sql,env,completeMatch[1]);if(!old)return json({error:'Task not found'},404);const before=snapshotTask(old);await sql`UPDATE tasks SET status='done',completed_at=COALESCE(completed_at,now()),waiting_on=NULL,updated_at=now() WHERE workspace_id=${workspace(env)} AND id=${completeMatch[1]}::uuid`;await activity(sql,env,'task',completeMatch[1],'complete_manual',`Completed task: ${old.title}`,{reversible:true,operation:'task_complete',entity_id:completeMatch[1],before});return json({ok:true,task:await taskById(sql,env,completeMatch[1])});}
+  const projectMatch=url.pathname.match(/^\/api\/projects\/([0-9a-f-]+)$/i);if(projectMatch&&request.method==='PATCH')return patchProject(request,env,projectMatch[1]);
+  if(!authed){const loginUrl=new URL('/login.html',url);return env.ASSETS.fetch(new Request(loginUrl,request));}
+  return env.ASSETS.fetch(request);
+}catch(e){console.error(e);return json({error:e?.message||String(e)},500);}}};

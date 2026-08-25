@@ -13,9 +13,6 @@ permissions:
   pages: write
   id-token: write
 
-environment:
-  name: github-pages
-
 jobs:
   patch-and-deploy:
     runs-on: ubuntu-latest
@@ -33,7 +30,6 @@ jobs:
           import re, pathlib
           s=pathlib.Path('index.html').read_text(encoding='utf-8')
           blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
-          # Main dashboard script is the first substantial inline block without JSON-only seed content.
           main=max((b for b in blocks if 'function businessDay' in b), key=len)
           pathlib.Path('/tmp/dashboard-main.js').write_text(main,encoding='utf-8')
           PY

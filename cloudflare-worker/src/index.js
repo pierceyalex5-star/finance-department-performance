@@ -36,6 +36,8 @@ function arrayBufferToBase64(buffer){const bytes=new Uint8Array(buffer);let bina
 function base64ToBytes(value){const binary=atob(String(value||'')),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return bytes}
 function decodeHeader(value,fallback=''){try{return decodeURIComponent(String(value||''))||fallback}catch{return String(value||'')||fallback}}
 async function listFiles(env,period,itemType,itemId){await ensureFilesTable(env);const sql=sqlFor(env);return await sql`SELECT id,file_name,content_type,size_bytes,uploaded_at,uploaded_by FROM dashboard_files WHERE period=${period} AND item_type=${itemType} AND item_id=${itemId} ORDER BY uploaded_at DESC`}
+async function listFileStatus(env,period){await ensureFilesTable(env);const sql=sqlFor(env);return await sql`SELECT period,item_type,item_id,COUNT(*)::int AS file_count,MAX(uploaded_at) AS last_uploaded FROM dashboard_files WHERE period='SOP' OR period=${period} GROUP BY period,item_type,item_id`}
+// close-risk-opportunity-v1
 async function uploadFile(env,request,url){const period=url.searchParams.get('period')||'',itemType=url.searchParams.get('itemType')||'',itemId=url.searchParams.get('itemId')||'';if(!period||!['task','deliverable'].includes(itemType)||!itemId)return json({error:'Missing or invalid file target'},400);const state=await getState(env),exists=itemType==='task'?(state.taskTemplates||[]).some(x=>x.id===itemId):(state.headOfficeTemplate||[]).some(x=>x.id===itemId);if(!exists)return json({error:'Task or deliverable not found'},404);const buffer=await request.arrayBuffer();if(!buffer.byteLength)return json({error:'Empty file'},400);if(buffer.byteLength>MAX_FILE_BYTES)return json({error:'File exceeds 10 MB limit'},413);const id=crypto.randomUUID(),fileName=decodeHeader(request.headers.get('X-File-Name'),'backup-file'),uploadedBy=decodeHeader(request.headers.get('X-Uploaded-By'),''),contentType=request.headers.get('Content-Type')||'application/octet-stream',base64=arrayBufferToBase64(buffer);await ensureFilesTable(env);const sql=sqlFor(env);const rows=await sql`INSERT INTO dashboard_files (id,period,item_type,item_id,file_name,content_type,size_bytes,uploaded_by,data) VALUES (${id},${period},${itemType},${itemId},${fileName},${contentType},${buffer.byteLength},${uploadedBy},decode(${base64},'base64')) RETURNING id,file_name,content_type,size_bytes,uploaded_at,uploaded_by`;return json(rows[0],201)}
 async function downloadFile(env,id){await ensureFilesTable(env);const sql=sqlFor(env);const rows=await sql`SELECT file_name,content_type,encode(data,'base64') AS data_base64 FROM dashboard_files WHERE id=${id}`;if(!rows.length)return json({error:'File not found'},404);const row=rows[0],bytes=base64ToBytes(row.data_base64);return new Response(bytes,{status:200,headers:{...CORS,'Content-Type':row.content_type||'application/octet-stream','Content-Disposition':`attachment; filename*=UTF-8''${encodeURIComponent(row.file_name||'backup-file')}`}})}
 async function deleteFile(env,id){await ensureFilesTable(env);const sql=sqlFor(env);const rows=await sql`DELETE FROM dashboard_files WHERE id=${id} RETURNING id`;return rows.length?json({ok:true}):json({error:'File not found'},404)}
@@ -255,6 +257,14 @@ function applyAction(input, a) {
     state.improvements.push(a.item);
   } else if (a.type === 'improvement_delete') {
     state.improvements = (state.improvements || []).filter(x => x.id !== a.id);
+  } else if (a.type === 'riskop_add') {
+    state.riskOpportunities ??= []; state.riskOpportunities.push(a.item);
+  } else if (a.type === 'riskop_update') {
+    state.riskOpportunities ??= []; const i = state.riskOpportunities.findIndex(x => x.id === a.item.id); if (i >= 0) state.riskOpportunities[i] = { ...state.riskOpportunities[i], ...a.item };
+  } else if (a.type === 'riskop_delete') {
+    state.riskOpportunities = (state.riskOpportunities || []).filter(x => x.id !== a.id);
+  } else if (a.type === 'riskop_complete') {
+    const x = (state.riskOpportunities || []).find(x => x.id === a.id); if (x) { x.status = 'Done'; x.completedAt = a.at || new Date().toISOString(); x.completedBy = a.doneBy || ''; }
   } else if (a.type === 'settings_update') {
     state.settings = { ...(state.settings || {}), ...(a.settings || {}) };
   } else if (a.type === 'user_add') {
@@ -272,6 +282,7 @@ function applyAction(input, a) {
       for (const x of state.corrections || []) if (x.owner === oldName) x.owner = newName;
       for (const x of state.manualJEs || []) if (x.preparer === oldName) x.preparer = newName;
       for (const x of state.improvements || []) if (x.owner === oldName) x.owner = newName;
+      for (const x of state.riskOpportunities || []) if (x.owner === oldName) x.owner = newName;
       state.settings ??= {};
       state.settings.teamsEmails ??= {};
       if (Object.prototype.hasOwnProperty.call(state.settings.teamsEmails, oldName)) {
@@ -323,6 +334,7 @@ export default {
       if (url.pathname === '/' || url.pathname === '/health') {
         return json({ ok: true, service: 'finance-performance-api' });
       }
+      if (url.pathname === '/api/file-status' && request.method === 'GET') return json(await listFileStatus(env, url.searchParams.get('period') || ''));
       if (url.pathname === '/api/files' && request.method === 'GET') {
         return json(await listFiles(env, url.searchParams.get('period') || '', url.searchParams.get('itemType') || '', url.searchParams.get('itemId') || ''));
       }

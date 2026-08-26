@@ -1,72 +1,88 @@
-/* Finance Control Tower · shared SOP import/open support */
+/* Finance Control Tower · client performance + compatibility shim
+   Legacy GitHub-token SOP uploader retired. SOP/Backup are handled by the shared Worker/Neon modal in index.html. */
 (function(){
   "use strict";
-  const GH_REPO="pierceyalex5-star/finance-department-performance";
-  const GH_BRANCH="main";
-  const PAGES_BASE="https://pierceyalex5-star.github.io/finance-department-performance/";
 
-  function say(msg){ if(typeof toast==="function") try{return toast(msg)}catch(e){}; console.log(msg); }
-  function escHtml(s){return String(s||"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-  function getToken(){
-    let t=localStorage.getItem("fct_gh_token");
-    if(!t){
-      t=prompt("Import SOP — paste your GitHub fine-grained token (Contents: read & write). It stays only in this browser.");
-      if(t){t=t.trim();localStorage.setItem("fct_gh_token",t)}
-    }
-    return t||"";
-  }
-  function sanitizeExt(name){
-    const m=String(name||"").toLowerCase().match(/\.([a-z0-9]{1,8})$/);
-    return m?m[1]:"bin";
-  }
-  function toBase64(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result).split(",")[1]||"");r.onerror=reject;r.readAsDataURL(file)})}
-  function locate(type,id){
-    if(typeof state==="undefined") return null;
-    return type==="task"?(state.taskTemplates||[]).find(x=>x.id===id):(state.headOfficeTemplate||[]).find(x=>x.id===id);
-  }
-  async function uploadToGitHub(path,file,token){
-    const api=`https://api.github.com/repos/${GH_REPO}/contents/${path}`;
-    let sha="";
-    const cur=await fetch(api+`?ref=${GH_BRANCH}`,{headers:{Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json"}});
-    if(cur.ok) sha=(await cur.json()).sha||"";
-    else if(cur.status!==404) throw new Error(`Unable to check existing SOP (${cur.status})`);
-    const payload={message:`SOP upload · ${path}`,content:await toBase64(file),branch:GH_BRANCH};
-    if(sha) payload.sha=sha;
-    const r=await fetch(api,{method:"PUT",headers:{Authorization:`Bearer ${token}`,Accept:"application/vnd.github+json","Content-Type":"application/json"},body:JSON.stringify(payload)});
-    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.message||`GitHub upload failed (${r.status})`)}
-  }
-  window.importSOP=async function(type,id){
-    const item=locate(type,id); if(!item) return say("Item not found.");
-    const input=document.createElement("input"); input.type="file"; input.accept=".doc,.docx,.pdf,.xlsx,.xls,.pptx,.ppt,.txt";
-    input.onchange=async()=>{
-      const file=input.files&&input.files[0]; if(!file)return;
-      if(file.size>20*1024*1024) return say("SOP file exceeds 20 MB.");
-      const token=getToken(); if(!token)return;
-      const ext=sanitizeExt(file.name);
-      const path=`sops/${type}-${id}.${ext}`;
-      try{
-        say("Uploading SOP…");
-        await uploadToGitHub(path,file,token);
-        item.sopUrl=PAGES_BASE+path;
-        item.sopFileName=file.name;
-        item.sopUpdatedAt=new Date().toISOString();
-        item.sopUpdatedBy=(typeof currentUser!=="undefined"?currentUser:"");
-        state.updatedAt=new Date().toISOString();
-        if(typeof saveLocal==="function") try{saveLocal()}catch(e){}
-        if(typeof renderAll==="function") try{renderAll()}catch(e){}
-        if(typeof fctSaveNow==="function") await fctSaveNow();
-        say("SOP imported ✓ It may take a few seconds to become available to everyone.");
-      }catch(e){say("SOP import failed: "+e.message)}
+  // Do not override the current SOP functions. The previous version of this file
+  // replaced sopButton/importSOP with an obsolete GitHub-token workflow.
+
+  function installPerformanceClient(){
+    if(typeof action!=="function" || typeof applyLocal!=="function" || typeof apiUrl!=="function") return;
+    if(window.__FCT_PERF_V3__) return;
+    window.__FCT_PERF_V3__=true;
+
+    // Optimistic actions: update the screen immediately, then reconcile with
+    // the authoritative shared state. Roll back visibly if the server rejects it.
+    window.action=async function(a){
+      if(typeof serverMode!=="undefined" && serverMode){
+        const before=structuredClone(state);
+        applyLocal(a);
+        renderSharedChrome();
+        renderPage(activePageId());
+        checkAlerts(true);
+        try{
+          const r=await fetch(apiUrl("/api/action"),{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(a)
+          });
+          if(!r.ok){
+            const j=await r.json().catch(()=>({}));
+            state=before;
+            renderSharedChrome();renderPage(activePageId());checkAlerts(true);
+            toast("Update failed"+(j.error?": "+j.error:""));
+            return false;
+          }
+          state=await r.json();
+          renderSharedChrome();checkAlerts(true);
+          return true;
+        }catch(e){
+          state=before;
+          renderSharedChrome();renderPage(activePageId());checkAlerts(true);
+          toast("Update failed — connection unavailable");
+          return false;
+        }
+      }
+      applyLocal(a);renderSharedChrome();renderPage(activePageId());checkAlerts(true);return true;
     };
-    input.click();
-  };
-  window.sopButton=function(u,type,id){
-    const href=typeof safeSOPUrl==="function"?safeSOPUrl(u):String(u||"");
-    const item=locate(type,id)||{};
-    const name=item.sopFileName?`<span class="small" title="${escHtml(item.sopFileName)}">${escHtml(item.sopFileName)}</span>`:"";
-    if(href){
-      return `<span style="display:flex;gap:5px;align-items:center;flex-wrap:wrap"><a class="btn ghost" href="${escHtml(href)}" target="_blank" rel="noopener">Open SOP</a><button type="button" class="btn ghost" onclick="importSOP('${type}','${id}')">Replace SOP</button><button type="button" class="btn ghost" onclick="openFinanceSOPTemplate()">Template</button>${name}</span>`;
+
+    // The Worker sends a lightweight version event. Only fetch /api/state when
+    // that version is actually newer than the browser's state.
+    window.connectEvents=function(){
+      if(typeof serverMode==="undefined" || !serverMode) return;
+      if(typeof eventSource!=="undefined" && eventSource){try{eventSource.close()}catch(e){}}
+      eventSource=new EventSource(apiUrl("/api/events"));
+      eventSource.onmessage=async function(e){
+        try{
+          const meta=JSON.parse(e.data||"{}");
+          if(Number(meta.version||0)<=Number(state.version||0)) return;
+          const r=await fetch(apiUrl("/api/state"),{cache:"no-store"});
+          if(!r.ok) return;
+          const next=await r.json();
+          if(Number(next.version||0)<=Number(state.version||0)) return;
+          state=next;renderSharedChrome();renderPage(activePageId());checkAlerts(true);
+        }catch(err){}
+      };
+    };
+
+    // Skip controlled-document status calls on pages that do not display file
+    // indicators. The original function keeps its cache for relevant pages.
+    if(typeof refreshFileStatus==="function"){
+      const originalRefreshFileStatus=refreshFileStatus;
+      window.refreshFileStatus=function(force=false){
+        const page=typeof activePageId==="function"?activePageId():"";
+        if(!force && !["cockpit","workflow","headOffice","team","managerKpi"].includes(page)) return Promise.resolve();
+        return originalRefreshFileStatus(force);
+      };
     }
-    return `<span style="display:flex;gap:5px;align-items:center;flex-wrap:wrap"><button type="button" class="btn ghost" onclick="importSOP('${type}','${id}')">Import SOP</button><button type="button" class="btn ghost" onclick="openFinanceSOPTemplate()">Template</button></span>`;
-  };
+
+    // If the initial async boot connected before this shim loaded, replace that
+    // connection with the version-aware one once server mode is known.
+    setTimeout(function(){
+      try{if(typeof serverMode!=="undefined" && serverMode) window.connectEvents()}catch(e){}
+    },1500);
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",installPerformanceClient,{once:true});
+  else installPerformanceClient();
 })();

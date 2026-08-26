@@ -1,0 +1,96 @@
+name: Apply risks opportunities and SOP controls
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apply_risk_sop_kpi_v1.py'
+      - '.github/workflows/apply-risk-sop-kpi-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  patch-deploy:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate patch script
+        run: python -m py_compile apply_risk_sop_kpi_v1.py
+      - name: Apply patch
+        run: python apply_risk_sop_kpi_v1.py
+      - name: Validate dashboard JavaScript
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          s=pathlib.Path('index.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          main=max((b for b in blocks if 'function businessDay' in b), key=len)
+          pathlib.Path('/tmp/dashboard-main.js').write_text(main,encoding='utf-8')
+          required=['riskOpp:renderRiskOpportunities','kpiSOPCoverage','data-sop-open','refreshFileStatus','riskop_add','cockpitCloseActionBody']
+          missing=[x for x in required if x not in s]
+          if missing: raise SystemExit('Missing dashboard controls: '+', '.join(missing))
+          if "if (typeof sopButton === 'function')" in s: raise SystemExit('Legacy SOP override still present')
+          PY
+          node --check /tmp/dashboard-main.js
+          node --check cloudflare-worker/src/index.js
+      - name: Resolve Cloudflare credentials
+        shell: bash
+        env:
+          TOKEN_1: ${{ secrets.CLOUDFLARE_API_TOKEN || vars.CLOUDFLARE_API_TOKEN }}
+          TOKEN_2: ${{ secrets.CLOUDFARE_API_TOKEN || vars.CLOUDFARE_API_TOKEN }}
+          TOKEN_3: ${{ secrets.CF_API_TOKEN || vars.CF_API_TOKEN }}
+          TOKEN_4: ${{ secrets.CLOUDFLARE_TOKEN || vars.CLOUDFLARE_TOKEN }}
+          ACCOUNT_1: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
+          ACCOUNT_2: ${{ secrets.CLOUDFARE_ACCOUNT_ID || vars.CLOUDFARE_ACCOUNT_ID }}
+          ACCOUNT_3: ${{ secrets.CF_ACCOUNT_ID || vars.CF_ACCOUNT_ID }}
+          ACCOUNT_4: ${{ secrets.CLOUDFLARE_ACCOUNTID || vars.CLOUDFLARE_ACCOUNTID }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          token="$TOKEN_1"; [ -n "$token" ] || token="$TOKEN_2"; [ -n "$token" ] || token="$TOKEN_3"; [ -n "$token" ] || token="$TOKEN_4"
+          account="$ACCOUNT_1"; [ -n "$account" ] || account="$ACCOUNT_2"; [ -n "$account" ] || account="$ACCOUNT_3"; [ -n "$account" ] || account="$ACCOUNT_4"
+          test -n "$token" || { echo 'Missing Cloudflare API token'; exit 1; }
+          test -n "$account" || { echo 'Missing Cloudflare account ID'; exit 1; }
+          test -n "$DATABASE_URL" || { echo 'Missing DATABASE_URL'; exit 1; }
+          echo "::add-mask::$token"
+          echo "::add-mask::$account"
+          echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
+          echo "CLOUDFLARE_ACCOUNT_ID=$account" >> "$GITHUB_ENV"
+      - name: Deploy live API without touching state
+        working-directory: cloudflare-worker
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          npm install
+          npx wrangler deploy
+          printf '%s' "$DATABASE_URL" | npx wrangler secret put DATABASE_URL
+      - name: Commit code only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html cloudflare-worker/src/index.js
+          git diff --cached --quiet || git commit -m 'Add risks opportunities SOP coverage and file status'
+          git push
+      - uses: actions/configure-pages@v5
+      - name: Build static site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js auto-sync.js sop-upload.js state.json journal-analytics-seed.json _site/
+          if [ -d sops ]; then cp -R sops _site/; fi
+          if [ -d templates ]; then cp -R templates _site/; fi
+          if [ -d d365-control-tower ]; then cp -R d365-control-tower _site/; fi
+          if [ -d fastener-intelligence ]; then cp -R fastener-intelligence _site/; fi
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy GitHub Pages
+        uses: actions/deploy-pages@v4

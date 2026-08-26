@@ -78,3 +78,4 @@ ws=ws.replace(old_event,new_event,1)
 w.write_text(ws,encoding='utf-8')
 
 print('Performance v3 patch applied')
+# trigger-active-workflow: 2026-08-26

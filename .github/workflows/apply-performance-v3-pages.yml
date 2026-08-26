@@ -1,0 +1,61 @@
+name: Apply dashboard performance v3 pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apply_performance_v3.py'
+      - '.github/workflows/apply-performance-v3-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  patch-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply performance patch
+        run: python apply_performance_v3.py
+      - name: Validate dashboard
+        run: |
+          python - <<'PY'
+          import re,pathlib
+          s=pathlib.Path('index.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          main=max((b for b in blocks if 'function businessDay' in b), key=len)
+          pathlib.Path('/tmp/dashboard-main.js').write_text(main,encoding='utf-8')
+          required=['const before=structuredClone(state)','JSON.parse(e.data||"{}")',"['cockpit','workflow','headOffice','team','managerKpi'].includes(page)"]
+          missing=[x for x in required if x not in s]
+          if missing: raise SystemExit('Missing performance controls: '+', '.join(missing))
+          PY
+          node --check /tmp/dashboard-main.js
+      - name: Commit front-end and prepared Worker optimization
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html cloudflare-worker/src/index.js
+          git diff --cached --quiet || git commit -m 'Improve dashboard responsiveness and live sync efficiency'
+          git push
+      - uses: actions/configure-pages@v5
+      - name: Build static site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js auto-sync.js sop-upload.js state.json journal-analytics-seed.json _site/
+          if [ -d sops ]; then cp -R sops _site/; fi
+          if [ -d templates ]; then cp -R templates _site/; fi
+          if [ -d d365-control-tower ]; then cp -R d365-control-tower _site/; fi
+          if [ -d fastener-intelligence ]; then cp -R fastener-intelligence _site/; fi
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy GitHub Pages
+        uses: actions/deploy-pages@v4

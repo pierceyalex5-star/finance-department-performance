@@ -79,3 +79,4 @@ w.write_text(ws,encoding='utf-8')
 
 print('Performance v3 patch applied')
 # trigger-active-workflow: 2026-08-26
+# trigger-pages-workflow: 2026-08-26T11:16ET

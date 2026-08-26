@@ -1,0 +1,47 @@
+name: Fast Pages deploy (macOS)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'sop-upload.js'
+      - 'config.js'
+      - '.github/workflows/fast-pages-macos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages-fast
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Build current Finance Control Tower
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js auto-sync.js sop-upload.js state.json journal-analytics-seed.json _site/
+          if [ -d templates ]; then cp -R templates _site/; fi
+          if [ -d sops ]; then cp -R sops _site/; fi
+          if [ -d d365-control-tower ]; then cp -R d365-control-tower _site/; fi
+          if [ -d fastener-intelligence ]; then cp -R fastener-intelligence _site/; fi
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,55 @@
+name: Fix SOP deliverable save
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fix_sop_modal_deliverable_save.py'
+      - '.github/workflows/fix-sop-deliverable-save.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  patch-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply hotfix
+        run: python fix_sop_modal_deliverable_save.py
+      - name: Validate inline JavaScript
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          s=pathlib.Path('index.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          main=max((b for b in blocks if 'function businessDay' in b), key=len)
+          pathlib.Path('/tmp/dashboard-main.js').write_text(main,encoding='utf-8')
+          PY
+          node --check /tmp/dashboard-main.js
+      - name: Commit hotfix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Fix deliverable save with SOP modal'
+          git push
+      - uses: actions/configure-pages@v5
+      - name: Build static site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js auto-sync.js sop-upload.js state.json journal-analytics-seed.json _site/
+          if [ -d sops ]; then cp -R sops _site/; fi
+          if [ -d templates ]; then cp -R templates _site/; fi
+          if [ -d d365-control-tower ]; then cp -R d365-control-tower _site/; fi
+          if [ -d fastener-intelligence ]; then cp -R fastener-intelligence _site/; fi
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

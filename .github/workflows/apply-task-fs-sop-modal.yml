@@ -1,0 +1,61 @@
+name: Apply task FS mapping and SOP modal
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apply_task_fs_sop_modal.py'
+      - '.github/workflows/apply-task-fs-sop-modal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  patch-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply front-end patch
+        run: python apply_task_fs_sop_modal.py
+      - name: Validate inline JavaScript
+        run: |
+          python - <<'PY'
+          import re, pathlib
+          s=pathlib.Path('index.html').read_text(encoding='utf-8')
+          blocks=re.findall(r'<script(?: [^>]*)?>(.*?)</script>',s,re.S)
+          main=max((b for b in blocks if 'function businessDay' in b), key=len)
+          pathlib.Path('/tmp/dashboard-main.js').write_text(main,encoding='utf-8')
+          PY
+          node --check /tmp/dashboard-main.js
+      - name: Verify new controls
+        run: |
+          grep -q 'Financial statement line' index.html
+          grep -q 'function openSOP' index.html
+          grep -q "period:'SOP'" index.html
+          grep -q 'taskDivisionOptions' index.html
+      - name: Commit front-end patch only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Add task FS mapping and controlled SOP modal'
+          git push
+      - uses: actions/configure-pages@v5
+      - name: Build static site
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html manifest.json sw.js config.js auto-sync.js sop-upload.js state.json journal-analytics-seed.json _site/
+          if [ -d sops ]; then cp -R sops _site/; fi
+          if [ -d templates ]; then cp -R templates _site/; fi
+          if [ -d d365-control-tower ]; then cp -R d365-control-tower _site/; fi
+          if [ -d fastener-intelligence ]; then cp -R fastener-intelligence _site/; fi
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

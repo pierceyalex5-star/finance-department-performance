@@ -78,11 +78,12 @@ function ensureNav(){
    const b=document.createElement('button');b.dataset.view=VIEW;b.textContent=tr('Current State Sprints','Sprints État actuel');
    const exec=nav.querySelector('[data-view="execution"]');nav.insertBefore(b,exec||null);
  }
+ const navButton=nav?.querySelector('[data-view="'+VIEW+'"]');
+ if(navButton)navButton.textContent=tr('Current State Sprints','Sprints État actuel');
  const side=document.getElementById('v25Sidebar');
  if(side&&!side.querySelector('[data-v25-view="'+VIEW+'"]')){
    const b=document.createElement('button');b.type='button';b.dataset.v25View=VIEW;b.innerHTML='<span>▤</span><b>'+escV(tr('Current State','État actuel'))+'</b>';
    const exec=side.querySelector('[data-v25-view="execution"]');side.querySelector('nav')?.insertBefore(b,exec||null);
-   b.addEventListener('click',()=>{try{view=VIEW;render()}catch(_){}});
  }
 }
 function apply(){
@@ -95,7 +96,11 @@ function apply(){
  }
 }
 const prev=render;
-render=function(){const out=prev.apply(this,arguments);try{apply()}catch(e){console.warn('[V31]',e)}return out};
+render=function(){
+ // Render the sprint view directly; the legacy router otherwise falls back to cockpit.
+ if(view===VIEW){try{apply()}catch(e){console.error('[V31]',e)}return}
+ const out=prev.apply(this,arguments);try{apply()}catch(e){console.warn('[V31]',e)}return out
+};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ensureNav();apply()},0));else setTimeout(()=>{ensureNav();apply()},0);
 window.D365_V31={apply,SPRINTS};
 })();

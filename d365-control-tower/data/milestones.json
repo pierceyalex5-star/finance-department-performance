@@ -2,11 +2,11 @@
   "milestones": [
     {
       "id": "M-01",
-      "name": "Mobilization & current-state validation",
+      "name": "Phase 0.1 · Mobilization & current-state validation",
       "stream": "Program",
       "start": "2026-08-17",
-      "end": "2026-10-16",
-      "status": "Proposed",
+      "end": "2026-12-31",
+      "status": "In Progress",
       "exitCriteria": "All in-scope current-state processes are accounted for and validated; accountable BPO/process ownership is confirmed; material findings are reviewed and classified; milestone work is fully decomposed, completed and approved.",
       "exitCriteriaFr": "Tous les processus actuels dans la portée sont recensés et validés; les responsabilités BPO/processus sont confirmées; les constats significatifs sont révisés et classifiés; le travail du jalon est entièrement décomposé, complété et approuvé.",
       "gateCriteria": [
@@ -42,7 +42,8 @@
         }
       ],
       "owner": "Business Owner",
-      "description": ""
+      "description": "Phase 0.1 target month: December 2026. Ten-week current-state sprint cadence runs October 5 through December 13, followed by validation and closure buffer to month-end.",
+      "descriptionFr": "Mois cible de la phase 0.1 : décembre 2026. La cadence de sprints de 10 semaines sur l’état actuel se déroule du 5 octobre au 13 décembre, suivie d’une période de validation et de clôture jusqu’à la fin du mois."
     },
     {
       "id": "M-02",

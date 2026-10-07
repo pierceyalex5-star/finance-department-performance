@@ -43,7 +43,9 @@
       ],
       "owner": "Business Owner",
       "description": "Phase 0.1 target month: December 2026. Ten-week current-state sprint cadence runs October 5 through December 13, followed by validation and closure buffer to month-end.",
-      "descriptionFr": "Mois cible de la phase 0.1 : décembre 2026. La cadence de sprints de 10 semaines sur l’état actuel se déroule du 5 octobre au 13 décembre, suivie d’une période de validation et de clôture jusqu’à la fin du mois."
+      "descriptionFr": "Mois cible de la phase 0.1 : décembre 2026. La cadence de sprints de 10 semaines sur l’état actuel se déroule du 5 octobre au 13 décembre, suivie d’une période de validation et de clôture jusqu’à la fin du mois.",
+      "schedulePlanVersion": "2026-08-15-readiness-dec2027-v1",
+      "scheduleBasis": "Phase 0.1 target approved for December 31, 2026; current-state sprints October 5–December 13 followed by validation and closure."
     },
     {
       "id": "M-02",
